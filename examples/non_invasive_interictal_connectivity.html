@@ -130,7 +130,7 @@
 </html>
 <script type="module" async>
   import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
-  let response = await fetch("https://roehrin.github.io/test/ictal_connectivity/plotlyColorscale4niiVue.json", {})
+  let response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/plotlyColorscale4niiVue.json", {})
   let plotlyColorscales = await response.json()
   
   const freqList = ['delta', 'theta', 'alpha', 'beta'];
@@ -147,7 +147,7 @@
   var NdColormap = "YlOrRd";
   
   async function loadConnMaP(uploadData = 'all'){
-		let fname = "https://roehrin.github.io/test/non-invasive_interictal_connectivity/connectivity_"  + connList[currConn].toLowerCase() + 
+		let fname = "https://roehrin.github.io/webapps_for_EEG_courses/non-invasive_interictal_connectivity/connectivity_"  + connList[currConn].toLowerCase() + 
 							"_" + freqList[currFreqId] + ".json"
 		let response = await fetch(fname, {})
 		let connectivity = await response.json()
@@ -369,12 +369,12 @@
   nv1.opts.isOrientCube = true;
   await nv1.loadMeshes([
     {
-      url: "https://roehrin.github.io/test/src/Lausanne2_ROI.jcon",
+      url: "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI.jcon",
     },
   ]);
   nv1.meshes[0].colorbarVisible = false;
   nv1.opts.showLegend = false;
-  response = await fetch("https://roehrin.github.io/test/src/Lausanne2_ROI.jcon", {})
+  response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI.jcon", {})
   const roiNetw = await response.json()
   roiNetw.edges = edges;
   roiNetw.edgeMin = .5;

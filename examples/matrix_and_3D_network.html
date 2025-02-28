@@ -117,7 +117,7 @@
       opacity: 1
     }
   ];
-  var fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC.jcon"
+  var fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI_n_SC.jcon"
   function toggleGroup(id) {
     let buttons = document.getElementsByClassName("viewBtn");
     let char0 = id.charAt(0);
@@ -210,12 +210,12 @@
 		  // "_SC""_SClog""_SCCC""_SClogCC""_SCNE""_SClogNE"
 		  let lbl1 = "fiber count";
 		  let lbl2 = "strength";
-		  if (event.target.id === "_SC"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC.jcon";}
-		  else if (event.target.id === "_SClog"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SClogfiber.jcon"; lbl1 = "log(fiber count)";}
-		  else if (event.target.id === "_SCCC"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC_CC.jcon" ; lbl2 = "clustering coeff.";}
-		  else if (event.target.id === "_SClogCC"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SClogfiber_CC.jcon" ; lbl1 = "log(fiber count)"; lbl2 = "clustering coeff.";}
-		  else if (event.target.id === "_SCNE"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC_NE.jcon" ; lbl2 = "nodal efficiency";}
-		  else if (event.target.id === "_SClogNE"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SClogfiber_NE.jcon" ; lbl1 = "log(fiber count)"; lbl2 = "nodal efficiency";}
+		  if (event.target.id === "_SC"){ fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI_n_SC.jcon";}
+		  else if (event.target.id === "_SClog"){ fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI_n_SClogfiber.jcon"; lbl1 = "log(fiber count)";}
+		  else if (event.target.id === "_SCCC"){ fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI_n_SC_CC.jcon" ; lbl2 = "clustering coeff.";}
+		  else if (event.target.id === "_SClogCC"){ fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI_n_SClogfiber_CC.jcon" ; lbl1 = "log(fiber count)"; lbl2 = "clustering coeff.";}
+		  else if (event.target.id === "_SCNE"){ fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI_n_SC_NE.jcon" ; lbl2 = "nodal efficiency";}
+		  else if (event.target.id === "_SClogNE"){ fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/Lausanne2_ROI_n_SClogfiber_NE.jcon" ; lbl1 = "log(fiber count)"; lbl2 = "nodal efficiency";}
 		  await nv1.loadConnectomeFromUrl(fname);
 		  nv1.document.labels[0].text = "edge: " + lbl1 + ",\n node: " + lbl2;
 		  nv1.meshes[0].edgeColormapNegative = '';

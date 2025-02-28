@@ -121,7 +121,7 @@
 		visible: true,
 	},
 	{
-		url: "https://roehrin.github.io/test/src/PSF_eloreta.nii",
+		url: "https://roehrin.github.io/webapps_for_EEG_courses/src/PSF_eloreta.nii",
 		colormap: "hot",
 		opacity: .8,
 		visible: true,
@@ -220,7 +220,7 @@
 		const cal_min = nv1.volumes[1].cal_min;
 		const curr_crmap = nv1.volumes[1].colormap;
 		nv1.volumes.pop(); //remove current 4D volume
-		let fname = "https://roehrin.github.io/test/src/PSF_" + event.target.id.substr(1).toLowerCase() + '.nii';
+		let fname = "https://roehrin.github.io/webapps_for_EEG_courses/src/PSF_" + event.target.id.substr(1).toLowerCase() + '.nii';
 		volumeList1[1].url = fname;
 		await nv1.addVolumeFromUrl(volumeList1[1]);
 		nv1.volumes[1].colormap = curr_crmap;
@@ -259,7 +259,7 @@
 		nv1.createOnLocationChange()
 		nv1.drawScene()
 	}
-	const response = await fetch("https://roehrin.github.io/test/src/source_points.jcon", {})
+	const response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/src/source_points.jcon", {})
 	const srcPos = await response.json()
 	var currSrcPos = [srcPos.nodes.X[0], srcPos.nodes.Y[0], srcPos.nodes.Z[0]];
 	// draw dipole using connectome variable

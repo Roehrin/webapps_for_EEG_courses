@@ -146,8 +146,8 @@
 <script type="module" async>
 	document.body.style.cursor = 'wait'
   import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
-  import * as vhdrReader from 'https://roehrin.github.io/test/js-scripts/brainvisionReader.js';
-  let response = await fetch("https://roehrin.github.io/test/ictal_connectivity/plotlyColorscale4niiVue.json", {})
+  import * as vhdrReader from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/brainvisionReader.js';
+  let response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/plotlyColorscale4niiVue.json", {})
   let plotlyColorscales = await response.json()
   
   
@@ -225,7 +225,7 @@
 	document.body.style.cursor = 'wait'	
 	if (event.target.id.charAt(0) === "]") { // select connectivity type
 			currSz = event.target.id.substr(1)
-			var fileUrl = "https://roehrin.github.io/test/ictal_connectivity/seizure" + currSz.slice(2,3) + "ds.eeg";
+			var fileUrl = "https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/seizure" + currSz.slice(2,3) + "ds.eeg";
 			var hdr = await vhdrReader.readVHDRfromURL(fileUrl.replace(".eeg", ".vhdr"));
 			var iEEGdata = await vhdrReader.readBrainvisionEEGData(fileUrl,hdr, 0.0064/2, true);
 			connMap.length = 0; // clear existing array
@@ -359,7 +359,7 @@
   var EdColormap = "Inferno";
   var mapColormap = "YlOrRd";
   
-  var fileUrl = "https://roehrin.github.io/test/ictal_connectivity/seizure" + currSz.slice(2,3) + "ds.eeg";
+  var fileUrl = "https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/seizure" + currSz.slice(2,3) + "ds.eeg";
   var hdr = await vhdrReader.readVHDRfromURL(fileUrl.replace(".eeg", ".vhdr"));
   var iEEGdata = await vhdrReader.readBrainvisionEEGData(fileUrl,hdr, 0.0064/2, true);
   const freqList = ['delta', 'theta', 'alpha', 'beta', 'gamma'];
@@ -372,7 +372,7 @@
   }
   
   async function loadConnMaP(){
-		let fname = "https://roehrin.github.io/test/ictal_connectivity/connectivity_" + currSz + "_" + connList[currConn] + 
+		let fname = "https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/connectivity_" + currSz + "_" + connList[currConn] + 
 							"_" + freqList[currFreqId] + ".json"
 		let response = await fetch(fname, {})
 		let connectivity = await response.json()
@@ -471,7 +471,7 @@
 	Plotly.restyle(seizureTraces, {'line.width': 1.5});
   var volumeList1 = [
     {
-      url: "https://roehrin.github.io/test/ictal_connectivity/patient_mri.nii", 
+      url: "https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/patient_mri.nii", 
       colormap: "gray",
       visible: true,
       opacity: 1
@@ -508,15 +508,15 @@
   nv1.opts.isColorbar = true;
   nv1.opts.isOrientCube = true;
   Object.keys(plotlyColorscales).map(function(item) {nv1.addColormap(item, plotlyColorscales[item])})
-  //await nv1.loadConnectomeFromUrl("https://roehrin.github.io/test/ictal_connectivity/pat_elec.jcon");
+  //await nv1.loadConnectomeFromUrl("https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/pat_elec.jcon");
   await nv1.loadMeshes([
     {
-      url: "https://roehrin.github.io/test/ictal_connectivity/pat_elec.jcon",
+      url: "https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/pat_elec.jcon",
     },
   ]);
   nv1.meshes[0].colorbarVisible = false;
   nv1.opts.showLegend = false;
-  response = await fetch("https://roehrin.github.io/test/ictal_connectivity/pat_bipelec.jcon", {})
+  response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/pat_bipelec.jcon", {})
   const bipElec = await response.json()
   
   bipElec.edgeMin = .5;
