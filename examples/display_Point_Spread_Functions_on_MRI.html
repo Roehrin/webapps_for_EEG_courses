@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Investigate Point spread functions of several inverse solution methods</title>
+    <link rel="stylesheet" href="../niivue.css" />
+  </head>
+  <body>
+    <noscript>niivue requires JavaScript.</noscript>
+    <header>
+	<h3>Investigate Point spread functions of several inverse solution methods</h3>
+	<div class="row">
+		<div class="dropdown">
+			<button class="dropbtn" data-toggle="dropdown">
+			  View
+			  <i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+			  <a href="#" class="viewBtn" id="|Axial">Axial</a>
+			  <a class="viewBtn" id="|Sagittal">Sagittal</a>
+			  <a class="viewBtn" id="|Coronal">Coronal</a>
+			  <a class="viewBtn" id="|Render">Render</a>
+			  <a class="viewBtn" id="|MultiPlanar">A+C+S</a>
+			  <a class="viewBtn dropdown-item-checked" id="|MultiPlanarRender">A+C+S+R</a		  >
+			  <a class="viewBtn divider dropdown-item-checked" id="Colorbar">Colorbar</a>
+			  <a class="viewBtn" id="Radiological">Radiological</a>
+			  <a class="viewBtn" id="ClipPlane">Render Clip Plane</a>
+			</div>
+		</div>
+		<div class="dropdown">
+			<button class="dropbtn">
+			  PSF Color
+			  <i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+			<a class="viewBtn" id="!Blue">Blue</a>
+			  <a class="viewBtn" id="!Blue2Cyan">Blue2Cyan</a>
+			  <a class="viewBtn" id="!Bronze">Bronze</a>
+			  <a class="viewBtn" id="!Cividis">Cividis</a>
+			  <a class="viewBtn" id="!Electric_Blue">Electric_Blue</a>
+			  <a class="viewBtn dropdown-item-checked" id="!Hot">Hot</a>
+			  <a class="viewBtn" id="!Inferno">Inferno</a>
+			  <a class="viewBtn" id="!Magma">Magma</a>
+			  <a class="viewBtn" id="!Plasma">Plasma</a>
+			  <a class="viewBtn" id="!Rocket">Rocket</a>
+			  <a class="viewBtn" id="!Violet">Violet</a>
+			  <a class="viewBtn" id="!Viridis">Viridis</a>
+			</div>
+		</div>
+		<div class="dropdown">
+			<button class="dropbtn">
+			  Inverse solutions
+			  <i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+				<a class="viewBtn" id="_MNE">MNE</a>
+				<a class="viewBtn" id="_wMNE">wMNE</a>
+				<a class="viewBtn" id="_wMNE2">wMNE2</a>
+				<a class="viewBtn" id="_sLORETA">sLORETA</a>
+				<a class="viewBtn dropdown-item-checked" id="_eLORETA">eLORETA</a>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<label for="meshMinSlider">Min threshold</label>
+		<input
+			type="range"
+			min="0"
+			max="999"
+			value="0"
+			class="slider"
+			id="meshMinSlider"
+		/>
+		<label for="gammaSlider">Gamma</label>
+		<input
+			type="range"
+			min="10"
+			max="400"
+			value="100"
+			class="slider"
+			id="gammaSlider"
+		/>
+		<button id="reset">reset</button>
+	</div>
+	<div class="row" style="width:100%">
+		<p>
+		<label for="srcSlider">Brain source:</label>
+		<button id="prevVolume">previous</button>
+		<input
+			type="range"
+			min="0"
+			max="115"
+			value="0"
+			class="slider"
+			style="width:50%"
+			id="srcSlider"
+		/>
+		<button id="nextVolume">next</button>
+	</div>
+  </header>
+    <main id="container">
+		<canvas id="gl1"></canvas>
+    </main>
+  </body>
+</html>
+<script type="module" async>
+	import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
+	var srcSlider = document.getElementById("srcSlider");
+	var minSlider = document.getElementById("meshMinSlider");
+	var gamSlider = document.getElementById("gammaSlider");
+	var azi = 0;
+	var elev = 0;
+	var volumeList1 = [
+	// first item is background image
+	{
+		url: "https://niivue.github.io/niivue/images/mni152.nii.gz",
+		colormap: "gray",
+		opacity: 1,
+		visible: true,
+	},
+	{
+		url: "https://roehrin.github.io/test/src/PSF_eloreta.nii",
+		colormap: "hot",
+		opacity: .8,
+		visible: true,
+		frame4D: 0,
+		cal_min: 0,
+		cal_max: 100,
+	},
+	]
+	function toggleGroup(id) {
+	let buttons = document.getElementsByClassName("viewBtn");
+	let char0 = id.charAt(0);
+	let char03 = id.slice(0,3);
+	
+	for (let i = 0; i < buttons.length; i++) {
+		if (buttons[i].id.charAt(0) !== char0) continue;
+		if ((char03 === "!Ed" || char03 === "!Nd") && (buttons[i].id.slice(0,3) !== char03)) continue;
+		buttons[i].classList.remove("dropdown-item-checked");
+		if (buttons[i].id === id)
+		buttons[i].classList.add("dropdown-item-checked");
+	}
+	} // toggleGroup()
+	srcSlider.oninput = function () {
+		// PSF_eloreta.nii contains 1 every 50 sources, hence the 50*
+		currSrcPos = [srcPos.nodes.X[50*this.value], srcPos.nodes.Y[50*this.value], srcPos.nodes.Z[50*this.value]];
+		nv1.meshes[0].nodes = [
+		  {
+			name: "source",
+			x: currSrcPos[0],
+			y: currSrcPos[1],
+			z: currSrcPos[2],
+			colorValue: 1,
+			sizeValue: 5
+		  }
+		];
+		nv1.meshes[0].updateMesh(nv1.gl)
+		currentVol = this.value;
+		nv1.setFrame4D(nv1.volumes[1].id, currentVol)
+		convertEucliCoord2AziElev()
+		updateCrosshairPos();
+	};
+	minSlider.oninput = function () {
+		nv1.volumes[1].cal_min= this.value * 0.1;
+		nv1.updateGLVolume();
+	}; 
+	gamSlider.oninput = function () {
+		nv1.setGamma(this.value * 0.01);
+	};
+	async function onButtonClick(event) {
+	  if (event.target.id.charAt(0) === "|") {
+		  //sliceType
+		  if (event.target.id === "|Axial") nv1.setSliceType(nv1.sliceTypeAxial);
+		  if (event.target.id === "|Coronal")
+			nv1.setSliceType(nv1.sliceTypeCoronal);
+		  if (event.target.id === "|Sagittal")
+			nv1.setSliceType(nv1.sliceTypeSagittal);
+		  if (event.target.id === "|Render") nv1.setSliceType(nv1.sliceTypeRender);
+		  if (event.target.id === "|MultiPlanar") {
+			nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.NEVER;
+			nv1.setSliceType(nv1.sliceTypeMultiplanar);
+		  }
+		  if (event.target.id === "|MultiPlanarRender") {
+			nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.ALWAYS;
+			nv1.setSliceType(nv1.sliceTypeMultiplanar);
+		  }
+		  toggleGroup(event.target.id);
+	  } //sliceType
+	  if (event.target.id === "Colorbar") {
+		  nv1.opts.isColorbar = !nv1.opts.isColorbar;
+		  event.srcElement.classList.toggle("dropdown-item-checked");
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id === "Radiological") {
+		  nv1.opts.isRadiologicalConvention = !nv1.opts.isRadiologicalConvention;
+		  event.srcElement.classList.toggle("dropdown-item-checked");
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id === "ClipPlane") {
+		  if (nv1.scene.clipPlaneDepthAziElev[0] > 1)
+			nv1.setClipPlane([0.3, 270, 0]);
+		  else nv1.setClipPlane([2, 270, 0]);
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id.charAt(0) === "!") {
+		  // set color scheme
+		  const cal_min = nv1.volumes[1].cal_min;
+		  nv1.volumes[1].colormap = event.target.id.substr(1);
+		  nv1.volumes[1].cal_min = cal_min;
+		  nv1.updateGLVolume();
+		  toggleGroup(event.target.id);
+		  return;
+		}
+	  if (event.target.id.charAt(0) === "_") {
+		const cal_min = nv1.volumes[1].cal_min;
+		const curr_crmap = nv1.volumes[1].colormap;
+		nv1.volumes.pop(); //remove current 4D volume
+		let fname = "https://roehrin.github.io/test/src/PSF_" + event.target.id.substr(1).toLowerCase() + '.nii';
+		volumeList1[1].url = fname;
+		await nv1.addVolumeFromUrl(volumeList1[1]);
+		nv1.volumes[1].colormap = curr_crmap;
+		nv1.volumes[1].cal_min = cal_min;
+		nv1.document.labels[0].text = event.target.id.substr(1);
+		nv1.updateGLVolume();
+		nv1.setFrame4D(nv1.volumes[1].id, currentVol);
+		toggleGroup(event.target.id);
+		}
+	}
+	let opts = {
+	show3Dcrosshair: true,
+	isColorbar: true,
+	//isResizeCanvas: false,
+	backColor: [0, 0, 0, 1],
+	dragAndDropEnabled: false,
+	//sliceType: niivue.SLICE_TYPE.RENDER,
+	//multiplanarLayout: niivue.MULTIPLANAR_TYPE.GRID,
+	multiplanarShowRender: niivue.SHOW_RENDER.ALWAYS,
+	isOrientCube: true,
+	showLegend: false,
+	meshXRay: .3,
+	}
+	reset.onclick = function () {
+		nv1.setDefaults(opts, true)
+		//nv1.volumes[0].colorbarVisible = false
+		currentVol = 0;
+		srcSlider.value = String(currentVol);
+		srcSlider.oninput()
+		minSlider.value = String(0);
+		nv1.setRenderAzimuthElevation(-90-45, 0);
+	}
+	function updateCrosshairPos(){
+		let dPos = nv1.mm2frac(currSrcPos); // current position of the source, mm convert to frac
+		nv1.scene.crosshairPos = dPos;
+		nv1.createOnLocationChange()
+		nv1.drawScene()
+	}
+	const response = await fetch("https://roehrin.github.io/test/src/source_points.jcon", {})
+	const srcPos = await response.json()
+	var currSrcPos = [srcPos.nodes.X[0], srcPos.nodes.Y[0], srcPos.nodes.Z[0]];
+	// draw dipole using connectome variable
+	var dipole = {
+		name: "dipole",
+		nodeColormap: "hot",
+		nodeColormapNegative: "",
+		nodeMinColor: 0,
+		nodeMaxColor: 1,
+		nodeScale: 1, //scale factor for node, e.g. if 2 and a node has size 3, a 6mm ball is drawn
+		edgeColormap: "hot",
+		edgeColormapNegative: "",
+		edgeMin: 0,
+		edgeMax: 2.5,
+		edgeScale: 1,
+		legendLineThickness: 0,
+		nodes: [
+		  {
+			name: "source",
+			x: currSrcPos[0],
+			y: currSrcPos[1],
+			z: currSrcPos[2],
+			colorValue: 1,
+			sizeValue: 5
+		  }
+		],
+		edges: [],
+	}   //dipole{}
+	var nv1 = new niivue.Niivue(opts)
+	nv1.attachTo("gl1")
+	await nv1.loadVolumes(volumeList1)
+	nv1.addMesh(nv1.loadConnectomeAsMesh(dipole))
+	//nv1.drawScene()
+	nv1.setMeshShader(nv1.meshes[0].id, "Diffuse");
+	nv1.volumes[0].colorbarVisible = false;
+	nv1.meshes[0].colorbarVisible = false;
+	nv1.addLabel("eLORETA", 
+		{ textScale: 1.0, textAlignment: niivue.LabelTextAlignment.RIGHT, textColor: [1.0, 1.0, 1.0, 1.0], backgroundColor: [0.2, 0.2, 0.2, 0.2] }, 
+		undefined, niivue.LabelAnchorPoint.TOPRIGHT);
+	nv1.updateGLVolume()
+	let currentVol = 0
+	prevVolume.onclick = function () {
+		currentVol = nv1.getFrame4D(nv1.volumes[1].id)
+		currentVol--
+		currentVol = Math.max(currentVol, 0)
+		// PSF_eloreta.nii contains 1 every 50 sources, hence the 50*
+		currSrcPos = [srcPos.nodes.X[50*currentVol], srcPos.nodes.Y[50*currentVol], srcPos.nodes.Z[50*currentVol]];
+		nv1.meshes[0].nodes = [
+		  {
+			name: "source",
+			x: currSrcPos[0],
+			y: currSrcPos[1],
+			z: currSrcPos[2],
+			colorValue: 1,
+			sizeValue: 5
+		  }
+		];
+		nv1.meshes[0].updateMesh(nv1.gl);
+		srcSlider.value = String(currentVol);
+		srcSlider.oninput();
+		nv1.setFrame4D(nv1.volumes[1].id, currentVol);
+	}
+	nextVolume.onclick = function () {
+		currentVol = nv1.getFrame4D(nv1.volumes[1].id)
+		currentVol++
+		currentVol = Math.min(currentVol, nv1.volumes[1].nFrame4D - 1)
+		nv1.meshes[0].updateMesh(nv1.gl);
+		srcSlider.value = String(currentVol);
+		srcSlider.oninput();
+		nv1.setFrame4D(nv1.volumes[1].id, currentVol);
+	}
+	var buttons = document.getElementsByClassName("viewBtn");
+	for (let i = 0; i < buttons.length; i++){
+		buttons[i].addEventListener("click", onButtonClick, false);
+	}
+	updateCrosshairPos()
+	function convertEucliCoord2AziElev(){
+		let r = Math.sqrt(Math.pow(currSrcPos[0], 2) + Math.pow(currSrcPos[1], 2));
+		azi = -180/Math.PI*Math.atan2(currSrcPos[1], currSrcPos[0]) - 90; // remove 90 because -y and -x used as axis
+		elev = 180/Math.PI*Math.atan2(currSrcPos[2], r)
+		nv1.setRenderAzimuthElevation(azi, elev);
+	}
+	convertEucliCoord2AziElev();
+	
+  
+ </script>

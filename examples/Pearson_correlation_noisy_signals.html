@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pearson correlation of two noisy signals</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.header {
+		  position: sticky;
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		  z-index: 1;
+		}
+		.div {
+		  margin: 10px;
+		}
+    </style>
+</head>
+<body>
+	<h1>Pearson correlation of two noisy signals.</h1>
+    <div class="header" id="myHeader">
+		<span style="padding: 5px">
+			<label for="frequency">Frequency of Sine Wave 2:</label>
+			<input type="range" id="frequency" class="slider" min="1" max="25" value="10">
+			<span id="freqValue">3 Hz</span>
+		</span>
+			<span style="padding: 5px">
+			<label for="phase">Phase Shift of Sine Wave 2:</label>
+			<input type="range" id="phase" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue">0 rad</span>
+		</span>
+			<span style="padding: 5px">
+			<label for="noiseLevel">Noise Level:</label>
+			<input type="range" id="noiseLevel" class="slider" min="0" max="1" value="0.1" step="0.01">
+			<span id="noiseValue">0.1</span>
+		</span>
+    </div>
+
+    <div id="plot" style="width:100%;height:600px;"></div>
+	
+    <script type="module" async>
+		import {computeDFT, inverseDFT, generateGaussianNoise, pearsonCorrelation} from 'https://roehrin.github.io/test/js-scripts/simpleSignalProcessing.js';
+        
+        const sampleRate = 512;
+		const freq1 = 10;
+		const phase1 = 0;
+		var freq2 = parseFloat(document.getElementById("frequency").value);
+		var phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+		var noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+        const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
+		
+		var w1 = .45;
+		var w2 = .23;
+		var w3 = .23;
+		var w4 = .025;
+		var wgap = .05;
+		// normalise the ws to ensure the sum equals 1
+		let wnorm = w1 + w2 + w3 + w4 + 3*wgap;
+		w1 = w1/wnorm; w2 = w2/wnorm; w3 = w3/wnorm; w4 = w4/wnorm; wgap = wgap/wnorm;
+		
+        
+		// Generate noise
+		var noise1 = generateGaussianNoise(noiseLvl, time.length); // Noise for first channel
+		var noise2 = generateGaussianNoise(noiseLvl, time.length); // Second sine wave
+		
+		// Generate sine waves
+		var sineWave1 = generateSineWave(freq1, phase1, noise1); // First sine wave
+		var sineWave2 = generateSineWave(freq2, phase2, noise2); // Second sine wave
+
+		// Compute DFT
+		var dftResult1 = computeDFT(sineWave1, sampleRate);
+		var dftResult2 = computeDFT(sineWave2, sampleRate);
+		
+        function generateSineWave(frequency, phase, noise) {
+            return time.map((t, index) => Math.cos(2 * Math.PI * frequency * t + phase) + noise[index]);
+        }
+		
+		frequency.oninput = function () {
+			freq2 = parseFloat(document.getElementById("frequency").value);
+			document.getElementById("freqValue").textContent = freq2 + " Hz";
+			sineWave2 = generateSineWave(freq2, phase2, noise2);
+			dftResult2 = computeDFT(sineWave2, sampleRate);
+			updatePlots()
+		}
+		
+		phase.oninput = function () {
+			phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+			document.getElementById("phaseValue").textContent = phase2.toFixed(2) + " rad";
+			sineWave2 = generateSineWave(freq2, phase2, noise2);
+			dftResult2 = computeDFT(sineWave2, sampleRate);
+			updatePlots()
+		}
+		
+		noiseLevel.oninput = function () {
+			noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+			document.getElementById("noiseValue").textContent = noiseLvl.toFixed(2);
+			
+			noise1 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave1 = generateSineWave(freq1, phase1, noise1);
+			dftResult1 = computeDFT(sineWave1, sampleRate);
+			noise2 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave2 = generateSineWave(freq2, phase2, noise2);
+			dftResult2 = computeDFT(sineWave2, sampleRate);
+			updatePlots()
+		}
+		
+
+        function updatePlots() {        
+            
+			const { correlation, slope, intercept } = pearsonCorrelation(sineWave1, sineWave2);
+			
+			// Generate regression line points
+			let xMin = 1.05*Math.min(...sineWave1);
+			let xMax = 1.05*Math.max(...sineWave1);
+			let regressionLineX = [xMin, xMax];
+			let regressionLineY = [slope * xMin + intercept, slope * xMax + intercept];
+			
+            // Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1,
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Sine Wave 1',
+                line: { color: 'black' }
+            };
+
+            const timeTrace2 = {
+                x: time,
+                y: sineWave2,
+                mode: 'lines',
+                name: 'Sine Wave 2',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'}
+            };
+
+            // Create traces for frequency domain signals
+            const freqTrace1 = {
+                x: dftResult1.frequencies,
+                y: dftResult1.psd,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'lines',
+				type: 'scatter',
+                name: 'PSD of Sine Wave 1',
+                line: { color: 'black' },
+				showlegend: false,
+            };
+
+            const freqTrace2 = {
+                x: dftResult2.frequencies,
+                y: dftResult2.psd,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'lines',
+				type: 'scatter',
+                name: 'PSD of Sine Wave 2',
+                line: { color: 'blue', dash: 'dashdot'},
+				showlegend: false,
+            };
+			
+			// Create traces for phase domain signals
+            const phaseTrace1 = {
+                x: dftResult1.frequencies,
+                y: dftResult1.phase,
+				xaxis: 'x3',
+				yaxis: 'y3',
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Phase of Sine Wave 1',
+                line: { color: 'black' },
+				showlegend: false,
+            };
+
+            const phaseTrace2 = {
+                x: dftResult2.frequencies,
+                y: dftResult2.phase,
+				xaxis: 'x3',
+				yaxis: 'y3',
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Phase of Sine Wave 2',
+                line: { color: 'blue', dash: 'dashdot'},
+				showlegend: false,
+            };
+
+            // Create scatter plot trace
+            const scatterTrace = {
+                x: sineWave1,
+                y: sineWave2,
+				xaxis: 'x4',
+				yaxis: 'y4',
+                mode: 'markers',
+                name: 'Scatter Plot',
+				type: 'scatter',
+                marker: { color: 'black' },
+				showlegend: false,
+            };
+			
+			
+
+			// Add regression line to scatter plot
+			let regressionTrace = {
+				x: regressionLineX,
+				y: regressionLineY,
+				mode: 'lines',
+				type: 'scatter',
+				xaxis: 'x4',
+				yaxis: 'y4',
+				name: `Linear Regression (r = ${correlation.toFixed(2)})`,
+				line: { color: 'red', width: 2, dash: 'solid' }
+			};
+			
+			// Create bar plot for correlation
+			const barPlot = {
+				x: ['correlation'],
+				y: [correlation],
+				type: 'bar',
+				xaxis: 'x5',
+				yaxis: 'y5',
+				name: 'Bar Plot',
+				showlegend: false,
+			};
+			
+            // Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+                xaxis: { title: 'Time (s)', domain: [0, w1], anchor: 'y1'},
+                yaxis: { title: 'Amplitude', anchor: 'x1', range: [-2, 2]},
+				
+				xaxis2: { domain: [w1+wgap, w1+w2], anchor: 'y2', range: [0, 30]},
+                yaxis2: { title: 'PSD', domain: [.5, 1], anchor: 'x2', range: [0, 1]},
+				xaxis3: { title: 'Frequency (Hz)', domain: [w1+wgap, w1+w2], anchor: 'y3', range: [0, 30]},
+                yaxis3: { title: 'Phase', domain: [0, .45], anchor: 'x3', range: [-Math.PI, Math.PI]},
+				
+				xaxis4: { title: 'Sine Wave 1 Amplitude', side: 'bottom', domain: [w1+w2+wgap, w1+w2+w3], anchor: 'y4', range: [-2, 2]},
+                yaxis4: { title: 'Sine Wave 2 Amplitude', domain: [0, 1], anchor: 'x4', range: [-2, 2]},
+				
+				xaxis5: { domain: [w1+w2+w3+wgap, 1], anchor: 'y5'},
+                yaxis5: { title: 'correlation', side: 'right', domain: [0, 1], anchor: 'x5', range: [-1.2, 1.2]},
+                showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: -.3, orientation: "h", font: { size: 16 }}
+            };
+
+            // Combine all traces into a single data array
+            const combinedData = [
+                timeTrace1,
+                timeTrace2,
+                freqTrace1,
+                freqTrace2,
+				phaseTrace1,
+				phaseTrace2,
+                scatterTrace,
+				regressionTrace,
+				barPlot
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot', combinedData, layout, {responsive: true});
+			Plotly.newPlot('plot2', combinedData, layout, {responsive: true});
+			Plotly.newPlot('plot3', combinedData, layout, {responsive: true});
+			Plotly.newPlot('plot4', combinedData, layout, {responsive: true});
+        }
+
+        // Initial plot
+        updatePlots();
+				
+    </script>
+</body>
+</html>

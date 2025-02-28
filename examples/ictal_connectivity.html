@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Connectivity during seizure recorded by iEEG.</title>
+    <link rel="stylesheet" href="../niivue_dualview.css" />
+  </head>
+  <body>
+    <noscript>niivue requires JavaScript.</noscript>
+    <header>
+	<h3>Connectivity during a seizure recorded by iEEG.</h3>
+	<div class="dropdown" id='dropDownMenu'>
+		<button class="dropbtn" data-toggle="dropdown">
+		  View
+		  <i class="fa fa-caret-down"></i>
+		</button>
+		<div class="dropdown-content">
+		  <a href="#" class="viewBtn" id="|Axial">Axial</a>
+		  <a class="viewBtn" id="|Sagittal">Sagittal</a>
+		  <a class="viewBtn" id="|Coronal">Coronal</a>
+		  <a class="viewBtn" id="|Render">Render</a>
+		  <a class="viewBtn" id="|MultiPlanar">A+C+S</a>
+		  <a class="viewBtn dropdown-item-checked" id="|MultiPlanarRender">A+C+S+R</a>
+		  <a class="viewBtn divider dropdown-item-checked" id="Colorbar">Colorbar</a>
+		  <a class="viewBtn" id="Radiological">Radiological</a>
+		  <a class="viewBtn" id="ClipPlane">Render Clip Plane</a>
+		</div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Edge Color
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a class="viewBtn" id="!EdPlasma">Plasma</a>
+          <a class="viewBtn" id="!EdViridis">Viridis</a>
+          <a class="viewBtn dropdown-item-checked" id="!EdInferno">Inferno</a>
+		  <a class="viewBtn" id="!EdRandom">Random</a>
+        </div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Map Color
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a class="viewBtn dropdown-item-checked" id="!MapYlOrRd">YlOrRd</a>
+          <a class="viewBtn" id="!MapYlGnBu">YlGnBu</a>
+          <a class="viewBtn" id="!MapGreens">Greens</a>
+		  <a class="viewBtn" id="!MapReds">Reds</a>
+		  <a class="viewBtn" id="!MapBlues">Blues</a>
+        </div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Seizure
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+			<a class="viewBtn" id="]sz1">Seizure 1</a> 
+          <a class="viewBtn dropdown-item-checked" id="]sz2">Seizure 2</a> 
+        </div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Connectivity
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a class="viewBtn dropdown-item-checked" id="_PLV">PLV</a> 
+          <a class="viewBtn" id="_coh">coherence</a> 
+		  <a class="viewBtn" id="_env">envelope correlation</a>
+		  <a class="viewBtn divider" id="_ciPLV">corrected imaginary PLV</a> 
+          <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a> 
+        </div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Frequency band
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a class="viewBtn dropdown-item-checked" id="+delta">delta</a> 
+          <a class="viewBtn" id="+theta">theta</a> 
+		  <a class="viewBtn" id="+alpha">alpha</a> 
+		  <a class="viewBtn" id="+beta">beta</a> 
+		  <a class="viewBtn" id="+gamma">gamma</a> 
+        </div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Nodal measure
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+		<a class="viewBtn" id="?EI">epileptogenicity index</a>
+		<a class="viewBtn" id="?spike">spike rate</a>
+		<a class="viewBtn" id="?gamma">gamma burst rate</a>
+		<a class="viewBtn" id="?ripple">ripple rate</a>
+          <a class="viewBtn divider dropdown-item-checked" id="?strength">strength</a>
+		  <a class="viewBtn" id="?CC">clustering coef.</a>
+		  <a class="viewBtn" id="?eigCent">eigenvect. centrality.</a>
+        </div>
+    </div>
+	<div class="dropdown">
+			<button class="dropbtn">
+			  About
+			  <i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+				<a class="viewBtn dropdown" id="-Help">Help</a>
+				<a class="viewBtn dropdown" id="-Authors">Authors</a>
+				<a class="viewBtn dropdown" href="https://github.com/niivue/niivue" target="_blank">Niivue</a>
+				<a class="viewBtn dropdown" href="https://plotly.com/javascript/" target="_blank">Plotly</a>
+			</div>
+		</div>
+  </header>
+		<div class="page-wrapper">
+			<div class="row">
+				<div class="column">
+						<div id="seizureTraces" style="height:700px">
+						</div>
+						<div>
+						<label for="timeSlider">Network Time point</label>
+						<input type="range" min="0" max="5" value="0" class="slider" id="timeSlider"style="width:70%"/></div>
+				</div>
+				<div class="column">
+					<canvas id="gl1"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+  <footer>
+	<label for="edgeSlider">Edge Size</label>
+    <input type="range" min="0" max="100" value="10" class="slider" id="edgeSlider" />
+	<label for="percEdThreshSlider">Percentage of Edges</label>
+    <input type="range" min="1" max="999" value="20" class="slider" id="percEdThreshSlider" style="width:20%"/>
+    <label for="nodeSlider">Node Size</label>
+    <input type="range" min="1" max="200" value="100" class="slider" id="nodeSlider" />
+  </footer>
+  </body>
+</html>
+<script type="module" async>
+	document.body.style.cursor = 'wait'
+  import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
+  import * as vhdrReader from 'https://roehrin.github.io/test/js-scripts/brainvisionReader.js';
+  let response = await fetch("https://roehrin.github.io/test/ictal_connectivity/plotlyColorscale4niiVue.json", {})
+  let plotlyColorscales = await response.json()
+  
+  
+  async function onButtonClick(event) {
+	  if (event.target.id.charAt(0) === "|") {
+		  //sliceType
+		  if (event.target.id === "|Axial") nv1.setSliceType(nv1.sliceTypeAxial);
+		  if (event.target.id === "|Coronal")
+			nv1.setSliceType(nv1.sliceTypeCoronal);
+		  if (event.target.id === "|Sagittal")
+			nv1.setSliceType(nv1.sliceTypeSagittal);
+		  if (event.target.id === "|Render") nv1.setSliceType(nv1.sliceTypeRender);
+		  if (event.target.id === "|MultiPlanar") {
+			nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.NEVER;
+			nv1.setSliceType(nv1.sliceTypeMultiplanar);
+		  }
+		  if (event.target.id === "|MultiPlanarRender") {
+			nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.ALWAYS;
+			nv1.setSliceType(nv1.sliceTypeMultiplanar);
+		  }
+		  toggleGroup(event.target.id);
+	  } //sliceType
+	  if (event.target.id === "Colorbar") {
+		  nv1.opts.isColorbar = !nv1.opts.isColorbar;
+		  event.srcElement.classList.toggle("dropdown-item-checked");
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id === "Radiological") {
+		  nv1.opts.isRadiologicalConvention = !nv1.opts.isRadiologicalConvention;
+		  event.srcElement.classList.toggle("dropdown-item-checked");
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id === "ClipPlane") {
+		  if (nv1.scene.clipPlaneDepthAziElev[0] > 1)
+			nv1.setClipPlane([0.3, 270, 0]);
+		  else nv1.setClipPlane([2, 270, 0]);
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id.charAt(0) === "!") {
+		  // set color scheme
+		  //nv1.volumes[0].colormap = cmaps[i];
+		  if (event.target.id.startsWith("!Ed")){
+			EdColormap = event.target.id.substr(3);
+			for (let idMesh=1; idMesh<nv1.meshes.length;  idMesh++){
+				nv1.setMeshProperty(nv1.meshes[idMesh].id, "edgeColormap", EdColormap);
+			}
+		  } else { // change map colorscale/colormap
+			mapColormap = event.target.id.substr(4);
+			Plotly.restyle(seizureTraces, {'colorscale': mapColormap, 'reversescale': mapColormap != 'Reds'}, 0);
+			chanAstickLabel()
+			for (let idMesh=1; idMesh<nv1.meshes.length;  idMesh++){
+				nv1.setMeshProperty(nv1.meshes[idMesh].id, "nodeColormap", mapColormap);
+			}
+		  }
+		  toggleGroup(event.target.id);
+		  return;
+		}
+	  if (event.target.id.charAt(0) === "-") {
+			if (event.target.id.substr(1) == "Help"){
+				alert("Navigate the connectivity changes during an epileptic seizure.\n\n Hover on the traces to know the name of the iEEG channel.\n" + 
+				"One click will show this channel on the MRI.\n A second on the same region will show only the neighbourhood of this channel.\n" + 
+				"Another click will reset the view.\n\n" + 
+				"SEEG electrodes are displayed in yellow on the MRI. Bipolar electrodes according to the maximum of the current time window; their colours are the same as the map \n\n" +
+				"The edge and node size sliders allow you to change the size of the edges and electrodes of the graph displayed on the MRI.\n" + 
+				"The percentage of edges slider allows you to display only a given percentage of edges on the MRI.\n" +
+				"The network time point slider allows you to change the time window (dotted rectangle on the traces) corresponding to the network displayed on the MRI.");
+			} else if (event.target.id.substr(1) == "Authors"){
+				alert("The data were curated and selected by Dr Stanislas Lagarde.\nThe data were processed by Dr Nicolas Roehri, using Fieldtrip.\nThe webpage was written by Dr Nicolas Roehri, using Niivue and Plotly.");
+			}
+			return
+		}
+	document.body.style.cursor = 'wait'	
+	if (event.target.id.charAt(0) === "]") { // select connectivity type
+			currSz = event.target.id.substr(1)
+			var fileUrl = "https://roehrin.github.io/test/ictal_connectivity/seizure" + currSz.slice(2,3) + "ds.eeg";
+			var hdr = await vhdrReader.readVHDRfromURL(fileUrl.replace(".eeg", ".vhdr"));
+			var iEEGdata = await vhdrReader.readBrainvisionEEGData(fileUrl,hdr, 0.0064/2, true);
+			connMap.length = 0; // clear existing array
+			await loadConnMaP()
+			connMap.push(...iEEGdata)
+			Plotly.redraw('seizureTraces');
+			Plotly.restyle(seizureTraces, {'colorscale': mapColormap, 'reversescale': mapColormap != 'Reds'}, 0);
+			chanAstickLabel()
+			updateNodeSize()
+			if (nv1.meshes.length > 2) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+			nv1.meshes.pop();
+			nv1.addMesh(nv1.loadConnectomeAsMesh(bipElec))
+			toggleGroup(event.target.id);
+			edges.sort((a, b) => b - a)
+			percEdThreshSlider.oninput();
+			edgeSlider.oninput();
+			nv1.setMeshProperty(nv1.meshes[1].id, "edgeMax", edges[0]);
+		}
+	if (event.target.id.charAt(0) === "_") { // select connectivity type
+			currConn = ["_PLV", "_coh", "_env" , "_ciPLV", "_cicoh"].indexOf(event.target.id);
+			await loadConnMaP()
+			Plotly.redraw('seizureTraces');
+			Plotly.restyle(seizureTraces, {'colorscale': mapColormap, 'reversescale': mapColormap != 'Reds'}, 0);
+			chanAstickLabel()
+			updateNodeSize()
+			if (nv1.meshes.length > 2) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+			nv1.meshes.pop();
+			nv1.addMesh(nv1.loadConnectomeAsMesh(bipElec))
+			toggleGroup(event.target.id);
+			edges.sort((a, b) => b - a)
+			percEdThreshSlider.oninput();
+			edgeSlider.oninput();
+			nv1.setMeshProperty(nv1.meshes[1].id, "edgeMax", edges[0]);
+		}
+	  if (event.target.id.charAt(0) === "?") { // select network metric
+			currMetric = currMetric = ['?EI', '?spike', '?gamma', '?ripple', '?strength', '?CC', '?eigCent'].indexOf(event.target.id);
+			await loadConnMaP()
+			Plotly.redraw('seizureTraces');
+			Plotly.restyle(seizureTraces, {'colorscale': mapColormap, 'reversescale': mapColormap != 'Reds'}, 0);
+			chanAstickLabel()
+			updateNodeSize()
+			if (nv1.meshes.length > 2) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+			nv1.meshes.pop();
+			nv1.addMesh(nv1.loadConnectomeAsMesh(bipElec))
+			edges.sort((a, b) => b - a)
+			percEdThreshSlider.oninput();
+			edgeSlider.oninput();
+			nv1.setMeshProperty(nv1.meshes[1].id, "edgeMax", edges[0]);
+			toggleGroup(event.target.id);
+		}
+	  if (event.target.id.charAt(0) === "+") { // select frequency band
+			// turn off current heatmap
+			currFreqId = freqList.indexOf(event.target.id.substr(1));
+			await loadConnMaP()
+			Plotly.redraw('seizureTraces');
+			// known issue, this creates an error when the time widows has been updated...
+			Plotly.restyle(seizureTraces, {'colorscale': mapColormap, 'reversescale': mapColormap != 'Reds'}, 0);
+			chanAstickLabel()
+			updateNodeSize()
+			if (nv1.meshes.length > 2) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+			nv1.meshes.pop();
+			nv1.addMesh(nv1.loadConnectomeAsMesh(bipElec))
+			toggleGroup(event.target.id);
+			edges.sort((a, b) => b - a)
+			percEdThreshSlider.oninput();
+			edgeSlider.oninput();
+			nv1.setMeshProperty(nv1.meshes[1].id, "edgeMax", edges[0]);
+		}
+	  //let connList = ['POW', 'PLV', 'coh', 'envCorr', "ciPLV", "cicoh"];
+	  //let measStr = ['strength', 'clustering coef.', 'eigenvect. centrality'];
+	  edgeSlider.oninput();
+	  let meas = measStr[currMetric];
+	  nv1.document.labels[0].text = updateLabel();
+	  //nv1.updateGLVolume();
+	  nv1.drawScene()
+	  document.body.style.cursor = 'default'
+  }
+  
+  edgeSlider.oninput = function () {
+    for (let idMesh=1; idMesh<nv1.meshes.length;  idMesh++){
+		nv1.setMeshProperty(nv1.meshes[idMesh].id, "edgeScale", this.value*.1)
+	}
+  }
+  nodeSlider.oninput = function () {
+	nv1.setMeshProperty(nv1.meshes[0].id, "nodeScale", this.value*.01);
+	for (let idMesh=1; idMesh<nv1.meshes.length;  idMesh++){
+		nv1.setMeshProperty(nv1.meshes[idMesh].id, "nodeScale", this.value*.01*6);
+	}
+  }
+  percEdThreshSlider.oninput = function () {
+	document.body.style.cursor = 'wait';
+    //  as edges are aleardy sorted in a descending way,
+	edMin = edges[Math.round(this.value*.001*edges.length)];
+    for (let idMesh=1; idMesh<nv1.meshes.length;  idMesh++){
+		nv1.setMeshProperty(nv1.meshes[idMesh].id, "edgeMin", edMin);
+	}
+	document.body.style.cursor = 'default';
+  }
+  timeSlider.oninput = async function () {
+	document.body.style.cursor = 'wait';
+	currWindow = this.valueAsNumber;
+	// update only values within nested objects (x0 and x1 or rectangle)
+	var update = {
+		'shapes[0].x0': timeSample[currWindow]-2,   // updates the start of the rectangle
+		'shapes[0].x1': timeSample[currWindow]+2    // updates the end of the rectangle
+	};
+	Plotly.relayout('seizureTraces', update)
+	Plotly.restyle(seizureTraces, {'colorscale': mapColormap, 'reversescale': mapColormap != 'Reds'}, 0);	
+	chanAstickLabel()
+	await loadConnMaP()
+	updateNodeSize()
+	nv1.meshes.pop();
+	nv1.addMesh(nv1.loadConnectomeAsMesh(bipElec))
+	edges.sort((a, b) => b - a)
+	percEdThreshSlider.oninput();
+	edgeSlider.oninput();
+	nv1.setMeshProperty(nv1.meshes[1].id, "edgeMax", edges[0]);
+	document.body.style.cursor = 'default';
+  }
+  
+  var currFreqId = 0; // variable with the current frequency index (linked to freqList)
+  var currConn = 0; // variable with the current connectivity type ([pow, PLV, coh. envCorr])
+  var currMetric = 4; // variable with the current metric type ([pow, strength, clustering coeff., eignvect centrality])
+  var currWindow = 0; // variable with the current time window of the connectivity graph (3D)
+  var currSz = 'sz2';
+  var edMin = 0; // variable to store minimum edge value to display
+  var nodeSize = []; // variable with the node size (to encode nodal measures)
+  var edges = []; // variable with the current connectivity graph (3D)
+  var connMap = []; // variable with the current heatmap
+  var timeSample = [];
+  var EdColormap = "Inferno";
+  var mapColormap = "YlOrRd";
+  
+  var fileUrl = "https://roehrin.github.io/test/ictal_connectivity/seizure" + currSz.slice(2,3) + "ds.eeg";
+  var hdr = await vhdrReader.readVHDRfromURL(fileUrl.replace(".eeg", ".vhdr"));
+  var iEEGdata = await vhdrReader.readBrainvisionEEGData(fileUrl,hdr, 0.0064/2, true);
+  const freqList = ['delta', 'theta', 'alpha', 'beta', 'gamma'];
+  const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh"];
+  const measStr = ['EI', 'spike', 'gamma', 'ripple', 'strength', 'CC', 'eigCent'];
+   
+  function updateLabel(){
+	var lblTmplt = `${currSz}, ${connList[currConn]}: ${measStr[currMetric]}, ${freqList[currFreqId]}`;
+	return lblTmplt
+  }
+  
+  async function loadConnMaP(){
+		let fname = "https://roehrin.github.io/test/ictal_connectivity/connectivity_" + currSz + "_" + connList[currConn] + 
+							"_" + freqList[currFreqId] + ".json"
+		let response = await fetch(fname, {})
+		let connectivity = await response.json()
+		//let connList = ['POW', 'PLV', 'coh', 'envCorr', "ciPLV", "cicoh"];
+		//let measStr = ['strength', 'CC', 'eigCent'];
+		let meas = measStr[currMetric];
+		//if (currConn == 0){  // no connectivity matrix only power
+		//	meas = "pow";
+		//	edges = connectivity.mat[currWindow].map(function(val) {return 0}); // if edges = [], 3D view not displayed...
+		//} else {
+			edges = connectivity.mat[currWindow];
+		//}
+		nodeSize = connectivity[meas].map(function(item) {return item[currWindow]});
+		let currMap = {
+			x: connectivity.t,
+			z: connectivity[meas],
+			type: 'heatmap',
+			colorscale: mapColormap,
+			reversescale: true,
+			zmin:0,
+			opacity:1,
+			showscale: true,
+		};
+		timeSample = connectivity.t;
+		connMap[0]  = currMap;
+  }
+  
+  function centerCrosshairOnNode(nodeID){
+		let nodes = nv1.meshes[1].nodes;
+		// position crosshair at the center of the ROI
+		let dPos = [nodes[nodeID].x, nodes[nodeID].y, nodes[nodeID].z];
+		dPos = nv1.volumes[0].mm2vox(dPos);
+		const xhPos = nv1.frac2vox(nv1.scene.crosshairPos).slice(0, 3)
+		for (let j = 0; j < dPos.length; j++){
+		  dPos[j] = dPos[j] - xhPos[j];
+		};
+		nv1.moveCrosshairInVox(dPos[0], dPos[1], dPos[2]);
+	}
+  
+  await loadConnMaP()
+  timeSlider.max = timeSample.length-1;
+  connMap.push(...iEEGdata)
+  //let chanNames = Object.values( hdr['Channel Infos']).map(function(item) {return item["label"]});
+  //let chanVec = Array.from({length: hdr['Common Infos'].NumberOfChannels}, (_, i) => i);
+  var layout = {
+      hovermode:'closest',
+	  xaxis: {
+		  title: {
+			text: 'Time [s]'
+		  },
+		  showgrid: true,
+		  automargin: true,
+		  tickfont: { size: 14}
+	  },
+	  autosize: true,
+	  margin: {
+		l: 100,
+		r: 2,
+		b: 50,
+		t: 2,
+		//pad: 4
+	  },
+	  yaxis: {
+		  //tickvals: chanVec,
+		  //ticktext: chanNames,
+		  //dtick: 0,
+		  //tickformat: '.1f',
+		  visible: true,
+		  //tickmode: "array",
+		  //nticks: 20,
+		  automargin: true,
+		  autorange: 'reversed',
+		  tickfont: { size: 11}
+	  },
+	  showlegend: false,
+	  shapes:[
+		{
+			type: 'rect',
+			xref: 'x',
+			yref: 'y',
+			x0: timeSample[currWindow]-2,
+			y0: -1,
+			x1: timeSample[currWindow]+2,
+			y1: Number(hdr["Common Infos"]["NumberOfChannels"])+1-1,
+			line: {
+				color: 'rgb(0, 0, 0)',
+				width: 5,
+				dash: 'dot'
+			},
+			fillcolor: ''
+		}]
+	};
+	var config = {responsive: true};
+	Plotly.newPlot('seizureTraces', connMap, layout, config);
+	// update line width to 1
+	Plotly.restyle(seizureTraces, {'line.width': 1.5});
+  var volumeList1 = [
+    {
+      url: "https://roehrin.github.io/test/ictal_connectivity/patient_mri.nii", 
+      colormap: "gray",
+      visible: true,
+      opacity: 1
+    }
+  ];
+  let opts = {
+    show3Dcrosshair: true,
+    isColorbar: true,
+	//isResizeCanvas: false,
+    backColor: [0, 0, 0, 1],
+	dragAndDropEnabled: false,
+    //sliceType: niivue.SLICE_TYPE.RENDER,
+	multiplanarLayout: niivue.MULTIPLANAR_TYPE.GRID,
+	multiplanarShowRender: niivue.SHOW_RENDER.ALWAYS,
+	isOrientCube: true,
+	showLegend: false,
+	meshXRay: .3,
+  }
+  
+  var nv1 = new niivue.Niivue(opts);
+  nv1.attachTo("gl1");	
+  nv1.addLabel(updateLabel(), 
+		{ textScale: .75, textAlignment: niivue.LabelTextAlignment.LEFT, textColor: [1.0, 1.0, 1.0, 1.0], backgroundColor: [0.2, 0.2, 0.2, 0.2]}, 
+		undefined, niivue.LabelAnchorPoint.TOPRIGHT);
+  nv1.addLabel('', 
+		{ textScale: .75, textAlignment: niivue.LabelTextAlignment.LEFT, textColor: [1.0, 1.0, 1.0, 1.0], backgroundColor: [0.2, 0.2, 0.2, 0.2]}, 
+		undefined, niivue.LabelAnchorPoint.TOPLEFT);		
+  await nv1.loadVolumes(volumeList1);
+  //nv1.setClipPlane([-0.0, 0, 40]);
+  nv1.volumes[0].colorbarVisible = false
+  //thickness of slab. Value 0..1.73 (cube opposite corner length is sqrt(3)).
+  nv1.setClipPlaneThick(1.73)
+  nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.ALWAYS;
+  nv1.opts.isColorbar = true;
+  nv1.opts.isOrientCube = true;
+  Object.keys(plotlyColorscales).map(function(item) {nv1.addColormap(item, plotlyColorscales[item])})
+  //await nv1.loadConnectomeFromUrl("https://roehrin.github.io/test/ictal_connectivity/pat_elec.jcon");
+  await nv1.loadMeshes([
+    {
+      url: "https://roehrin.github.io/test/ictal_connectivity/pat_elec.jcon",
+    },
+  ]);
+  nv1.meshes[0].colorbarVisible = false;
+  nv1.opts.showLegend = false;
+  response = await fetch("https://roehrin.github.io/test/ictal_connectivity/pat_bipelec.jcon", {})
+  const bipElec = await response.json()
+  
+  bipElec.edgeMin = .5;
+  bipElec.edgeMax = 1;
+  bipElec.edgeColormap = EdColormap;
+  bipElec.edgeColormapNegative = '';
+  bipElec.nodeColormap = mapColormap;
+  updateNodeSize()
+  nv1.addMesh(nv1.loadConnectomeAsMesh(bipElec))
+  edges.sort((a, b) => b - a)
+  percEdThreshSlider.oninput();
+  edgeSlider.oninput();
+  nv1.setMeshProperty(nv1.meshes[1].id, "edgeMax", edges[0]);
+  nodeSlider.oninput();
+  var buttons = document.getElementsByClassName("viewBtn");
+  for (let i = 0; i < buttons.length; i++){
+	buttons[i].addEventListener("click", onButtonClick, false);
+  }
+  function updateNodeSize(){
+	bipElec.edges = edges;
+	bipElec.nodeMaxColor = Math.max(...connMap[0].z.flat(1));
+	bipElec.nodeMinColor = Math.min(...connMap[0].z.flat(1));
+	bipElec.nodes.Color = nodeSize;
+	bipElec.nodeColormap = mapColormap;
+	if (currMetric > 3){
+		bipElec.nodes.Size = nodeSize.map(function (value) { return Math.pow(value/Math.max(...nodeSize),2)}); // value < 1 so pow helps visually 
+	} else {
+		bipElec.nodes.Size = nodeSize.map(function (value) { return value/Math.max(...nodeSize)});
+	}
+	bipElec.nodeScale = 6;
+  }
+  function toggleGroup(id) {
+    let buttons = document.getElementsByClassName("viewBtn");
+    let char0 = id.charAt(0);
+	let char03 = id.slice(0,3);
+    for (let i = 0; i < buttons.length; i++) {
+	  if (buttons[i].id.charAt(0) !== char0) continue;
+	  if ((char03 === "!Ed" || char03 === "!Map") && (buttons[i].id.slice(0,3) !== char03)) continue;
+	  buttons[i].classList.remove("dropdown-item-checked");
+	  if (buttons[i].id === id)
+		buttons[i].classList.add("dropdown-item-checked");
+    }
+  } // toggleGroup()
+	var nodes = nv1.meshes[1].nodes;
+	chanAstickLabel()
+	seizureTraces.on('plotly_relayout', function(eventdata){chanAstickLabel()});
+	function chanAstickLabel(){
+		Plotly.d3.selectAll(".ytick text").each(function(d, i) {
+				if (d.x > hdr["Common Infos"]["NumberOfChannels"] || d.x < 0 || !Number.isInteger(d.x)) {
+					Plotly.d3.select(this).html('')
+				} else{
+					Plotly.d3.select(this).html(nodes[d.x].name);
+				}
+		})
+	}
+	seizureTraces.on('plotly_hover', function(data){
+		//let connList = ['POW', 'PLV', 'coh', 'envCorr', "ciPLV", "cicoh"];
+		//let measStr = ['strength', 'CC', 'centrality'];
+		let nodeID = data.points[0].curveNumber-1;
+		if (nodeID === -1) nodeID = data.points[0].pointIndex[0]; // clicked on heatmap not traces
+		nv1.document.labels[1].text = nodes[nodeID].name;
+		nv1.updateGLVolume();
+	});
+	var clickMode = 0;
+	var clickROI = 0;
+	seizureTraces.on('plotly_click', function(data){
+		let nodeID = data.points[0].curveNumber-1;
+		if (nodeID === -1) nodeID = data.points[0].pointIndex[0]; // clicked on heatmap not traces
+		if (nv1.document.labels[1].text.includes(nodes[clickROI].name)) clickMode++; // if click on the same ROI, then change behaviour
+		clickROI = nodeID;
+		if (clickMode === 0){
+			centerCrosshairOnNode(nodeID);
+		} else if (clickMode === 1){
+			let ConnectedNodes, ConnectedNodesIdx = showNeighbourhood(nodeID);		
+			clickMode++;
+		} else {
+			if (nv1.meshes.length > 2) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+			nv1.setMeshProperty(nv1.meshes[1].id, "visible", true);
+			centerCrosshairOnNode(nodeID);
+			clickMode = 0;
+		}
+	});
+	
+	function showNeighbourhood(node_idx){
+		
+		if (nv1.meshes.length > 2) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+		// deep copy of the original edges of the connectome
+		let currentEdges = JSON.parse(JSON.stringify(nv1.meshes[1].edges));
+		let ConnectedNodes = []; // init list of connected nodes
+		let ConnectedNodesIdx = []; // init list of connected nodes indices
+		let nodes = nv1.meshes[1].nodes;
+		// set to zero all edges not connected to the node of interest
+		for (let i = 0; i < currentEdges.length; i++) {
+			// if edge is already zero continue
+			if (currentEdges[i].colorValue == 0){continue}
+			if ((currentEdges[i].first != node_idx) && (currentEdges[i].second != node_idx) ){
+				currentEdges[i].colorValue = 0;
+				continue
+			}
+			if (currentEdges[i].colorValue <= edMin){continue} // here edge belong to neighbourhood, but we don't want to write it's name if edve value to low
+			// check if first correspond to the node of interest, if not add it otherwise add the second
+			// (as it means the second is the node of interest)
+			if (nodes[currentEdges[i].first].name != nodes[node_idx].name){
+				ConnectedNodes.push(nodes[currentEdges[i].first].name);
+				ConnectedNodesIdx.push(currentEdges[i].first);
+			} else {
+				ConnectedNodes.push(nodes[currentEdges[i].second].name);
+				ConnectedNodesIdx.push(currentEdges[i].second);
+			}
+		}
+		// deep copy of the original connectome to modify its edges
+		let newConnectome = JSON.parse(JSON.stringify(nv1.meshes[1].connectome));
+		newConnectome.edges = currentEdges;
+		newConnectome.edgeColormapNegative = "";
+		newConnectome.edgeMin = edMin;
+		nv1.addMesh(nv1.loadConnectomeAsMesh(newConnectome))
+		nv1.meshes[2].colorbarVisible = false;
+		nv1.setMeshProperty(nv1.meshes[2].id, "edgeColormap", EdColormap)
+		nv1.setMeshProperty(nv1.meshes[2].id, "edgeScale", edgeSlider.value*.1)
+		nv1.setMeshProperty(nv1.meshes[1].id, "visible", false);
+		return ConnectedNodes, ConnectedNodesIdx
+		
+	}// end showNeighbourhood
+	//var animationTimer = null
+	//async function doAnimate() {
+	//	timeSlider.value++
+	//	await timeSlider.oninput();
+	//}
+	//animate.onclick = function () {
+	//	if (animationTimer == null) animationTimer = setInterval(doAnimate, 2000)
+	//	else {
+	//	  clearInterval(animationTimer)
+	//	  animationTimer = null
+	//	}
+	//}
+	document.body.style.cursor = 'default';
+</script>

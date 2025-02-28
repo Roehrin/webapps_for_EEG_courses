@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase Locking Value correlation of two noisy signals</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.header {
+		  position: sticky;
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		  z-index: 1;
+		}
+		.div {
+		  margin: 10px;
+		}
+    </style>
+</head>
+<body>
+	<h1>Phase Locking Value correlation of two noisy signals.</h1>
+    <div class="header" id="myHeader">
+		<span style="padding: 5px">
+			<label for="frequency">Frequency of Sine Wave 2:</label>
+			<input type="range" id="frequency" class="slider" min="1" max="25" value="10">
+			<span id="freqValue">3 Hz</span>
+		</span>
+			<span style="padding: 5px">
+			<label for="phase">Phase Shift of Sine Wave 2:</label>
+			<input type="range" id="phase" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue">0 rad</span>
+		</span>
+			<span style="padding: 5px">
+			<label for="noiseLevel">Noise Level:</label>
+			<input type="range" id="noiseLevel" class="slider" min="0" max="1" value="0.1" step="0.01">
+			<span id="noiseValue">0.1</span>
+		</span>
+    </div>
+
+    <div id="plot" style="width:100%;height:600px;"></div>
+	
+    <script type="module" async>
+		import {computeDFT, inverseDFT, generateGaussianNoise, analyticSignal} from 'https://roehrin.github.io/test/js-scripts/simpleSignalProcessing.js';
+        
+        const sampleRate = 512;
+		const freq1 = 10;
+		const phase1 = 0;
+		var freq2 = parseFloat(document.getElementById("frequency").value);
+		var phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+		var noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+        const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
+		
+		var w1 = .65;
+		var w2 = .25;
+		var w3 = .05;
+		var wgap = .05;
+		// normalise the ws to ensure the sum equals 1
+		let wnorm = w1 + w2 + w3 + 2*wgap;
+		w1 = w1/wnorm; w2 = w2/wnorm; wgap = wgap/wnorm;
+		
+        
+		// Generate noise
+		var noise1 = generateGaussianNoise(noiseLvl, time.length); // Noise for first channel
+		var noise2 = generateGaussianNoise(noiseLvl, time.length); // Second sine wave
+		
+		// Generate sine waves
+		var sineWave1 = generateSineWave(freq1, phase1, noise1); // First sine wave
+		var sineWave2 = generateSineWave(freq2, phase2, noise2); // Second sine wave
+		
+		// compute analytic signal
+		var zWave1 = analyticSignal(sineWave1); // First sine wave
+		var zWave2 = analyticSignal(sineWave2); // Second sine wave
+		
+		var instPhase1 = zWave1.map(([real, imag]) => Math.atan2(imag, real)); // Math.atan2(imag, real))
+		var instPhase2 = zWave2.map(([real, imag]) => Math.atan2(imag, real));
+		
+        function generateSineWave(frequency, phase, noise) {
+            return time.map((t, index) => Math.cos(2 * Math.PI * frequency * t + phase) + noise[index]);
+        }
+		
+		frequency.oninput = function () {
+			freq2 = parseFloat(document.getElementById("frequency").value);
+			document.getElementById("freqValue").textContent = freq2 + " Hz";
+			sineWave2 = generateSineWave(freq2, phase2, noise2);
+			zWave2 = analyticSignal(sineWave2);
+			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			updatePlots()
+		}
+		
+		phase.oninput = function () {
+			phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+			document.getElementById("phaseValue").textContent = phase2.toFixed(2) + " rad";
+			sineWave2 = generateSineWave(freq2, phase2, noise2);
+			zWave2 = analyticSignal(sineWave2);
+			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			updatePlots()
+		}
+		
+		noiseLevel.oninput = function () {
+			noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+			document.getElementById("noiseValue").textContent = noiseLvl.toFixed(2);
+			
+			noise1 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave1 = generateSineWave(freq1, phase1, noise1);
+			zWave1 = analyticSignal(sineWave1);
+			instPhase1 = zWave1.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			
+			noise2 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave2 = generateSineWave(freq2, phase2, noise2);
+			zWave2 = analyticSignal(sineWave2);
+			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			updatePlots()
+		}
+		
+
+        function updatePlots() {        
+            
+			const PLV = computePLV(instPhase1, instPhase2);
+			const iPLV = computeiPLV(PLV);
+			const ciPLV = computeciPLV(PLV)
+			let angleDiff = instPhase1.map((ph1, i) => ph1-instPhase2[i]); 
+            // Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1,
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Signal 1',
+                line: { color: 'black' }
+            };
+
+            const timeTrace2 = {
+                x: time,
+                y: sineWave2,
+                mode: 'lines',
+                name: 'Signal 2',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'}
+            };
+			
+			// Create traces for instantaneous phase signals
+            const instPhTrace1 = {
+                x: time,
+                y: instPhase1,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				type: 'scatter',
+                name: 'Inst. Phase, Wave 1',
+                line: { color: 'black' },
+				showlegend: false,
+            };
+
+            const instPhTrace2 = {
+                x: time,
+                y: instPhase2,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+                name: 'Inst. Phase, Wave 2',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'},
+				showlegend: false,
+            };
+
+
+            // Create scatter plot trace
+            const scatterTrace = {
+				type: "scatterpolar",
+				r: new Array(angleDiff.length).fill(1),
+				theta: angleDiff,
+				mode: "markers",
+				marker: {
+					color: "#2255ff",
+					size: 10,
+					line: {
+					  color: "white"
+					},
+					opacity: 0.1
+				},
+				thetaunit: "radians",
+				cliponaxis: true,
+				subplot: "polar",
+				name: "phase diff.",
+			};
+			
+			// Create bar plot for correlation
+			const plvPlot = [{
+				type: "scatterpolar",
+				name: `PLV (r = ${PLV.magnitude.toFixed(2)})`,
+				r: [0, PLV.magnitude],
+				theta: [0, PLV.phaseLocking],
+				marker: {
+					color: "orange",
+					symbol: "square",
+					size: 15,
+				},
+				line: {
+					color: "black",
+					width: 5},
+				thetaunit: "radians",
+				subplot: "polar",
+			},
+			{
+				type: "scatterpolar",
+				name: `iPLV (r = ${iPLV.magnitude.toFixed(2)})`,
+				r: [0, iPLV.magnitude],
+				theta: [0, iPLV.phaseLocking],
+				marker: {
+					color: "green",
+					symbol: 121,
+					line: {
+						width: 3
+					},
+					size: 15,
+				},
+				line: {
+					color: "black",
+					width: 5},
+				thetaunit: "radians",
+				subplot: "polar",
+			},
+			{
+				type: "scatterpolar",
+				name: `ciPLV (r = ${ciPLV.magnitude.toFixed(2)})`,
+				r: [0, ciPLV.magnitude],
+				theta: [0, ciPLV.phaseLocking],
+				marker: {
+					color: "purple",
+					symbol: 121,
+					line: {
+						width: 3
+					},
+					size: 15,
+				},
+				line: {
+					color: "black",
+					width: 5},
+				thetaunit: "radians",
+				subplot: "polar",
+			}
+			];
+			
+			// Create bar plot for correlation
+			const barPlot = {
+				x: ['PLV', 'iPLV', 'ciPLV'],
+				y: [PLV.magnitude, iPLV.magnitude, ciPLV.magnitude],
+				type: 'bar',
+				xaxis: 'x3',
+				yaxis: 'y3',
+				name: 'Bar Plot',
+				marker:{
+					color: ['orange', 'green', 'purple']
+				},
+				showlegend: false
+			};
+			
+            // Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+				// time domain
+                xaxis: { domain: [0, w1], anchor: 'y1'},
+                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-2, 2]},
+				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
+                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI]},
+				
+				// bar plot
+				xaxis3: { domain: [w1+w2+wgap, 1], anchor: 'y3'},
+                yaxis3: { title: 'Magnitude', domain: [0, 1], side: 'right', anchor: 'x3', range: [0, 1]},
+				
+				// polar scatter
+				polar: {domain: {x: [w1+wgap, w1+w2], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+				showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: -.3, orientation: "h", font: { size: 16 }}
+            };
+
+            // Combine all traces into a single data array
+            var combinedData = [
+                timeTrace1,
+                timeTrace2,
+                instPhTrace1,
+                instPhTrace2,
+				scatterTrace,
+				barPlot
+            ];
+			combinedData = combinedData.concat(plvPlot);
+
+            // Update the plot
+            Plotly.newPlot('plot', combinedData, layout, {responsive: true});
+        }
+
+        // Initial plot
+        updatePlots();
+		
+		function computePLV(phase1, phase2) {
+			let N = phase1.length;
+			if (N !== phase2.length) {
+				throw new Error("Phase arrays must have the same length.");
+			}
+
+			let sumReal = 0;
+			let sumImag = 0;
+
+			for (let i = 0; i < N; i++) {
+				let deltaPhi = phase1[i] - phase2[i];
+				sumReal += Math.cos(deltaPhi);
+				sumImag += Math.sin(deltaPhi);
+			}
+
+			let magnitude = Math.sqrt(sumReal * sumReal + sumImag * sumImag) / N; // PLV magnitude
+			let phaseLocking = Math.atan2(sumImag, sumReal); // PLV phase locking
+			return { magnitude, phaseLocking};
+		}
+		
+		function computeiPLV(PLV) {
+		
+			let magnitude = Math.abs(PLV.magnitude * Math.sin(PLV.phaseLocking)); // iPLV magnitude
+			let phaseLocking = Math.sign(Math.sin(PLV.phaseLocking)) * Math.PI/2; // PLV phase locking
+			return { magnitude, phaseLocking};
+		}
+		
+		function computeciPLV(PLV) {
+			let numerator = Math.abs(PLV.magnitude * Math.sin(PLV.phaseLocking));
+			let denominator = Math.sqrt(1 -  Math.pow(PLV.magnitude * Math.cos(PLV.phaseLocking),2));
+			let magnitude = (denominator === 0) ? 0 : (numerator/denominator); // iPLV magnitude
+			let phaseLocking = Math.sign(Math.sin(PLV.phaseLocking)) * Math.PI/2; // PLV phase locking
+			return { magnitude, phaseLocking};
+		}
+				
+    </script>
+</body>
+</html>

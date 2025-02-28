@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Interactive ROI Network</title>
+    <link rel="stylesheet" href="../niivue_dualview.css" />
+  </head>
+  <body>
+    <noscript>niivue requires JavaScript.</noscript>
+    <header>
+	<h3>Investigate the structural connectome</h3>
+	<div class="dropdown" id='dropDownMenu'>
+		<button class="dropbtn" data-toggle="dropdown">
+		  View
+		  <i class="fa fa-caret-down"></i>
+		</button>
+		<div class="dropdown-content">
+		  <a href="#" class="viewBtn" id="|Axial">Axial</a>
+		  <a class="viewBtn" id="|Sagittal">Sagittal</a>
+		  <a class="viewBtn" id="|Coronal">Coronal</a>
+		  <a class="viewBtn" id="|Render">Render</a>
+		  <a class="viewBtn" id="|MultiPlanar">A+C+S</a>
+		  <a class="viewBtn dropdown-item-checked" id="|MultiPlanarRender">A+C+S+R</a>
+		  <a class="viewBtn divider dropdown-item-checked" id="Colorbar">Colorbar</a>
+		  <a class="viewBtn" id="Radiological">Radiological</a>
+		  <a class="viewBtn" id="ClipPlane">Render Clip Plane</a>
+		</div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Edge Color
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a class="viewBtn" id="!EdPlasma">Plasma</a>
+          <a class="viewBtn" id="!EdViridis">Viridis</a>
+          <a class="viewBtn dropdown-item-checked" id="!EdInferno">Inferno</a>
+		  <a class="viewBtn" id="!EdRandom">Random</a>
+        </div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Node Color
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a class="viewBtn dropdown-item-checked" id="!NdPlasma">Plasma</a>
+          <a class="viewBtn" id="!NdViridis">Viridis</a>
+          <a class="viewBtn" id="!NdInferno">Inferno</a>
+		  <a class="viewBtn" id="!NdRandom">Random</a>
+        </div>
+    </div>
+	<div class="dropdown">
+        <button class="dropbtn">
+          Network file
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a class="viewBtn dropdown-item-checked" id="_SC">fiber count and strength</a> 
+          <a class="viewBtn" id="_SClog">log fiber count and strength</a> 
+          <a class="viewBtn" id="_SCCC">fiber count and clustering coeff</a> 
+          <a class="viewBtn" id="_SClogCC">log fiber count and clustering coeff</a> 
+		  <a class="viewBtn" id="_SCNE">fiber count and nodal eff</a> 
+          <a class="viewBtn" id="_SClogNE">log fiber count and nodal eff</a> 
+        </div>
+    </div>
+	<div class="dropdown">
+			<button class="dropbtn">
+			  About
+			  <i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+				<a class="viewBtn dropdown" id="-Help">Help</a>
+				<a class="viewBtn dropdown" id="-Authors">Authors</a>
+				<a class="viewBtn dropdown" href="https://github.com/niivue/niivue" target="_blank">Niivue</a>
+				<a class="viewBtn dropdown" href="https://plotly.com/javascript/" target="_blank">Plotly</a>
+			</div>
+		</div>
+  </header>
+		<div class="page-wrapper">
+			<div class="row">
+				
+				<div class="column">
+						<div id="matrixDiv" style="height:700px">
+						</div>
+				</div>
+				<div class="column">
+					<canvas id="gl1"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+  <footer>
+	<label for="edgeSlider">Edge Size</label>
+    <input type="range" min="0" max="100" value="30" class="slider" id="edgeSlider" />
+	<label for="EdThreshSlider">Edge Threshold</label>
+    <input type="range" min="0" max="99" value="0" class="slider" id="EdThreshSlider" />
+    <label for="nodeSlider">Node Size</label>
+    <input type="range" min="0" max="150" value="30" class="slider" id="nodeSlider" />
+    <label for="NdThreshSlider">Node Threshold</label>
+    <input type="range" min="0" max="99" value="0" class="slider" id="NdThreshSlider" />
+    <button id="reset">reset</button>
+  </footer>
+  </body>
+</html>
+<script type="module" async>
+  import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
+
+  var volumeList1 = [
+    {
+      url: "https://niivue.github.io/niivue/images/mni152.nii.gz", 
+      colormap: "gray",
+      visible: true,
+      opacity: 1
+    }
+  ];
+  var fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC.jcon"
+  function toggleGroup(id) {
+    let buttons = document.getElementsByClassName("viewBtn");
+    let char0 = id.charAt(0);
+	let char03 = id.slice(0,3);
+    for (let i = 0; i < buttons.length; i++) {
+	  if (buttons[i].id.charAt(0) !== char0) continue;
+	  if ((char03 === "!Ed" || char03 === "!Nd") && (buttons[i].id.slice(0,3) !== char03)) continue;
+	  buttons[i].classList.remove("dropdown-item-checked");
+	  if (buttons[i].id === id)
+		buttons[i].classList.add("dropdown-item-checked");
+    }
+  } // toggleGroup()
+  function updateMeshes() {
+	// apply current threshold (setMeshProperty updates the volume every time it is called, slowers everything)
+	//var startTime = performance.now()
+	nv1.meshes[0].setProperty("edgeScale", edgeSlider.value*.1, nv1.gl)
+	nv1.meshes[0].setProperty("nodeScale", nodeSlider.value*.1, nv1.gl)
+	nv1.meshes[0].setProperty("nodeMinColor", NdThreshSlider.value * .01, nv1.gl)
+	nv1.meshes[0].setProperty("edgeMin", EdThreshSlider.value * .01, nv1.gl)
+	nv1.meshes[0].setProperty("edgeColormap", EdColormap, nv1.gl)
+	nv1.meshes[0].setProperty("nodeColormap", NdColormap, nv1.gl)
+	nv1.updateGLVolume()
+	nv1.onMeshPropertyChanged(0, "edgeScale", edgeSlider.value*.1)
+	nv1.onMeshPropertyChanged(0, "nodeScale", nodeSlider.value*.1)
+	nv1.onMeshPropertyChanged(0, "nodeMinColor", NdThreshSlider.value * .01)
+	nv1.onMeshPropertyChanged(0, "edgeMin", EdThreshSlider.value * .01)
+	nv1.onMeshPropertyChanged(0, "edgeColormap", EdColormap)
+	nv1.onMeshPropertyChanged(0, "nodeColormap", NdColormap)
+	//var endTime = performance.now()
+	//console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
+  } // updateMeshes
+  async function onButtonClick(event) {
+	  if (event.target.id.charAt(0) === "|") {
+		  //sliceType
+		  if (event.target.id === "|Axial") nv1.setSliceType(nv1.sliceTypeAxial);
+		  if (event.target.id === "|Coronal")
+			nv1.setSliceType(nv1.sliceTypeCoronal);
+		  if (event.target.id === "|Sagittal")
+			nv1.setSliceType(nv1.sliceTypeSagittal);
+		  if (event.target.id === "|Render") nv1.setSliceType(nv1.sliceTypeRender);
+		  if (event.target.id === "|MultiPlanar") {
+			nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.NEVER;
+			nv1.setSliceType(nv1.sliceTypeMultiplanar);
+		  }
+		  if (event.target.id === "|MultiPlanarRender") {
+			nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.ALWAYS;
+			nv1.setSliceType(nv1.sliceTypeMultiplanar);
+		  }
+		  toggleGroup(event.target.id);
+	  } //sliceType
+	  if (event.target.id === "Colorbar") {
+		  nv1.opts.isColorbar = !nv1.opts.isColorbar;
+		  event.srcElement.classList.toggle("dropdown-item-checked");
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id === "Radiological") {
+		  nv1.opts.isRadiologicalConvention = !nv1.opts.isRadiologicalConvention;
+		  event.srcElement.classList.toggle("dropdown-item-checked");
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id === "ClipPlane") {
+		  if (nv1.scene.clipPlaneDepthAziElev[0] > 1)
+			nv1.setClipPlane([0.3, 270, 0]);
+		  else nv1.setClipPlane([2, 270, 0]);
+		  nv1.drawScene();
+		  return;
+		}
+	  if (event.target.id.charAt(0) === "!") {
+		  // set color scheme
+		  //nv1.volumes[0].colormap = cmaps[i];
+		  if (event.target.id.startsWith("!Ed")){
+			EdColormap = event.target.id.substr(3);
+			for (let idMesh=0; idMesh<nv1.meshes.length;  idMesh++)
+			nv1.setMeshProperty(nv1.meshes[idMesh].id, "edgeColormap", EdColormap);
+			currCScale = convertMapperclut2Colorscale();
+			data[0].colorscale = currCScale;
+			Plotly.redraw('matrixDiv');
+		  } else {
+			NdColormap = event.target.id.substr(3);
+			for (let idMesh=0; idMesh<nv1.meshes.length;  idMesh++)
+			nv1.setMeshProperty(nv1.meshes[idMesh].id, "nodeColormap", NdColormap)
+		  }
+		  toggleGroup(event.target.id);
+		  return;
+		}
+	  if (event.target.id.charAt(0) === "_") {
+		  nv1.meshes = []; //close open meshes
+		  // "_SC""_SClog""_SCCC""_SClogCC""_SCNE""_SClogNE"
+		  let lbl1 = "fiber count";
+		  let lbl2 = "strength";
+		  if (event.target.id === "_SC"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC.jcon";}
+		  else if (event.target.id === "_SClog"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SClogfiber.jcon"; lbl1 = "log(fiber count)";}
+		  else if (event.target.id === "_SCCC"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC_CC.jcon" ; lbl2 = "clustering coeff.";}
+		  else if (event.target.id === "_SClogCC"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SClogfiber_CC.jcon" ; lbl1 = "log(fiber count)"; lbl2 = "clustering coeff.";}
+		  else if (event.target.id === "_SCNE"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SC_NE.jcon" ; lbl2 = "nodal efficiency";}
+		  else if (event.target.id === "_SClogNE"){ fname = "https://roehrin.github.io/test/src/Lausanne2_ROI_n_SClogfiber_NE.jcon" ; lbl1 = "log(fiber count)"; lbl2 = "nodal efficiency";}
+		  await nv1.loadConnectomeFromUrl(fname);
+		  nv1.document.labels[0].text = "edge: " + lbl1 + ",\n node: " + lbl2;
+		  nv1.meshes[0].edgeColormapNegative = '';
+		  data.pop()
+		  data[0] = convertConn2Heatmap()[0];
+		  updateMeshes()
+		  toggleGroup(event.target.id);
+		  matrixDiv.layout.yaxis.autorange = true;
+		  matrixDiv.layout.xaxis.autorange = true;
+		  matrixDiv.layout.xaxis.dtick = 0;
+		  matrixDiv.layout.xaxis.tickmode = "auto";
+		  clickMode = 0;
+		  EdThreshSlider.oninput()
+		} else if (event.target.id.charAt(0) === "-") {
+			if (event.target.id.substr(1) == "Help"){
+				alert("Navigate the structural connectome.\nHover on the matrix will highlight the region (or node) on the y axis.\n\n" + 
+				"One click will show this region on the MRI.\nA second on the same region will show only the neighbourhood of this region.\n" + 
+				"Another click will reset the view.\n\n" + 
+				"The edge and node size sliders allow you to change the size of the nodes and edges of the graph displayed on the MRI.\n" + 
+				"The edge and node threshold sliders allow you to set a threshold below which the node or edges are not displayed (on the MRI and matrix).\n");
+			} else if (event.target.id.substr(1) == "Authors"){
+				alert("The webpage was written by Dr Nicolas Roehri, using Niivue and Plotly.");
+			}
+		}	
+  }
+  // Update the current slider value (each time you drag the slider handle)
+  edgeSlider.oninput = function () {
+	for (let idMesh=0; idMesh<nv1.meshes.length;  idMesh++)
+    nv1.setMeshProperty(nv1.meshes[idMesh].id, "edgeScale", this.value*.1)
+  }
+  nodeSlider.oninput = function () {
+	for (let idMesh=0; idMesh<nv1.meshes.length;  idMesh++)
+    nv1.setMeshProperty(nv1.meshes[idMesh].id, "nodeScale", this.value*.1);
+  }
+  // Here we suppose that the node and edge values are normalised in [0 1]
+  NdThreshSlider.oninput = function () {
+	for (let idMesh=0; idMesh<nv1.meshes.length;  idMesh++)
+    nv1.setMeshProperty(nv1.meshes[idMesh].id, "nodeMinColor", this.value * .01);
+  }
+  EdThreshSlider.oninput = function () {
+	for (let idMesh=0; idMesh<nv1.meshes.length;  idMesh++)
+    nv1.setMeshProperty(nv1.meshes[idMesh].id, "edgeMin", this.value * .01);
+	data[0].zmin = this.value * .01;
+	Plotly.redraw('matrixDiv');
+  }
+  let opts = {
+    show3Dcrosshair: true,
+    isColorbar: true,
+	//isResizeCanvas: false,
+    backColor: [0, 0, 0, 1],
+	dragAndDropEnabled: false,
+    //sliceType: niivue.SLICE_TYPE.RENDER,
+	multiplanarLayout: niivue.MULTIPLANAR_TYPE.GRID,
+	multiplanarShowRender: niivue.SHOW_RENDER.ALWAYS,
+	isOrientCube: true,
+	showLegend: false,
+	meshXRay: .3,
+  }
+  reset.onclick = function () {
+    nv1.setDefaults(opts, true)
+    nv1.setClipPlane([-0.0, 0, 40])
+	nv1.setClipPlaneThick(1.73)
+	nv1.volumes[0].colorbarVisible = false
+  }
+  var nv1 = new niivue.Niivue(opts);
+  nv1.attachTo("gl1");
+  await nv1.loadVolumes(volumeList1);
+  await nv1.loadConnectomeFromUrl(fname);
+  //   indexNearestXYZmm(Xmm: number, Ymm: number, Zmm: number): number[]  could be of interest
+  // nv1.getAllLabels()
+  var EdColormap = "Inferno";
+  var NdColormap = "Plasma";
+  nv1.setMeshProperty(nv1.meshes[0].id, "nodeColormap", NdColormap)
+  nv1.setMeshProperty(nv1.meshes[0].id, "edgeColormap", EdColormap)
+  nv1.meshes[0].edgeColormapNegative = '';
+  nv1.setClipPlane([-0.0, 0, 40]);
+  nv1.volumes[0].colorbarVisible = false;
+  //nv1.setMeshProperty(nv1.meshes[0].id, "legendLineThickness", 2)
+  //let AllLbl = nv1.getAllLabels();
+  //for (var i = 0; i < AllLbl.length; i++){
+//	AllLbl[i].style.textScale = .5;
+  //}
+  nv1.setClipPlaneThick(1.73)
+  nv1.addLabel("edge: fiber count,\n node: strength", 
+		{ textScale: .75, textAlignment: niivue.LabelTextAlignment.RIGHT, textColor: [1.0, 1.0, 1.0, 1.0], backgroundColor: [0.2, 0.2, 0.2, 0.2]}, 
+		undefined, niivue.LabelAnchorPoint.TOPRIGHT);
+  let nodes = nv1.meshes[0].nodes;
+  nv1.addLabel(nodes[0].name, 
+		{ textScale: 1.0, textAlignment: niivue.LabelTextAlignment.RIGHT, textColor: [1.0, 1.0, 1.0, 1.0], backgroundColor: [0.2, 0.2, 0.2, 0.2] }, 
+		[nodes[0].x, nodes[0].y, nodes[0].z], niivue.LabelAnchorPoint.TOPLEFT);
+  nv1.updateGLVolume()
+  var buttons = document.getElementsByClassName("viewBtn");
+  for (let i = 0; i < buttons.length; i++){
+	buttons[i].addEventListener("click", onButtonClick, false);
+  }
+  function convertMapperclut2Colorscale(){
+	let currCmap = nv1.meshes[0].edgeColormap;
+	let currClut = niivue.cmapper.cluts[currCmap.toLowerCase()];
+	let nVal = currClut.I.length;
+	let colorscale = [];
+	for (let idC = 0; idC < nVal; idC++){
+		let convertedInt = currClut.I[idC]/255;
+		let rgbStr = 'rgb(' + [currClut.R[idC], currClut.G[idC], currClut.B[idC]].join(',') + ')';
+		colorscale.push([ convertedInt.toString(), rgbStr])
+	};
+	
+	return colorscale
+  }
+  var currCScale = convertMapperclut2Colorscale();
+  function convertConn2Heatmap(){
+	var data = [{
+		x: [],
+		y: [],
+		z: [],
+		colorscale: currCScale,
+		type: 'heatmap',
+		zmin:0,
+		zmax:1
+	}];
+	//data[0].z = Array(nodes.length).fill(Array(nodes.length).fill(0)); 
+	// fill adds the same array reference to each index. So changes of one row affects all the others
+	data[0].z = Array.from({ length: nodes.length }, () => Array(nodes.length).fill(0));
+	for (let i = 0; i < nodes.length; i++) {
+		data[0].x.push(nodes[i].name)
+		data[0].y.push(nodes[i].name)
+	}
+	for (let i = 0; i < nv1.meshes[0].connectome.edges.length; i++) {
+		let row_id = nv1.meshes[0].connectome.edges[i].first;
+		let col_id = nv1.meshes[0].connectome.edges[i].second;
+		let value = nv1.meshes[0].connectome.edges[i].colorValue;
+		data[0].z[row_id][col_id]= value;
+		data[0].z[col_id][row_id]= value; //symmetrize the data
+	}
+		
+	return data
+  }
+	var data = convertConn2Heatmap();
+	var layout = {
+	  xaxis: {
+		  title: {
+			text: 'ROI'
+		  },
+		  //dtick: 1,
+		  automargin: true,
+		  //tickfont: { size: 10},
+	  },
+	  yaxis: {
+		  title: {
+			text: 'ROI'
+		  },
+		  //tickfont: { size: 10},
+		  //dtick: 1,
+		  automargin: true,
+		  autorange: 'reversed'
+	  },
+	  shapes: [{
+		type: 'line',
+		x0: 118/2+.5-1,
+		y0: 0-.5,
+		x1: 118/2+.5-1,
+		y1: 118-1+.5,
+		line: {
+		  color: 'white',
+		  width: 2,
+		  dash: 'dot'
+		}},
+		{
+		type: 'line',
+		y0: 118/2+.5-1,
+		x0: 0-.5,
+		y1: 118/2+.5-1,
+		x1: 118-1+.5,
+		line: {
+		  color: 'white',
+		  width: 2,
+		  dash: 'dot'
+		}
+	  }]
+	};
+	Plotly.newPlot('matrixDiv', data, layout, {responsive: true});
+	matrixDiv.on('plotly_hover', function(data){
+		let nodeID = data.points[0].pointIndex[0];
+		nv1.document.labels[1].text = nodes[nodeID].name;
+		nv1.updateGLVolume();
+	});
+	var clickMode = 0;
+	var clickROI = 0;
+	matrixDiv.on('plotly_click', function(data){
+		let nodeID = data.points[0].pointIndex[0];
+		if (nodes[clickROI].name == nv1.document.labels[1].text) clickMode++; // if click on the same ROI, then change behaviour
+		clickROI = nodeID;
+		if (clickMode === 0){
+			centerCrosshairOnNode(nodeID);
+		} else if (clickMode === 1){
+			let ConnectedNodes, ConnectedNodesIdx = showNeighbourhood(nodeID);
+			matrixDiv.layout.yaxis.autorange = false;
+			matrixDiv.layout.xaxis.autorange = false;
+			matrixDiv.layout.xaxis.range = [-.5, nodes.length+.5];
+			matrixDiv.layout.yaxis.range = [nodeID+.5,nodeID-.5];
+			matrixDiv.layout.xaxis.dtick = 1;
+			matrixDiv.layout.xaxis.tickmode = "array";
+			matrixDiv.layout.xaxis.tickvals =  ConnectedNodesIdx;
+			matrixDiv.layout.xaxis.ticktext = ConnectedNodes;
+			Plotly.redraw('matrixDiv');
+			clickMode++;
+		} else {
+			if (nv1.meshes.length > 1) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+			matrixDiv.layout.yaxis.autorange = true;
+			matrixDiv.layout.xaxis.autorange = true;
+			matrixDiv.layout.xaxis.dtick = 0;
+			matrixDiv.layout.xaxis.tickmode = "auto";
+			//matrixDiv.layout.xaxis.ticktext = nodes.map(({ name }) => name);
+			Plotly.redraw('matrixDiv');
+			nv1.setMeshProperty(nv1.meshes[0].id, "visible", true);
+			centerCrosshairOnNode(nodeID);
+			clickMode = 0;
+		}
+	});
+	//matrixDiv.on('plotly_doubleclick', function(data){
+	//	if (nv1.meshes.length > 1) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+	//	nv1.setMeshProperty(nv1.meshes[0].id, "visible", true);
+	//});
+
+	function centerCrosshairOnNode(nodeID){
+		// position crosshair at the center of the ROI
+		let dPos = [nodes[nodeID].x, nodes[nodeID].y, nodes[nodeID].z];
+		dPos = nv1.volumes[0].mm2vox(dPos);
+		const xhPos = nv1.frac2vox(nv1.scene.crosshairPos).slice(0, 3)
+		for (let j = 0; j < dPos.length; j++){
+		  dPos[j] = dPos[j] - xhPos[j];
+		};
+		nv1.moveCrosshairInVox(dPos[0], dPos[1], dPos[2]);
+	}
+	
+	function showNeighbourhood(node_idx){
+		
+		if (nv1.meshes.length > 1) nv1.meshes.pop(); // close any open 'Neighbour' mesh
+		// deep copy of the original edges of the connectome
+		let currentEdges = JSON.parse(JSON.stringify(nv1.meshes[0].edges));
+		let ConnectedNodes = []; // init list of connected nodes
+		let ConnectedNodesIdx = []; // init list of connected nodes indices
+		let nodes = nv1.meshes[0].nodes;
+		// set to zero all edges not connected to the node of interest
+		for (let i = 0; i < currentEdges.length; i++) {
+			// if edge is already zero continue
+			if (currentEdges[i].colorValue === 0){ continue}
+			if ((currentEdges[i].first != node_idx) && (currentEdges[i].second != node_idx) ){
+				currentEdges[i].colorValue = 0;
+				continue
+			}
+			// check if first correspond to the node of interest, if not add it otherwise add the second
+			// (as it means the second is the node of interest)
+			if (nodes[currentEdges[i].first].name != nodes[node_idx].name){
+				ConnectedNodes.push(nodes[currentEdges[i].first].name);
+				ConnectedNodesIdx.push(currentEdges[i].first);
+			} else {
+				ConnectedNodes.push(nodes[currentEdges[i].second].name);
+				ConnectedNodesIdx.push(currentEdges[i].second);
+			}
+		}
+		// deep copy of the original connectome to modify its edges
+		let newConnectome = JSON.parse(JSON.stringify(nv1.meshes[0].connectome));
+		newConnectome.edges = currentEdges;
+		newConnectome.edgeColormapNegative = "";
+		nv1.addMesh(nv1.loadConnectomeAsMesh(newConnectome))
+		nv1.meshes[1].colorbarVisible = false;
+		nv1.setMeshProperty(nv1.meshes[1].id, "nodeColormap", NdColormap)
+		nv1.setMeshProperty(nv1.meshes[1].id, "edgeColormap", EdColormap)
+		nv1.setMeshProperty(nv1.meshes[1].id, "edgeScale", edgeSlider.value*.1)
+		nv1.setMeshProperty(nv1.meshes[1].id, "nodeScale", nodeSlider.value*.1)
+		nv1.setMeshProperty(nv1.meshes[0].id, "visible", false);
+		return ConnectedNodes, ConnectedNodesIdx
+		
+	}
+
+</script>
