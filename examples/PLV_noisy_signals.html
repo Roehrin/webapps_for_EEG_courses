@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phase Locking Value correlation of two noisy signals</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script type="text/javascript" id="MathJax-script" async
+		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+	</script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,43 +16,109 @@
         .slider {
             margin: 10px 0;
         }
-		.header {
+		.banner {
 		  position: sticky;
+		  top: 0;
+		  background:#96004B;
+		  color: #f1f1f1;
+		  z-index: 1;
+		  text-align: right;
+		  padding: 10px
+		}
+		.divfooter {
 		  top: 0;
 		  background: #555;
 		  color: #f1f1f1;
-		  z-index: 1;
+		}
+		.text {
+		  text-align: right;
 		}
 		.div {
-		  margin: 10px;
+		  margin: 20px;
+		}
+		section {
+			margin: 30px;
+		}
+		h1 {
+			margin: 10px;
 		}
     </style>
 </head>
 <body>
-	<h1>Phase Locking Value correlation of two noisy signals.</h1>
-    <div class="header" id="myHeader">
+	<div class="banner">
+			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
+			<br>&copy; 2025 Dr Nicolas Roehri
+	</div>
+	<h1>Phase Locking Value of two noisy signals.</h1>
+    
+	<p>
+	<section>
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of constant amplitude \(A\), frequency \(f_1\) and \(f_2\), and phase shift \(\theta_1\) and \(phi_2\), respectively. These signals are can be written as:
+	$$S_1 = A\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2 = A\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
+	\(f_1\), \(\theta_1\) and \(A\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}, A=1\). <br>
+	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.</section>
+	<section>
+	To compute connectivity metric between \(S_1\) and \(S_2\), we need to compute their analytic signal first. Thanks to the Hilbert transform, we obtain:
+	$$\mathcal{H}(S_1)=\tilde{S_1}= A\exp^{i(2\pi f_1t + \theta_1)} + \mathcal{H}(\epsilon_1),$$
+	$$\tilde{S_2}= A\exp^{i(2\pi f_2t + \theta_2)} + \mathcal{H}(\epsilon_2).$$
+	The instantaneous phase is defined as:
+	$$\phi_i(t)= 2\pi f_it + \theta_i,$$
+	$$\textrm{so }\tilde{S_1}= A\exp^{i\phi_1(t)} + \mathcal{H}(\epsilon_1(t)), \textrm{ and } \tilde{S_2}= A\exp^{i\phi_2(t)} + \mathcal{H}(\epsilon_2(t)),$$<br>
+	The Phase Locking Value (PLV) is a measure of phase synchrony between two signals, independent of the amplitude of the signal.
+	$$\text{PLV} = \left| \frac{1}{N} \sum_{t=1}^{N} e^{i (\phi_1(t) - \phi_2(t))} \right|$$
+	$$\text{PLV} = \left| \frac{1}{N} \sum_{t=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right|$$<br>
+	\(N\) is the total number of time points, \(\Delta\phi_{1,2}\) the phase difference, and \(\left| . \right|\)the absolute value.<br>
+	This measure quantifies how consistent the phase difference between two signals is over time, ranging from 0 (no phase synchrony) to 1 (perfect synchrony).
+	$$\Phi_{\text{PLV}} = \arg \left( \frac{1}{N} \sum_{n=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right)$$
+	\(\arg(.)\) is the argument function, which gives the phase angle of the complex mean phase difference.<br>
+	\(\Phi_{\text{PLV}}\) represents the preferred phase difference.<br>
+	One can represent both information as a phasor in a polar plot, where its radius would be the \(\text{PLV}\) and \(\Phi_{\text{PLV}}\) its angle, that is:
+	$$\mathcal{P}_{\text{PLV}} = \frac{1}{N} \sum_{t=1}^{N} e^{i \Delta\phi_{1,2}(t)} = \text{PLV}e^{i \Phi_{\text{PLV}}}$$	
+	<p>
+	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the PLV.
+	</section>
+    <div id="plot" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter">
 		<span style="padding: 5px">
-			<label for="frequency">Frequency of Sine Wave 2:</label>
+			<label for="frequency">\(f_2\) :</label>
 			<input type="range" id="frequency" class="slider" min="1" max="25" value="10">
-			<span id="freqValue">3 Hz</span>
+			<span id="freqValue">10 Hz</span>
 		</span>
-			<span style="padding: 5px">
-			<label for="phase">Phase Shift of Sine Wave 2:</label>
+		<span style="padding: 5px">
+			<label for="phase">\(\theta_2\) :</label>
 			<input type="range" id="phase" class="slider" min="-175" max="180" value="0" step="5">
 			<span id="phaseValue">0 rad</span>
 		</span>
-			<span style="padding: 5px">
-			<label for="noiseLevel">Noise Level:</label>
+		<span style="padding: 5px">
+			<label for="noiseLevel">\(\sigma\) :</label>
 			<input type="range" id="noiseLevel" class="slider" min="0" max="1" value="0.1" step="0.01">
 			<span id="noiseValue">0.1</span>
 		</span>
+		<span style="padding: 5px">
+		Show: 
+		<input type="checkbox" id="showPLV" checked /><label for="showPLV">PLV</label>
+		<input type="checkbox" id="showiPLV"/><label for="showiPLV">iPLV</label>
+		<input type="checkbox" id="showciPLV"/><label for="showicPLV">ciPLV</label>
+		</span>
     </div>
-
-    <div id="plot" style="width:100%;height:600px;"></div>
+	<h1>Version of the Phase Locking Value robust to spatial leakage.</h1>
+	<section>
+	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can ne spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensiate for that is by removing the contribution to the 0-lag in the computation of the PLV. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the PLV is defined as:
+	$$\text{iPLV} = \Im\left( \mathcal{P}_{\text{PLV}} \right)$$<br>
+	This metric is now robust to spurious 0-lag but also removes any genuine 0-lag. We cannot, however, estimate the true preferred phase due to the mixing. Check the \(\text{iPLV})\) box, and see how this metric behave according to different change in phase and noise.
+	<br>
+	<br>
+	Unfortunately, \(\text{iPLV})\) is sensitive to the preferred phase difference \(\Phi_{\text{PLV}}\). A corrected version of \(\text{iPLV})\), named corrected iPLV, mitigates this effect and is defined as:
+	$$\text{ciPLV} = \frac{\Im\left( \mathcal{P}_{\text{PLV}}\right)}{\sqrt{1-\Re\left( \mathcal{P}_{\text{PLV}} \right)}}$$<br>
+	Check the \(\text{ciPLV}\) box, and see how this metric behave according to different change in phase and noise.
+	</section>
+	
 	
     <script type="module" async>
 		import {computeDFT, inverseDFT, generateGaussianNoise, analyticSignal} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
         
+		const checkboxes = document.querySelectorAll('input[type=checkbox]');
+		
         const sampleRate = 512;
 		const freq1 = 10;
 		const phase1 = 0;
@@ -126,7 +195,7 @@
 			const PLV = computePLV(instPhase1, instPhase2);
 			const iPLV = computeiPLV(PLV);
 			const ciPLV = computeciPLV(PLV)
-			let angleDiff = instPhase1.map((ph1, i) => ph1-instPhase2[i]); 
+			const angleDiff = instPhase1.map((ph1, i) => ph1-instPhase2[i]); 
             // Create traces for time domain signals
             const timeTrace1 = {
                 x: time,
@@ -208,6 +277,7 @@
 					width: 5},
 				thetaunit: "radians",
 				subplot: "polar",
+				visible: showPLV.checked,
 			},
 			{
 				type: "scatterpolar",
@@ -226,7 +296,8 @@
 					color: "black",
 					width: 5},
 				thetaunit: "radians",
-				subplot: "polar",
+				subplot: "polar",				
+				visible: showiPLV.checked,
 			},
 			{
 				type: "scatterpolar",
@@ -246,13 +317,31 @@
 					width: 5},
 				thetaunit: "radians",
 				subplot: "polar",
+				visible: showciPLV.checked,
 			}
 			];
 			
+			// Define metric data
+			const metricsData = {
+				PLV: PLV.magnitude,
+				iPLV: iPLV.magnitude,
+				ciPLV: ciPLV.magnitude
+			};
+			
+			var barValues = [];
+			var barText = [];
+			
+			checkboxes.forEach(checkbox => {
+				if (checkbox.checked) {
+					barValues.push(metricsData[checkbox.id.substr(4)]);  // Store metric name
+					barText.push(checkbox.id.substr(4)); // Store corresponding values
+				}
+			});
+			
 			// Create bar plot for correlation
 			const barPlot = {
-				x: ['PLV', 'iPLV', 'ciPLV'],
-				y: [PLV.magnitude, iPLV.magnitude, ciPLV.magnitude],
+				x: barText,
+				y: barValues,
 				type: 'bar',
 				xaxis: 'x3',
 				yaxis: 'y3',
@@ -270,8 +359,10 @@
                 xaxis: { domain: [0, w1], anchor: 'y1'},
                 yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-2, 2]},
 				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
-                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI]},
-				
+                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
+							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
+							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']
+						},				
 				// bar plot
 				xaxis3: { domain: [w1+w2+wgap, 1], anchor: 'y3'},
                 yaxis3: { title: 'Magnitude', domain: [0, 1], side: 'right', anchor: 'x3', range: [0, 1]},
@@ -280,7 +371,7 @@
 				polar: {domain: {x: [w1+wgap, w1+w2], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
 				showlegend: true,
 				font: { size: 16 },
-				legend: {x: 0, xanchor: 'left', y: -.3, orientation: "h", font: { size: 16 }}
+				legend: {x: 0, xanchor: 'left', y: 1, orientation: "h", font: { size: 16 }}
             };
 
             // Combine all traces into a single data array
@@ -300,6 +391,10 @@
 
         // Initial plot
         updatePlots();
+		
+		checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('click', updatePlots);
+        });
 		
 		function computePLV(phase1, phase2) {
 			let N = phase1.length;
