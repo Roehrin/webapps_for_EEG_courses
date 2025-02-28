@@ -1,0 +1,41 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Interactive web-based applications for teaching and learning advanced EEG signal processing methods.
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Nicolas
+    family-names: Roehri
+    email: nicolas.roehri@unige.ch
+    affiliation: >-
+      EEG and Epilepsy Unit, University Hospitals and
+      Faculty of Medicine, University of Geneva
+    orcid: 'https://orcid.org/0000-0002-6948-1055'
+repository-code: 'https://github.com/Roehrin/webapps_for_EEG_courses'
+url: 'https://roehrin.github.io/webapps_for_EEG_courses/'
+abstract: >-
+  Welcome to the prototype of a future interactive learning
+  platform dedicated to advanced EEG analysis. Here, you
+  will find a series of web applications designed to help
+  you intuitively explore key concepts such as electrical
+  source imaging (ESI) and functional connectivity.
+  Developed for students and researchers, this open-access
+  resource aims to make complex neuroimaging methods more
+  accessible. The applications are built using NiiVue and
+  Plotly and were developed by Dr Nicolas Roehri at the
+  University of Geneva, Faculty of Medecine, EEG and
+  Epilepsy Unit.
+keywords:
+  - electrical source imaging
+  - EEG
+  - intracranial EEG
+  - learning by doing
+  - connectivity analysis
+  - network analysis
+  - signal processing
+license: GPL-3.0
