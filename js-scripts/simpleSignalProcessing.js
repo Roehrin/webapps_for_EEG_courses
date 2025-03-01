@@ -106,26 +106,6 @@ function computePLV(phase1, phase2) {
 	return { magnitude, phaseLocking};
 }
 
-function computePLV(phase1, phase2) {
-	let N = phase1.length;
-	if (N !== phase2.length) {
-		throw new Error("Phase arrays must have the same length.");
-	}
-
-	let sumReal = 0;
-	let sumImag = 0;
-
-	for (let i = 0; i < N; i++) {
-		let deltaPhi = phase1[i] - phase2[i];
-		sumReal += Math.cos(deltaPhi);
-		sumImag += Math.sin(deltaPhi);
-	}
-
-	let magnitude = Math.sqrt(sumReal * sumReal + sumImag * sumImag) / N; // PLV magnitude
-	let phaseLocking = Math.atan2(sumImag, sumReal); // PLV phase locking
-	return { magnitude, phaseLocking};
-}
-
 function computeiPLV(PLV) {
 
 	let magnitude = Math.abs(PLV.magnitude * Math.sin(PLV.phaseLocking)); // iPLV magnitude
