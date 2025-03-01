@@ -26,7 +26,7 @@ function computeDFT(signal, sampleRate) {
 // Compute Inverse DFT (IDFT)
 function analyticSignal(signal) {
 	let N = signal.length;
-	let { real, imag } = computeDFT(signal, sampleRate); // outputs : { frequencies, psd, phase, real, imag };
+	let { real, imag } = computeDFT(signal, 2*Math.PI); // outputs : { frequencies, psd, phase, real, imag };
 
 	// Apply Hilbert transform filter in frequency domain
 	let h = new Array(N).fill(0);
