@@ -24,34 +24,9 @@ function computeDFT(signal, sampleRate) {
 }
 
 // Compute Inverse DFT (IDFT)
-function inverseDFT(real, imag) {
-	let N = real.length;
-	let signal = new Array(N).fill(0);
-
-	for (let n = 0; n < N; n++) {
-		for (let k = 0; k < N; k++) {
-			let angle = (2 * Math.PI * k * n) / N;
-			signal[n] += real[k] * Math.cos(angle) - imag[k] * Math.sin(angle);
-		}
-		signal[n] /= N; // Normalize
-	}
-
-	return signal;
-}
-
 function analyticSignal(signal) {
 	let N = signal.length;
-	let real = new Array(N).fill(0);
-	let imag = new Array(N).fill(0);
-
-	// Compute the full DFT (Discrete Fourier Transform)
-	for (let k = 0; k < N; k++) {
-		for (let n = 0; n < N; n++) {
-			let angle = (-2 * Math.PI * k * n) / N;
-			real[k] += signal[n] * Math.cos(angle);
-			imag[k] += signal[n] * Math.sin(angle);
-		}
-	}
+	let { real, imag } = computeDFT(signal, sampleRate); // outputs : { frequencies, psd, phase, real, imag };
 
 	// Apply Hilbert transform filter in frequency domain
 	let h = new Array(N).fill(0);
@@ -69,22 +44,27 @@ function analyticSignal(signal) {
 		imag[i] *= h[i];
 	}
 
+	return inverseDFT(real, imag);
+}
+
+function inverseDFT(real, imag) {
+	let N = real.length;
 	// Compute the inverse DFT (IDFT) to get the analytic signal
-	let analyticReal = new Array(N).fill(0);
-	let analyticImag = new Array(N).fill(0);
+	let signalReal = new Array(N).fill(0);
+	let signalImag = new Array(N).fill(0);
 
 	for (let n = 0; n < N; n++) {
 		for (let k = 0; k < N; k++) {
 			let angle = (2 * Math.PI * k * n) / N;
-			analyticReal[n] += real[k] * Math.cos(angle) - imag[k] * Math.sin(angle);
-			analyticImag[n] += real[k] * Math.sin(angle) + imag[k] * Math.cos(angle);
+			signalReal[n] += real[k] * Math.cos(angle) - imag[k] * Math.sin(angle);
+			signalImag[n] += real[k] * Math.sin(angle) + imag[k] * Math.cos(angle);
 		}
-		analyticReal[n] /= N; // Normalize
-		analyticImag[n] /= N; // Normalize
+		signalReal[n] /= N; // Normalize
+		signalImag[n] /= N; // Normalize
 	}
 
 	// Return the analytic signal as an array of [real, imag] components
-	return analyticReal.map((re, i) => [re, analyticImag[i]]);
+	return signalReal.map((re, i) => (signalImag === 0) ? re : [re, signalImag[i]]);
 }
 
 function pearsonCorrelation(x, y) {
@@ -126,6 +106,41 @@ function computePLV(phase1, phase2) {
 	return { magnitude, phaseLocking};
 }
 
+function computePLV(phase1, phase2) {
+	let N = phase1.length;
+	if (N !== phase2.length) {
+		throw new Error("Phase arrays must have the same length.");
+	}
+
+	let sumReal = 0;
+	let sumImag = 0;
+
+	for (let i = 0; i < N; i++) {
+		let deltaPhi = phase1[i] - phase2[i];
+		sumReal += Math.cos(deltaPhi);
+		sumImag += Math.sin(deltaPhi);
+	}
+
+	let magnitude = Math.sqrt(sumReal * sumReal + sumImag * sumImag) / N; // PLV magnitude
+	let phaseLocking = Math.atan2(sumImag, sumReal); // PLV phase locking
+	return { magnitude, phaseLocking};
+}
+
+function computeiPLV(PLV) {
+
+	let magnitude = Math.abs(PLV.magnitude * Math.sin(PLV.phaseLocking)); // iPLV magnitude
+	let phaseLocking = Math.sign(Math.sin(PLV.phaseLocking)) * Math.PI/2; // PLV phase locking
+	return { magnitude, phaseLocking};
+}
+
+function computeciPLV(PLV) {
+	let numerator = Math.abs(PLV.magnitude * Math.sin(PLV.phaseLocking));
+	let denominator = Math.sqrt(1 -  Math.pow(PLV.magnitude * Math.cos(PLV.phaseLocking),2));
+	let magnitude = (denominator === 0) ? 0 : (numerator/denominator); // iPLV magnitude
+	let phaseLocking = Math.sign(Math.sin(PLV.phaseLocking)) * Math.PI/2; // PLV phase locking
+	return { magnitude, phaseLocking};
+}
+
 function generateGaussianNoise(noiseLvl, length){
 	const noise = [];
 	for (let i = 0; i < length; i++) {
@@ -138,4 +153,4 @@ function generateGaussianNoise(noiseLvl, length){
 }
 
 // Export functions for use in another script
-export { computeDFT, inverseDFT, analyticSignal, pearsonCorrelation, generateGaussianNoise, computePLV};
+export { computeDFT, inverseDFT, analyticSignal, pearsonCorrelation, generateGaussianNoise, computePLV, computeiPLV, computeciPLV};
