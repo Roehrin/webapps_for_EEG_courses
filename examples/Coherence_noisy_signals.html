@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phase Locking Value correlation of two noisy signals</title>
+    <title>Coherence-based connectivity</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script type="text/javascript" id="MathJax-script" async
 		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
@@ -49,41 +49,34 @@
 			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
 			<br>&copy; 2025 Dr Nicolas Roehri
 	</div>
-	<h1>Phased-based connectivity</h1>
+	<h1>Coherence-based connectivity</h1>
 	<p>
 	<section>
 	<h2>Introduction</h2>
 	<h3>Definition</h3>
-	Phase-based connectivity is a measure of the functional connectivity between two or more signals based on the synchronisation of their instantaneous phase dynamics rather than their amplitude or power. It is commonly used in neuroscience and signal processing to analyse oscillatory interactions between brain regions, usually using EEG, MEG or LFP signals.
 	<h3>Key concept</h3>
-	Two signals are considered to be phase-coupled if their instantaneous phase differences remain coherent over time, even if their amplitudes fluctuate. This suggests a functional interaction between the underlying sources that generate these signals.
 	</section>
 	<section>
-	<h2>Example: Computing the Phase-Locking Value (PLV)</h2>
-	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of constant amplitude \(A\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(phi_2\), respectively. These signals are can be written as:
-	$$S_1(t) = A\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
-	\(f_1\), \(\theta_1\) and \(A\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}, A=1\), \(t\) is the time. <br>
-	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
+	<h2>Example: Computing the Coherence (Coh)</h2>
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(phi_2\), respectively. These signals are can be written as:
+	$$S_1(t) = A_1\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
+	\(f_1\), \(\theta_1\) and \(A\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}\), \(t\) is the time. <br>
+	\(A_1\), \(A_2\), \(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
 	</section>
 	<section>
-	To compute phased-based connectivity metric between \(S_1\) and \(S_2\), we need to estimate a phase. Here we will use the instantaneous phase given by their analytic signal (\(\tilde{S_1}\) and \(\tilde{S_2}\)). Thanks to the Hilbert transform (\(\mathcal{H}(.)\)), we obtain:
-	$$\tilde{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = Ae^{i(2\pi f_1t + \theta_1)} + \tilde{\epsilon_1}(t),$$
-	$$\tilde{S_2}(t)= Ae^{i(2\pi f_2t + \theta_2)} + \tilde{\epsilon_1}(t).$$
-	The instantaneous phase is defined as:
-	$$\phi_i(t)= 2\pi f_it + \theta_i,$$
-	$$\textrm{so }\tilde{S_1}(t)= Ae^{i\phi_1(t)} + \tilde{\epsilon_1}(t), \textrm{ and } \tilde{S_2}(t)= Ae^{i\phi_2(t)} + \tilde{\epsilon_2}(t),$$<br>
-	The Phase Locking Value (PLV) is a measure of phase synchrony between two signals, independent of the amplitude of the signal.
-	$$\text{PLV} = \left| \frac{1}{N} \sum_{t=1}^{N} e^{i (\phi_1(t) - \phi_2(t))} \right|$$
-	$$\text{or, PLV} = \left| \frac{1}{N} \sum_{t=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right|$$<br>
+	The Coherence (Coh) measures the consistency of both phase and power correlations between two signals, ranging from 0 (no synchrony) to 1 (perfect synchrony).
+	$$\text{Coh} = \frac{\left| \sum_{t=1}^{N} \tilde{S_1}(t) \tilde{S_2}^{*}(t) \right|}{\sqrt{\sum_{t=1}^{N} \left| \tilde{S_1}(t) \right|^2 \sum_{t=1}^{N} \left| \tilde{S_2}(t) \right|^2}}$$
+	$$\text{Coh} = \frac{\left| \sum_{t=1}^{N} A_1(t)e^{i\phi_1(t)} A_2(t)e^{-i\phi_2(t)} \right|}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$
+	$$\text{Coh} = \frac{\left| \sum_{t=1}^{N} A_1(t)A_2(t)e^{i\Delta\phi_{1,2}(t)} \right|}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$<br>
 	\(N\) is the total number of time points, \(\Delta\phi_{1,2}\) the phase difference, and \(\left| . \right|\)the absolute value.<br>
-	This measure quantifies how consistent the phase difference between two signals is over time, ranging from 0 (no phase synchrony) to 1 (perfect synchrony). Noteworthy, \(A\) is not used in the defition of the \(\text{PLV}\) rendering this metric independent of the amplitude. Beware, that it is still dependent on the signal-to-noise ratio, but not the amplitude of the signal per se.
-	$$\Phi_{\text{PLV}} = \arg \left( \frac{1}{N} \sum_{n=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right)$$
+	$$\Phi_{\text{Coh}} = \arg \left( \frac{ \sum_{t=1}^{N} A_1(t)A_2^*(t)e^{i\Delta\phi_{1,2}(t)}}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}} \right)$$
 	\(\arg(.)\) is the argument function, which gives the phase angle of the complex mean phase difference.<br>
-	\(\Phi_{\text{PLV}}\) represents the preferred phase difference.<br>
-	One can represent both information as a phasor in a polar plot, where its radius would be the \(\text{PLV}\) and \(\Phi_{\text{PLV}}\) its angle, that is:
-	$$\mathcal{P}_{\text{PLV}} = \frac{1}{N} \sum_{t=1}^{N} e^{i \Delta\phi_{1,2}(t)} = \text{PLV}e^{i \Phi_{\text{PLV}}}$$	
+	\(\Phi_{\text{Coh}}\) represents the preferred phase difference.<br>
+	One can represent both information as a phasor, using the complex valued coherence (before applying \(\left| . \right|\) in a polar plot, where its radius would be the \(\text{Coh}\) and \(\Phi_{\text{Coh}}\) its angle.	
 	<p>
-	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{PLV}\).
+	<h3>Case 1: constant amplitude</h3>
+	As a first example, let us define \(A_1=A_2=A=1\).
+	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{Coh}\).
 	</section>
     <div id="plot" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter">
@@ -104,28 +97,32 @@
 		</span>
 		<span style="padding: 5px">
 		Show: 
-		<input type="checkbox" id="showPLV" checked /><label for="showPLV">PLV</label>
-		<input type="checkbox" id="showiPLV"/><label for="showiPLV">iPLV</label>
-		<input type="checkbox" id="showciPLV"/><label for="showicPLV">ciPLV</label>
+		<input type="checkbox" id="showCoh" checked /><label for="showCoh">Coh</label>
+		<input type="checkbox" id="showiCoh"/><label for="showiCoh">iCoh</label>
+		<input type="checkbox" id="showciCoh"/><label for="showicCoh">ciCoh</label>
 		</span>
     </div>
 	<section>
+	<h3>Case 2: TODO</h3>
+	<h3>Case 3: TODO</h3>
+	</section>
+	<section>
 	<h2>Version of the Phase Locking Value robust to spatial leakage.</h2>
-	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can ne spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensiate for that is by removing the contribution to the 0-lag in the computation of the PLV. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the PLV is defined as:
-	$$\text{iPLV} = \Im\left( \mathcal{P}_{\text{PLV}} \right)$$<br>
+	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can ne spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensiate for that is by removing the contribution to the 0-lag in the computation of the Coh. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the Coh is defined as:
+	$$\text{iCoh} = \Im\left( \mathcal{P}_{\text{Coh}} \right)$$<br>
 	\(\Im\) is the imaginary part. 
-	This metric is now robust to spurious 0-lag but also removes any genuine 0-lag. We cannot, however, estimate the true preferred phase due to the mixing. Intuitively, \(\text{iPLV}\) is the projection of the \(\text{PLV}\) phasor onto the imaginary axis. Check the \(\text{iPLV}\) box, and see how this metric behaves according to different changes in phase and noise.
+	This metric is now robust to spurious 0-lag but also removes any genuine 0-lag. We cannot, however, estimate the true preferred phase due to the mixing. Intuitively, \(\text{iCoh}\) is the projection of the \(\text{Coh}\) phasor onto the imaginary axis. Check the \(\text{iCoh}\) box, and see how this metric behaves according to different changes in phase and noise.
 	<br>
 	<br>
-	Unfortunately, \(\text{iPLV}\) is sensitive to the preferred phase difference \(\Phi_{\text{PLV}}\). A corrected version of \(\text{iPLV}\), named corrected iPLV, mitigates this effect and is defined as:
-	$$\text{ciPLV} = \frac{\Im\left( \mathcal{P}_{\text{PLV}}\right)}{\sqrt{1-\Re\left( \mathcal{P}_{\text{PLV}} \right)^2}}$$<br>
+	Unfortunately, \(\text{iCoh}\) is sensitive to the preferred phase difference \(\Phi_{\text{Coh}}\). A corrected version of \(\text{iCoh}\), named corrected iCoh, mitigates this effect and is defined as:
+	$$\text{ciCoh} = \frac{\Im\left( \mathcal{P}_{\text{Coh}}\right)}{\sqrt{1-\Re\left( \mathcal{P}_{\text{Coh}} \right)^2}}$$<br>
 	\(\Re\) is the real part.<br>
-	Check the \(\text{ciPLV}\) box, and see how this metric behaves according to different changes in phase and noise.
+	Check the \(\text{ciCoh}\) box, and see how this metric behaves according to different changes in phase and noise.
 	</section>
 	
 	
     <script type="module" async>
-		import {computeDFT, generateGaussianNoise, analyticSignal, computePLV, computeiPLV, computeciPLV} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
+		import {computeDFT, generateGaussianNoise, analyticSignal} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
         
 		const checkboxes = document.querySelectorAll('input[type=checkbox]');
 		
@@ -136,6 +133,7 @@
 		var phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
 		var noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
         const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
+		const N = time.length;
 		
 		var w1 = .65;
 		var w2 = .25;
@@ -158,8 +156,8 @@
 		var zWave1 = analyticSignal(sineWave1); // First sine wave
 		var zWave2 = analyticSignal(sineWave2); // Second sine wave
 		
-		var instPhase1 = zWave1.map(([real, imag]) => Math.atan2(imag, real)); // Math.atan2(imag, real))
-		var instPhase2 = zWave2.map(([real, imag]) => Math.atan2(imag, real));
+		// compute sample Coh
+		var sampleCoh = computeSampleCoh(zWave1, zWave2);
 		
         function generateSineWave(frequency, phase, noise) {
             return time.map((t, index) => Math.cos(2 * Math.PI * frequency * t + phase) + noise[index]);
@@ -170,7 +168,6 @@
 			document.getElementById("freqValue").textContent = freq2 + " Hz";
 			sineWave2 = generateSineWave(freq2, phase2, noise2);
 			zWave2 = analyticSignal(sineWave2);
-			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
 			updatePlots()
 		}
 		
@@ -179,7 +176,6 @@
 			document.getElementById("phaseValue").textContent = phase2.toFixed(2) + " rad";
 			sineWave2 = generateSineWave(freq2, phase2, noise2);
 			zWave2 = analyticSignal(sineWave2);
-			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
 			updatePlots()
 		}
 		
@@ -190,23 +186,22 @@
 			noise1 = generateGaussianNoise(noiseLvl, time.length);
 			sineWave1 = generateSineWave(freq1, phase1, noise1);
 			zWave1 = analyticSignal(sineWave1);
-			instPhase1 = zWave1.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
 			
 			noise2 = generateGaussianNoise(noiseLvl, time.length);
 			sineWave2 = generateSineWave(freq2, phase2, noise2);
 			zWave2 = analyticSignal(sineWave2);
-			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
 			updatePlots()
 		}
 		
 
         function updatePlots() {        
             
-			const PLV = computePLV(instPhase1, instPhase2);
-			const iPLV = computeiPLV(PLV);
-			const ciPLV = computeciPLV(PLV)
+			sampleCoh = computeSampleCoh(zWave1, zWave2);
+			const Coh = computeCoherence(zWave1, zWave2)
+			const iCoh = computeImCoh(Coh);
+			const ciCoh = computecImCoh(Coh)
 			// to compute the angle diff we have to pass again to the complex values to stay within [-pi, pi]
-			const angleDiff = instPhase1.map((ph1, i) => Math.atan2(Math.sin(ph1-instPhase2[i]),Math.cos(ph1-instPhase2[i]))); 
+			const angleDiff = 0; 
             // Create traces for time domain signals
             const timeTrace1 = {
                 x: time,
@@ -225,50 +220,14 @@
 				type: 'scatter',
                 line: { color: 'blue',dash: 'dashdot'}
             };
-			
-			// Create traces for instantaneous phase signals
-            const instPhTrace1 = {
-                x: time,
-                y: instPhase1,
-                mode: 'lines',
-				xaxis: 'x2',
-				yaxis: 'y2',
-				type: 'scatter',
-                name: 'Inst. Phase, Wave 1',
-                line: { color: 'black' },
-				showlegend: false,
-            };
 
-            const instPhTrace2 = {
-                x: time,
-                y: instPhase2,
-                mode: 'lines',
-				xaxis: 'x2',
-				yaxis: 'y2',
-                name: 'Inst. Phase, Wave 2',
-				type: 'scatter',
-                line: { color: 'blue',dash: 'dashdot'},
-				showlegend: false,
-            };
-			
-			const instPhDiffTrace = {
-                x: time,
-                y: angleDiff,
-                mode: 'lines',
-				xaxis: 'x2',
-				yaxis: 'y2',
-                name: 'Phase diff.',
-				type: 'scatter',
-                line: { color: 'brown',dash: 'solid'},
-				showlegend: true,
-            };
 
 
             // Create scatter plot trace
             const scatterTrace = {
 				type: "scatterpolar",
-				r: new Array(angleDiff.length).fill(1),
-				theta: angleDiff,
+				r: sampleCoh.sampleMagn,
+				theta: sampleCoh.samplePhase,
 				mode: "markers",
 				marker: {
 					color: 'brown',//"#2255ff",
@@ -281,16 +240,15 @@
 				thetaunit: "radians",
 				cliponaxis: true,
 				subplot: "polar",
-				name: "Phase diff.",
+				name: "sample coh.",
 			};
 			
-			
 			// Create bar plot for correlation
-			const plvPlot = [{
+			const CohPlot = [{
 				type: "scatterpolar",
-				name: `PLV (r = ${PLV.magnitude.toFixed(2)})`,
-				r: [0, PLV.magnitude],
-				theta: [0, PLV.phaseLocking],
+				name: `Coh (r = ${Coh.magnitude.toFixed(2)})`,
+				r: [0, Coh.magnitude],
+				theta: [0, Coh.preferredPhase],
 				marker: {
 					color: "orange",
 					symbol: "square",
@@ -301,13 +259,13 @@
 					width: 5},
 				thetaunit: "radians",
 				subplot: "polar",
-				visible: showPLV.checked,
+				visible: showCoh.checked,
 			},
 			{
 				type: "scatterpolar",
-				name: `iPLV (r = ${iPLV.magnitude.toFixed(2)})`,
-				r: [0, iPLV.magnitude],
-				theta: [0, iPLV.phaseLocking],
+				name: `iCoh (r = ${iCoh.magnitude.toFixed(2)})`,
+				r: [0, iCoh.magnitude],
+				theta: [0, iCoh.preferredPhase],
 				marker: {
 					color: "green",
 					symbol: 121,
@@ -321,13 +279,13 @@
 					width: 5},
 				thetaunit: "radians",
 				subplot: "polar",				
-				visible: showiPLV.checked,
+				visible: showiCoh.checked,
 			},
 			{
 				type: "scatterpolar",
-				name: `ciPLV (r = ${ciPLV.magnitude.toFixed(2)})`,
-				r: [0, ciPLV.magnitude],
-				theta: [0, ciPLV.phaseLocking],
+				name: `ciCoh (r = ${ciCoh.magnitude.toFixed(2)})`,
+				r: [0, ciCoh.magnitude],
+				theta: [0, ciCoh.preferredPhase],
 				marker: {
 					color: "purple",
 					symbol: 121,
@@ -341,15 +299,15 @@
 					width: 5},
 				thetaunit: "radians",
 				subplot: "polar",
-				visible: showciPLV.checked,
+				visible: showciCoh.checked,
 			}
 			];
 			
 			// Define metric data
 			const metricsData = {
-				PLV: PLV.magnitude,
-				iPLV: iPLV.magnitude,
-				ciPLV: ciPLV.magnitude
+				Coh: Coh.magnitude,
+				iCoh: iCoh.magnitude,
+				ciCoh: ciCoh.magnitude
 			};
 			
 			var barValues = [];
@@ -381,18 +339,13 @@
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
 				// time domain
                 xaxis: { domain: [0, w1], anchor: 'y1'},
-                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-2, 2]},
-				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
-                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
-							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
-							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']
-						},				
+                yaxis: { title: 'Amplitude', domain: [0, 1], anchor: 'x1', range: [-2, 2]},
 				// bar plot
 				xaxis3: { domain: [w1+w2+wgap, 1], anchor: 'y3'},
                 yaxis3: { title: 'Magnitude', domain: [0, 1], side: 'right', anchor: 'x3', range: [0, 1]},
 				
 				// polar scatter
-				polar: {domain: {x: [w1+wgap, w1+w2], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+				polar: {domain: {x: [w1+wgap, w1+w2], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 2]}},
 				showlegend: true,
 				font: { size: 16 },
 				legend: {x: 0, xanchor: 'left', y: 1, orientation: "h", font: { size: 16 }}
@@ -402,13 +355,10 @@
             var combinedData = [
                 timeTrace1,
                 timeTrace2,
-                instPhTrace1,
-                instPhTrace2,
-				instPhDiffTrace,
 				scatterTrace,
 				barPlot
             ];
-			combinedData = combinedData.concat(plvPlot);
+			combinedData = combinedData.concat(CohPlot);
 
             // Update the plot
             Plotly.newPlot('plot', combinedData, layout, {responsive: true});
@@ -421,6 +371,68 @@
             checkbox.addEventListener('click', updatePlots);
         });
 				
+		
+		function computeSampleCoh(analytic1, analytic2) {
+			// compute power
+			const power1 = zWave1.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // First sine wave
+			const power2 = zWave2.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // Second sine wave
+			
+			let sampleMagn = zWave1.map(([real, imag]) => N*(real ** 2 + imag ** 2)/Math.sqrt(power1 * power2));				
+			let samplePhase = zWave1.map(([real, imag], i) => Math.atan2(imag * zWave2[i][0] - real * zWave2[i][1], real * zWave2[i][0] + imag * zWave2[i][1] ));
+			
+			return {sampleMagn, samplePhase};
+		}
+		function computeCoherence(analytic1, analytic2) {
+			if (analytic1.length !== analytic2.length) {
+				throw new Error("Signals must have the same length.");
+			}
+
+			let N = analytic1.length;
+			let coh = 0;
+			let sumCrossRe = 0;
+			let sumCrossIm = 0;
+			let sumPower1 = 0;
+			let sumPower2 = 0;
+			
+			for (let t = 0; t < N; t++) {
+			
+				// Analytic signal components
+				let re1 = analytic1[t][0], im1 = analytic1[t][1];
+				let re2 = analytic2[t][0], im2 = analytic2[t][1];
+
+				// Compute cross-spectral real and imaginary parts
+				sumCrossRe += re1 * re2 + im1 * im2;  // Real part of A1 * conj(A2)
+				sumCrossIm += im1 * re2 - re1 * im2;  // Imaginary part of A1 * conj(A2)
+				
+				sumPower1 += re1 ** 2 + im1 ** 2;
+				sumPower2 += re2 ** 2 + im2 ** 2;
+	
+			}
+			
+			// Compute coherence magnitude
+			let crossMag = Math.sqrt(sumCrossRe ** 2 + sumCrossIm ** 2);
+			let magnitude = crossMag / Math.sqrt(sumPower1 * sumPower2);
+			// Compute preferred phase difference
+			let preferredPhase = Math.atan2(sumCrossIm, sumCrossRe);
+
+			return {magnitude, preferredPhase};
+		}
+		
+		function computeImCoh(Coh) {
+
+			let magnitude = Math.abs(Coh.magnitude * Math.sin(Coh.preferredPhase)); // imCoh magnitude
+			let preferredPhase = Math.sign(Math.sin(Coh.preferredPhase)) * Math.PI/2; // imCoh phase
+			return { magnitude, preferredPhase};
+		}
+
+		function computecImCoh(Coh) {
+			let numerator = Math.abs(Coh.magnitude * Math.sin(Coh.preferredPhase));
+			let denominator = Math.sqrt(1 -  Math.pow(Coh.magnitude * Math.cos(Coh.preferredPhase),2));
+			let magnitude = (denominator === 0) ? 0 : (numerator/denominator); // cimCoh magnitude
+			let preferredPhase = Math.sign(Math.sin(Coh.preferredPhase)) * Math.PI/2; // cimCoh phase locking
+			return { magnitude, preferredPhase};
+		}
+
     </script>
 </body>
 </html>
