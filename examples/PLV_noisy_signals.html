@@ -60,7 +60,7 @@
 	</section>
 	<section>
 	<h2>Example: Computing the Phase-Locking Value (PLV)</h2>
-	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of constant amplitude \(A\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(phi_2\), respectively. These signals are can be written as:
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of constant amplitude \(A\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
 	$$S_1(t) = A\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
 	\(f_1\), \(\theta_1\) and \(A\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}, A=1\), \(t\) is the time. <br>
 	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
@@ -111,7 +111,7 @@
     </div>
 	<section>
 	<h2>Version of the Phase Locking Value robust to spatial leakage.</h2>
-	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can ne spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensiate for that is by removing the contribution to the 0-lag in the computation of the PLV. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the PLV is defined as:
+	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can be spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensate for that is by removing the contribution to the 0-lag in the computation of the PLV. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the PLV is defined as:
 	$$\text{iPLV} = \Im\left( \mathcal{P}_{\text{PLV}} \right)$$<br>
 	\(\Im\) is the imaginary part. 
 	This metric is now robust to spurious 0-lag but also removes any genuine 0-lag. We cannot, however, estimate the true preferred phase due to the mixing. Intuitively, \(\text{iPLV}\) is the projection of the \(\text{PLV}\) phasor onto the imaginary axis. Check the \(\text{iPLV}\) box, and see how this metric behaves according to different changes in phase and noise.
