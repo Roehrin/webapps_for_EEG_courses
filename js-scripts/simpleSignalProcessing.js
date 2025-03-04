@@ -142,11 +142,11 @@ export function computeciPLV(PLV) {
 
 export function computeSampleCoh(analytic1, analytic2) {
 	// compute power
-	const power1 = zWave1.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // First sine wave
-	const power2 = zWave2.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // Second sine wave
+	const power1 = analytic1.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // First sine wave
+	const power2 = analytic2.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // Second sine wave
 	
-	let sampleMagn = zWave1.map(([real, imag]) => N*(real ** 2 + imag ** 2)/Math.sqrt(power1 * power2));				
-	let samplePhase = zWave1.map(([real, imag], i) => Math.atan2(imag * zWave2[i][0] - real * zWave2[i][1], real * zWave2[i][0] + imag * zWave2[i][1] ));
+	let sampleMagn = analytic1.map(([real, imag]) => N*(real ** 2 + imag ** 2)/Math.sqrt(power1 * power2));				
+	let samplePhase = analytic1.map(([real, imag], i) => Math.atan2(imag * analytic2[i][0] - real * analytic2[i][1], real * analytic2[i][0] + imag * analytic2[i][1] ));
 	
 	return {sampleMagn, samplePhase};
 }
