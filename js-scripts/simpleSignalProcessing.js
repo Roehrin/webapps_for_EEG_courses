@@ -1,6 +1,6 @@
 // simpleSignalProcessing.js
 
-function computeDFT(signal, sampleRate) {
+export function computeDFT(signal, sampleRate) {
 	let N = signal.length;
 	let real = new Array(N).fill(0);
 	let imag = new Array(N).fill(0);
@@ -47,7 +47,7 @@ function analyticSignal(signal) {
 	return inverseDFT(real, imag);
 }
 
-function inverseDFT(real, imag) {
+export function inverseDFT(real, imag) {
 	let N = real.length;
 	// Compute the inverse DFT (IDFT) to get the analytic signal
 	let signalReal = new Array(N).fill(0);
@@ -67,7 +67,16 @@ function inverseDFT(real, imag) {
 	return signalReal.map((re, i) => (signalImag === 0) ? re : [re, signalImag[i]]);
 }
 
-function pearsonCorrelation(x, y) {
+export function generateSineWave(time, frequency=10, phase=0, noise=0, envFreq=0, envPhi=0) {
+	if (envFreq === 0){
+		return time.map((t, index) => Math.cos(2 * Math.PI * frequency * t + phase) + noise[index]);
+	} else {
+		const env = time.map((t, index) => .5*(.8*Math.cos(2 * Math.PI * envFreq * t + envPhi) + 1));
+		return time.map((t, index) => env[index]*Math.cos(2 * Math.PI * frequency * t + phase) + noise[index]);
+	}
+}
+
+export function pearsonCorrelation(x, y) {
 	let n = x.length;
 	let sumX = x.reduce((a, b) => a + b, 0);
 	let sumY = y.reduce((a, b) => a + b, 0);
@@ -86,7 +95,17 @@ function pearsonCorrelation(x, y) {
     return { correlation, slope, intercept };
 }
 
-function computePLV(phase1, phase2) {
+export function computeEnvCorr(analytic1, analytic2) {
+	// compute envelop
+	const envp1 = analytic1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			pearsonCorrelation(x, y)
+	const envp2 = analytic2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			pearsonCorrelation(x, y)
+
+	return pearsonCorrelation(envp1, envp2)
+}
+
+export function computePLV(phase1, phase2) {
 	let N = phase1.length;
 	if (N !== phase2.length) {
 		throw new Error("Phase arrays must have the same length.");
@@ -106,14 +125,14 @@ function computePLV(phase1, phase2) {
 	return { magnitude, phaseLocking};
 }
 
-function computeiPLV(PLV) {
+export function computeiPLV(PLV) {
 
 	let magnitude = Math.abs(PLV.magnitude * Math.sin(PLV.phaseLocking)); // iPLV magnitude
 	let phaseLocking = Math.sign(Math.sin(PLV.phaseLocking)) * Math.PI/2; // PLV phase locking
 	return { magnitude, phaseLocking};
 }
 
-function computeciPLV(PLV) {
+export function computeciPLV(PLV) {
 	let numerator = Math.abs(PLV.magnitude * Math.sin(PLV.phaseLocking));
 	let denominator = Math.sqrt(1 -  Math.pow(PLV.magnitude * Math.cos(PLV.phaseLocking),2));
 	let magnitude = (denominator === 0) ? 0 : (numerator/denominator); // iPLV magnitude
@@ -121,7 +140,69 @@ function computeciPLV(PLV) {
 	return { magnitude, phaseLocking};
 }
 
-function generateGaussianNoise(noiseLvl, length){
+export function computeSampleCoh(analytic1, analytic2) {
+	// compute power
+	const power1 = zWave1.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // First sine wave
+	const power2 = zWave2.reduce((sum, [re, im]) => sum + (re ** 2 + im ** 2), 0); // Second sine wave
+	
+	let sampleMagn = zWave1.map(([real, imag]) => N*(real ** 2 + imag ** 2)/Math.sqrt(power1 * power2));				
+	let samplePhase = zWave1.map(([real, imag], i) => Math.atan2(imag * zWave2[i][0] - real * zWave2[i][1], real * zWave2[i][0] + imag * zWave2[i][1] ));
+	
+	return {sampleMagn, samplePhase};
+}
+
+export function computeCoherence(analytic1, analytic2) {
+	if (analytic1.length !== analytic2.length) {
+		throw new Error("Signals must have the same length.");
+	}
+
+	let N = analytic1.length;
+	let coh = 0;
+	let sumCrossRe = 0;
+	let sumCrossIm = 0;
+	let sumPower1 = 0;
+	let sumPower2 = 0;
+	
+	for (let t = 0; t < N; t++) {
+	
+		// Analytic signal components
+		let re1 = analytic1[t][0], im1 = analytic1[t][1];
+		let re2 = analytic2[t][0], im2 = analytic2[t][1];
+
+		// Compute cross-spectral real and imaginary parts
+		sumCrossRe += re1 * re2 + im1 * im2;  // Real part of A1 * conj(A2)
+		sumCrossIm += im1 * re2 - re1 * im2;  // Imaginary part of A1 * conj(A2)
+		
+		sumPower1 += re1 ** 2 + im1 ** 2;
+		sumPower2 += re2 ** 2 + im2 ** 2;
+
+	}
+	
+	// Compute coherence magnitude
+	let crossMag = Math.sqrt(sumCrossRe ** 2 + sumCrossIm ** 2);
+	let magnitude = crossMag / Math.sqrt(sumPower1 * sumPower2);
+	// Compute preferred phase difference
+	let preferredPhase = Math.atan2(sumCrossIm, sumCrossRe);
+
+	return {magnitude, preferredPhase};
+}
+
+export function computeImCoh(Coh) {
+
+	let magnitude = Math.abs(Coh.magnitude * Math.sin(Coh.preferredPhase)); // imCoh magnitude
+	let preferredPhase = Math.sign(Math.sin(Coh.preferredPhase)) * Math.PI/2; // imCoh phase
+	return { magnitude, preferredPhase};
+}
+
+export function computecImCoh(Coh) {
+	let numerator = Math.abs(Coh.magnitude * Math.sin(Coh.preferredPhase));
+	let denominator = Math.sqrt(1 -  Math.pow(Coh.magnitude * Math.cos(Coh.preferredPhase),2));
+	let magnitude = (denominator === 0) ? 0 : (numerator/denominator); // cimCoh magnitude
+	let preferredPhase = Math.sign(Math.sin(Coh.preferredPhase)) * Math.PI/2; // cimCoh phase locking
+	return { magnitude, preferredPhase};
+}
+
+export function generateGaussianNoise(noiseLvl, length){
 	const noise = [];
 	for (let i = 0; i < length; i++) {
 		const u1 = Math.random();
@@ -131,6 +212,3 @@ function generateGaussianNoise(noiseLvl, length){
 	}
 	return noise
 }
-
-// Export functions for use in another script
-export { computeDFT, inverseDFT, analyticSignal, pearsonCorrelation, generateGaussianNoise, computePLV, computeiPLV, computeciPLV};
