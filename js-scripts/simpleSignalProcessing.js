@@ -24,7 +24,7 @@ export function computeDFT(signal, sampleRate) {
 }
 
 // Compute Inverse DFT (IDFT)
-function analyticSignal(signal) {
+export function analyticSignal(signal) {
 	let N = signal.length;
 	let { real, imag } = computeDFT(signal, 2*Math.PI); // outputs : { frequencies, psd, phase, real, imag };
 
