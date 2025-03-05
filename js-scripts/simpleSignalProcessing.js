@@ -98,9 +98,7 @@ export function pearsonCorrelation(x, y) {
 export function computeEnvCorr(analytic1, analytic2) {
 	// compute envelop
 	const envp1 = analytic1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
-			pearsonCorrelation(x, y)
 	const envp2 = analytic2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
-			pearsonCorrelation(x, y)
 
 	return pearsonCorrelation(envp1, envp2)
 }

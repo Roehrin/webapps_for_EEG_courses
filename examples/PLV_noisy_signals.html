@@ -49,32 +49,32 @@
 			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
 			<br>&copy; 2025 Dr Nicolas Roehri
 	</div>
-	<h1>Phased-based connectivity</h1>
+	<h1>Phase-based connectivity</h1>
 	<p>
 	<section>
 	<h2>Introduction</h2>
 	<h3>Definition</h3>
 	Phase-based connectivity is a measure of the functional connectivity between two or more signals based on the synchronisation of their instantaneous phase dynamics rather than their amplitude or power. It is commonly used in neuroscience and signal processing to analyse oscillatory interactions between brain regions, usually using EEG, MEG or LFP signals.
 	<h3>Key concept</h3>
-	Two signals are considered to be phase-coupled if their instantaneous phase differences remain coherent over time, even if their amplitudes fluctuate. This suggests a functional interaction between the underlying sources that generate these signals.
+	Two signals are considered to be coupled in amplitude if their amplitude or envelope fluctuations show a consistent correlation over time. This means that when the amplitude of one signal increases or decreases, the amplitude of the other signal tends to follow a similar pattern. This suggests a functional interaction between the underlying sources that generate these signals.
 	</section>
 	<section>
 	<h2>Example: Computing the Phase-Locking Value (PLV)</h2>
-	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of constant amplitude \(A\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
-	$$S_1(t) = A\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
+	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
 	\(f_1\), \(\theta_1\) and \(A\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}, A=1\), \(t\) is the time. <br>
 	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
 	</section>
 	<section>
-	To compute phased-based connectivity metric between \(S_1\) and \(S_2\), we need to estimate a phase. Here we will use the instantaneous phase given by their analytic signal (\(\tilde{S_1}\) and \(\tilde{S_2}\)). Thanks to the Hilbert transform (\(\mathcal{H}(.)\)) and <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
-	$$\tilde{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = Ae^{i(2\pi f_1t + \theta_1)} + \tilde{\epsilon_1}(t),$$
-	$$\tilde{S_2}(t)= Ae^{i(2\pi f_2t + \theta_2)} + \tilde{\epsilon_2}(t).$$
+	To compute phased-based connectivity metric between \(S_1\) and \(S_2\), we need to estimate a phase. Here we will use the instantaneous phase given by their analytic signal (\(\widehat{S_1}\) and \(\widehat{S_2}\)). Thanks to the Hilbert transform (\(\mathcal{H}(.)\)) and <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
+	$$\widehat{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = Ae^{i(2\pi f_1t + \theta_1)} + \widehat{\epsilon_1}(t),$$
+	$$\widehat{S_2}(t)= Ae^{i(2\pi f_2t + \theta_2)} + \widehat{\epsilon_2}(t).$$
 	The instantaneous phase is defined as:
 	$$\phi_i(t)= 2\pi f_it + \theta_i,$$
-	$$\textrm{so }\tilde{S_1}(t)= Ae^{i\phi_1(t)} + \tilde{\epsilon_1}(t), \textrm{ and } \tilde{S_2}(t)= Ae^{i\phi_2(t)} + \tilde{\epsilon_2}(t),$$
-	as \(\tilde{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
-	$$\tilde{S_i}(t)= \hat{A}e^{i\hat{\phi_i}(t)}$$
-	where \(\hat{A}\) and \(\hat{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \hat{A} = A\) and \(\\lim_{\sigma\to0} \hat{\phi_i} = \phi_i\).
+	$$\textrm{so }\widehat{S_1}(t)= Ae^{i\phi_1(t)} + \widehat{\epsilon_1}(t), \textrm{ and } \widehat{S_2}(t)= Ae^{i\phi_2(t)} + \widehat{\epsilon_2}(t),$$
+	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
+	$$\widehat{S_i}(t)= \tilde{A}e^{i\tilde{\phi_i}(t)}$$
+	where \(\tilde{A}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A} = A\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
 	For simplicity of the notation we will only use \(A\)  and \(\phi_i\).
 	<p>	
 	The Phase Locking Value (PLV) is a measure of phase synchrony between two signals, independent of the amplitude of the signal.
@@ -114,14 +114,25 @@
 		Show: 
 		<input type="checkbox" id="showPLV" checked /><label for="showPLV">PLV</label>
 		<input type="checkbox" id="showiPLV"/><label for="showiPLV">iPLV</label>
-		<input type="checkbox" id="showciPLV"/><label for="showicPLV">ciPLV</label>
+		<input type="checkbox" id="showciPLV"/><label for="showciPLV">ciPLV</label>
+		</span>
+		<span style="padding: 5px">
+		Cases: 
+		<input type="radio" id="case1Btn" name="caseID" checked>
+		<label for="case1Lbl">case 1</label>
+		<input type="radio" id="case2Btn" name="caseID">
+		<label for="case2Lbl"> case 2</label>
 		</span>
     </div>
 	<section>
 	<h3>Case 2: amplitude modulated signal</h3>
-	Let us now investigate the coherence metric when the amplitude is not constant, but varies over time.
+	Let us now investigate the PLV metric when the amplitude is not constant, but varies over time.
 	$$A_1(t) = \frac{1}{2}(a\cos(2\pi f_{A1}t + \theta_{A1}) + 1)$$ 
-	\(f_{A1}\) the frequency of the cosine amplitude modulation, \(\theta_{A1}\) the phase shift of the cosine amplitude modulation and \(a\) the amount of modulation. Let us set \(f_{A1} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(a = \frac{4}{5}\).
+	\(f_{A1}\) the frequency of the cosine amplitude modulation, \(\theta_{A1}\) the phase shift of the cosine amplitude modulation and \(a\) the amount of modulation. Let us set \(f_{A1} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(a = \frac{4}{5}\).<br>
+	<br>
+	Interestingly, when \(\sigma = 0\), \(\text{PLV} = 1\), even if the amplitude/envelope of signal 1 is not constant anymore. This is because the computation of the \(\text{PLV}\) does not take the amplitude into account (and because the envelope is never 0 in our case, otherwise the phase could not be determine correctly).<br>
+	<br>
+	If \(\sigma \ne 0\), one can see that the \(\text{PLV}\) from case 2 is lower than the \(\text{PLV}\) from case 1 for the same amount of noise. This is due to the fact that at the trough of the envelope, the level of is relatively high compared to the amplitude of the signal. The instantaneous phase become more dependent to the noise than to the signal of interest. This is why, even though the \(\text{PLV}\) is not sensitive to the amplitude it is sensitive to the signal to noise ratio.
 	</section>
 	<section>
 	<h2>Version of the Phase Locking Value robust to spatial leakage.</h2>
@@ -142,14 +153,16 @@
 		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computePLV, computeiPLV, computeciPLV} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
         
 		const checkboxes = document.querySelectorAll('input[type=checkbox]');
+		const radiobuttons = document.querySelectorAll('input[type=radio]');
 		
-        const sampleRate = 512;
+        const sampleRate = 256;
 		const freq1 = 10;
 		const phase1 = 0;
 		var freq2 = parseFloat(document.getElementById("frequency").value);
 		var phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
 		var noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
-        const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
+        const time = Array.from({ length: 2*sampleRate }, (_, i) => i / sampleRate);
+		const envFreq = 2;
 		const metricColours = ['orange', 'green', 'purple'];
 		
 		var w1 = .65;
@@ -199,7 +212,7 @@
 			document.getElementById("noiseValue").textContent = noiseLvl.toFixed(2);
 			
 			noise1 = generateGaussianNoise(noiseLvl, time.length);
-			sineWave1 = generateSineWave(time, freq1, phase1, noise1);
+			sineWave1 = generateSineWave(time, freq1, phase1, noise1, case2Btn.checked*envFreq);
 			zWave1 = analyticSignal(sineWave1);
 			instPhase1 = zWave1.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
 			
@@ -394,8 +407,8 @@
             const layout = {
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
 				// time domain
-                xaxis: { domain: [0, w1], anchor: 'y1'},
-                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-2, 2]},
+                xaxis: { domain: [0, w1], anchor: 'y1', matches: 'x2'},
+                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
 				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
                 yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
 							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
@@ -409,7 +422,7 @@
 				polar: {domain: {x: [w1+wgap, w1+w2], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
 				showlegend: true,
 				font: { size: 16 },
-				legend: {x: 0, xanchor: 'left', y: 1, orientation: "h", font: { size: 16 }}
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
             };
 
             // Combine all traces into a single data array
@@ -433,6 +446,10 @@
 		
 		checkboxes.forEach(checkbox => {
             checkbox.addEventListener('click', updatePlots);
+        });
+		
+		radiobuttons.forEach(checkbox => {
+            checkbox.addEventListener('click', noiseLevel.oninput);
         });
 				
     </script>

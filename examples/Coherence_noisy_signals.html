@@ -50,33 +50,34 @@
 			<br>&copy; 2025 Dr Nicolas Roehri
 	</div>
 	<h1>Coherence-based connectivity</h1>
-	<p>
 	<section>
 	<h2>Introduction</h2>
 	<h3>Definition</h3>
+	
 	<h3>Key concept</h3>
+	Two signals are considered to be coherent if they maintain a consistent phase relationship across a specific frequency range while also exhibiting correlated amplitude fluctuations. This means that not only do their oscillations stay phase-locked to some degree, but their power dynamics are also related. This suggests a functional interaction between the underlying sources that generate these signals.
 	</section>
 	<section>
 	<h2>Example: Computing the Coherence (Coh)</h2>
 	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
 	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
-	\(f_1\), \(\theta_1\) and \(A\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}\), \(t\) is the time. <br>
-	\(A_1\), \(A_2\), \(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
+	\(f_1\), \(\theta_1\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}\), \(t\) is the time. <br>
+	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
 	</section>
 	<section>
-	As for the \(\text{PLV}\), we need to estimate a phase, but this time we also need an amplitude. Here we will again use the instantaneous phase given by their analytic signal (\(\tilde{S_1}\) and \(\tilde{S_2}\)). Note, however, that the coherence is generally presented as a spectral measure obtained with the phase of the Fourier transform. Both implementation are valid, but it highly depends on the context. Thanks to the Hilbert transform (\(\mathcal{H}(.)\)) and <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
-	$$\tilde{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = A(t)e^{i(2\pi f_1t + \theta_1)} + \tilde{\epsilon_1}(t),$$
-	$$\tilde{S_2}(t)= A(t)e^{i(2\pi f_2t + \theta_2)} + \tilde{\epsilon_2}(t).$$
+	As for the \(\text{PLV}\), we need to estimate a phase, but this time we also need an amplitude. Here we will again use the instantaneous phase given by their analytic signal (\(\widehat{S_1}\) and \(\widehat{S_2}\)). Note, however, that the coherence is generally presented as a spectral measure obtained with the phase of the Fourier transform. Both implementation are valid, but it highly depends on the context. Thanks to the Hilbert transform (\(\mathcal{H}(.)\)) and <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
+	$$\widehat{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = A(t)e^{i(2\pi f_1t + \theta_1)} + \widehat{\epsilon_1}(t),$$
+	$$\widehat{S_2}(t)= A(t)e^{i(2\pi f_2t + \theta_2)} + \widehat{\epsilon_2}(t).$$
 	The instantaneous phase is defined as:
 	$$\phi_i(t)= 2\pi f_it + \theta_i,$$
-	$$\textrm{so }\tilde{S_i}(t)= A_i(t)e^{i\phi_i(t)} + \tilde{\epsilon_i}(t),$$
-	as \(\tilde{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
-	$$\tilde{S_i}(t)= \hat{A}(t)e^{i\hat{\phi_i}(t)}$$
-	where \(\hat{A}\) and \(\hat{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \hat{A} = A\) and \(\\lim_{\sigma\to0} \hat{\phi_i} = \phi_i\).
+	$$\textrm{so }\widehat{S_i}(t)= A_i(t)e^{i\phi_i(t)} + \widehat{\epsilon_i}(t),$$
+	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
+	$$\widehat{S_i}(t)= \tilde{A}(t)e^{i\tilde{\phi_i}(t)}$$
+	where \(\tilde{A}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A} = A\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
 	For simplicity of the notation we will only use \(A\)  and \(\phi_i\).
-	<p>
+	<br>
 	The Coherence (Coh) measures the consistency of both phase and power correlations between two signals, ranging from 0 (no synchrony) to 1 (perfect synchrony).
-	$$\text{Coh}(S_1,S_2) = \frac{\left| \sum_{t=1}^{N} \tilde{S_1}(t) \tilde{S_2}^{*}(t) \right|}{\sqrt{\sum_{t=1}^{N} \left| \tilde{S_1}(t) \right|^2 \sum_{t=1}^{N} \left| \tilde{S_2}(t) \right|^2}}$$
+	$$\text{Coh}(S_1,S_2) = \frac{\left| \sum_{t=1}^{N} \widehat{S_1}(t) \widehat{S_2}^{*}(t) \right|}{\sqrt{\sum_{t=1}^{N} \left| \widehat{S_1}(t) \right|^2 \sum_{t=1}^{N} \left| \widehat{S_2}(t) \right|^2}}$$
 	$$\text{Coh}(S_1,S_2) = \frac{\left| \sum_{t=1}^{N} A_1(t)e^{i\phi_1(t)} A_2(t)e^{-i\phi_2(t)} \right|}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$
 	$$\text{Coh}(S_1,S_2) = \frac{\left| \sum_{t=1}^{N} A_1(t)A_2(t)e^{i\Delta\phi_{1,2}(t)} \right|}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$<br>
 	\(N\) is the total number of time points, \(\Delta\phi_{1,2}\) the phase difference, and \(\left| . \right|\)the absolute value. From the definition it is clear that the coherence is symmetrical or undirected, i.e. \(\text{Coh}(S_1,S_2) = \text{Coh}(S_2,S_1)\).<br>
@@ -85,7 +86,7 @@
 	\(\Phi_{\text{Coh}}\) represents the preferred phase difference. Note that \(\Phi_{\text{Coh}}(S_1,S_2) = -\Phi_{\text{Coh}}(S_2,S_1)\)<br>
 	One can represent both information as a phasor, using the complex valued coherence (before applying \(\left| . \right|\)) in a polar plot, where its radius would be the \(\text{Coh}\) and \(\Phi_{\text{Coh}}\) its angle.
 	$$\mathcal{P}_{\text{Coh}}(S_1,S_2) = \frac{\sum_{t=1}^{N} A_1(t)A_2(t)e^{i\Delta\phi_{1,2}(t)} }{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$
-	<p>
+	<br>
 	<h3>Case 1: constant amplitude</h3>
 	As a first example, let us define \(A_1=A_2=A=1\).
 	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{Coh}\).<br>
@@ -113,7 +114,7 @@
 		Show: 
 		<input type="checkbox" id="showCoh" checked /><label for="showCoh">Coh</label>
 		<input type="checkbox" id="showimCoh"/><label for="showimCoh">imCoh</label>
-		<input type="checkbox" id="showcimCoh"/><label for="showicCoh">cimCoh</label>
+		<input type="checkbox" id="showcimCoh"/><label for="showcimCoh">cimCoh</label>
 		</span>
 		<span style="padding: 5px">
 		Cases: 
@@ -127,14 +128,14 @@
 	<h3>Case 2: amplitude modulated signal</h3>
 	Let us now investigate the coherence metric when the amplitude is not constant, but varies over time.
 	$$A_1(t) = \frac{1}{2}(m\cos(2\pi f_{A1}t + \theta_{A1}) + 1)$$ 
-	\(f_{A1}\) the frequency of the cosine amplitude modulation, \(\theta_{A1}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(f_{A1} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(m = \frac{4}{5}\).
-	<p>
-	Note that now when \(\sigma = 0\), \(\text{Coh} \neq 1\). This is because, even though the signals still have a consistent phase difference over time, their amplitude variations are not consistent anymore.
-	<p>
-	Something strange happens when \(f_{2} = 8\textrm{ Hz}\) or \(f_{2} = 12\textrm{ Hz}\). For these frequencies, \(\text{Coh} \neq 0\) even if \(f_{1} \neq f_{2}\). Do you know why?<p>
+	\(f_{A1}\) the frequency of the cosine amplitude modulation, \(\theta_{A1}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(f_{A1} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
+	<br>
+	Note that now when \(\sigma = 0\), \(\text{Coh} \neq 1\). This is because, even though the signals still have a consistent phase difference over time, their amplitude variations are not consistent anymore.<br>
+	<br>
+	Something strange happens when \(f_{2} = 8\textrm{ Hz}\) or \(f_{2} = 12\textrm{ Hz}\). For these frequencies, \(\text{Coh} \neq 0\) even if \(f_{1} \neq f_{2}\). Do you know why?<br>
 	<button onclick="answerDisp()">Answer</button><div id="answerDiv" style="padding: 5px; display: none">Using trigonometric identities, we write \(S_1\) as a sum of three cosine waves:
-	$$S_1(t) = \frac{1}{2}(m\cos(2\pi f_{A1}t + \theta_{A1}) + 1)\cos(2\pi f_1t + \theta_1)
-	= \frac{1}{2}\cos(2\pi f_1t + \theta_1) + \frac{1}{2}m\cos(2\pi f_{A1}t + \theta_{A1})\cos(2\pi f_1t + \theta_1)$$
+	$$S_1(t) = \frac{1}{2}(m\cos(2\pi f_{A1}t + \theta_{A1}) + 1)\cos(2\pi f_1t + \theta_1)$$
+	$$S_1(t) = \frac{1}{2}\cos(2\pi f_1t + \theta_1) + \frac{1}{2}m\cos(2\pi f_{A1}t + \theta_{A1})\cos(2\pi f_1t + \theta_1)$$
 	$$S_1(t) = \frac{1}{2}\cos(2\pi f_1t + \theta_1) + \frac{1}{4}m\cos(2\pi (f_1 - f_{A1})t + \theta_1 - \theta_{A1}) + \frac{1}{4}m\cos(2\pi (f_1 + f_{A1})t + \theta_1 + \theta_{A1})$$ 
 	the carrier wave (\(S_1\) from case 1) which is unchanged in frequency (\(f_1\)), and two sidebands with frequencies slightly above and below the carrier frequency \(f_1\), i.e. \(f_{sb} = f_1 \pm f_{A1} = 10 \pm 2\textrm{ Hz}\).
 	</div>
@@ -171,7 +172,7 @@
 		const checkboxes = document.querySelectorAll('input[type=checkbox]');
 		const radiobuttons = document.querySelectorAll('input[type=radio]');
 		
-        const sampleRate = 512;
+        const sampleRate = 256;
 		const freq1 = 10;
 		const phase1 = 0;
 		var freq2 = parseFloat(document.getElementById("frequency").value);
@@ -196,7 +197,7 @@
 		var noise2 = generateGaussianNoise(noiseLvl, time.length); // Second sine wave
 		
 		// Generate sine waves
-		var sineWave1 = generateSineWave(time, freq1, phase1, noise1, case2Btn.checked*envFreq); // First sine wave
+		var sineWave1 = generateSineWave(time, freq1, phase1, noise1); // First sine wave
 		var sineWave2 = generateSineWave(time, freq2, phase2, noise2); // Second sine wave
 		
 		// compute analytic signal
@@ -252,10 +253,14 @@
 			const imCoh = computeImCoh(Coh);
 			const cimCoh = computecImCoh(Coh)
 			// compute envelop
-			const envp1 = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2)); // second sine wave
-		
+			const envp1 = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			const envp2 = zWave2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2)); 
+			// conpute instantaneous phase
+			const instPhase1 = zWave1.map(([real, imag]) => Math.atan2(imag, real)); // Math.atan2(imag, real))
+			const instPhase2 = zWave2.map(([real, imag]) => Math.atan2(imag, real));
 			// to compute the angle diff we have to pass again to the complex values to stay within [-pi, pi]
-			const angleDiff = 0; 
+			const angleDiff = instPhase1.map((ph1, i) => Math.atan2(Math.sin(ph1-instPhase2[i]),Math.cos(ph1-instPhase2[i]))); 
+			
             // Create traces for time domain signals
             const timeTrace1 = {
                 x: time,
@@ -281,10 +286,55 @@
                 mode: 'lines',
                 name: 'Envp 1',
 				type: 'scatter',
-                line: { color: 'black', dash: 'dashdot', width: 2}
+                line: { color: 'black', dash: 'dashdot', width: 2},
+				visible: 'legendonly'
+            };
+			const timeEnv2 = {
+                x: time,
+                y: envp2,
+                mode: 'lines',
+                name: 'Envp 2',
+				type: 'scatter',
+                line: { color: 'blue', dash: 'dash', width: 2},
+				visible: 'legendonly'
             };
 
+			// Create traces for instantaneous phase signals
+            const instPhTrace1 = {
+                x: time,
+                y: instPhase1,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				type: 'scatter',
+                name: 'Inst. Phase, Wave 1',
+                line: { color: 'black' },
+				showlegend: false,
+            };
 
+            const instPhTrace2 = {
+                x: time,
+                y: instPhase2,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+                name: 'Inst. Phase, Wave 2',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'},
+				showlegend: false,
+            };
+			
+			const instPhDiffTrace = {
+                x: time,
+                y: angleDiff,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+                name: 'Phase diff.',
+				type: 'scatter',
+                line: { color: 'brown', dash: 'solid', width:2},
+				showlegend: true,
+            };
 
             // Create scatter plot trace
             const scatterTrace = {
@@ -404,8 +454,14 @@
             const layout = {
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
 				// time domain
-                xaxis: { domain: [0, w1], anchor: 'y1'},
-                yaxis: { title: 'Amplitude', domain: [0, 1], anchor: 'x1', range: [-2, 2]},
+                xaxis: { domain: [0, w1], anchor: 'y1', matches: 'x2'},
+                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
+				// inst phase axis
+				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
+                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
+							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
+							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']
+						},
 				// bar plot
 				xaxis3: { domain: [w1+w2+wgap, 1], anchor: 'y3'},
                 yaxis3: { title: 'Magnitude', domain: [0, 1], side: 'right', anchor: 'x3', range: [0, 1]},
@@ -414,18 +470,23 @@
 				polar: {domain: {x: [w1+wgap, w1+w2], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 2]}},
 				showlegend: true,
 				font: { size: 16 },
-				legend: {x: 0, xanchor: 'left', y: 1, orientation: "h", font: { size: 16 }}
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
             };
 
             // Combine all traces into a single data array
             var combinedData = [
                 timeTrace1,
                 timeTrace2,
+				timeEnv1,
+				timeEnv2,
+				instPhTrace1,
+                instPhTrace2,
+				instPhDiffTrace,
 				scatterTrace,
-				barPlot
+				barPlot,
             ];
 			combinedData = combinedData.concat(CohPlot);
-			if (case2Btn.checked) combinedData.push(timeEnv1);
+
             // Update the plot
             Plotly.newPlot('plot', combinedData, layout, {responsive: true});
         }
