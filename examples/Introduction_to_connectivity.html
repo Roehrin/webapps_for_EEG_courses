@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to connectivity</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script type="text/javascript" id="MathJax-script" async
+		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+	</script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.banner {
+		  position: sticky;
+		  top: 0;
+		  background:#96004B;
+		  color: #f1f1f1;
+		  z-index: 1;
+		  text-align: right;
+		  padding: 10px
+		}
+		.divfooter {
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		}
+		.text {
+		  text-align: right;
+		}
+		.div {
+		  margin: 20px;
+		}
+		section {
+			margin: 30px;
+		}
+		h1 {
+			margin: 10px;
+		}
+    </style>
+</head>
+<body>
+	<div class="banner">
+			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
+			<br>&copy; 2025 Dr Nicolas Roehri
+	</div>
+	<h1>Introduction to connectivity</h1>
+	<section>
+	<h2>Frequency domain</h2>
+	</section>
+    <div id="plot_DFT" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter_DFT">
+		<span style="padding: 5px">
+			<label for="frequency_DFT">\(f_1\) :</label>
+			<input type="range" id="frequency_DFT" class="slider" min="1" max="25" value="10">
+			<span id="freqValue_DFT">10 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="phase_DFT">\(\theta_1\) :</label>
+			<input type="range" id="phase_DFT" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue_DFT">0 rad</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="noiseLevel_DFT">\(\sigma\) :</label>
+			<input type="range" id="noiseLevel_DFT" class="slider" min="0" max="1" value="0" step="0.01">
+			<span id="noiseValue_DFT">0.00</span>
+		</span>
+		<span style="padding: 5px">
+    </div>
+	
+	<section>
+	<h2>Time domain</h2>
+	</section>
+    <div id="plot_Hil" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter_Hil">
+		<span style="padding: 5px">
+			<label for="frequency_Hil">\(f_1\) :</label>
+			<input type="range" id="frequency_Hil" class="slider" min="1" max="25" value="10">
+			<span id="freqValue_Hil">10 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="phase_Hil">\(\theta_1\) :</label>
+			<input type="range" id="phase_Hil" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue_Hil">0 rad</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="noiseLevel_Hil">\(\sigma\) :</label>
+			<input type="range" id="noiseLevel_Hil" class="slider" min="0" max="1" value="0" step="0.01">
+			<span id="noiseValue_Hil">0.00</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="time_Hil">\(\sigma\) :</label>
+			<input type="range" id="time_Hil" class="slider" min="0" max=256 value="0" step="1">
+			<span id="timeValue_Hil">0.00</span>
+		</span>
+    </div>
+    <script type="module" async>
+		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computeCoherence, computecImCoh, computeImCoh} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
+			
+		const sampleRate = 256;
+		
+		var freq1_DFT = parseFloat(document.getElementById("frequency_DFT").value);
+		var phase1_DFT = 2*Math.PI/360*parseFloat(document.getElementById("phase_DFT").value);
+		var noiseLvl_DFT = parseFloat(document.getElementById("noiseLevel_DFT").value);
+		var freq1_Hil = parseFloat(document.getElementById("frequency_Hil").value);
+		var phase1_Hil = 2*Math.PI/360*parseFloat(document.getElementById("phase_Hil").value);
+		var noiseLvl_Hil = parseFloat(document.getElementById("noiseLevel_Hil").value);
+		var timeIdx_Hil = parseFloat(document.getElementById("time_Hil").value);
+        const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
+		const N = time.length;
+		const envFreq = 2;
+		const metricColours = ['orange', 'green', 'purple'];
+		
+		var w1_DFT = .65;
+		var w2_DFT = .25;
+		const wgap = .05;
+		// normalise the ws to ensure the sum equals 1
+		let wnorm = w1_DFT + w2_DFT + 2*wgap;
+		w1_DFT = w1_DFT/wnorm; w2_DFT = w2_DFT/wnorm; const wgap_DFT = wgap/wnorm;
+		
+		var w1_Hil = .65;
+		var w2_Hil = .25;
+		// normalise the ws to ensure the sum equals 1
+		wnorm = w1_Hil + w2_Hil + 2*wgap;
+		w1_Hil = w1_Hil/wnorm; w2_Hil = w2_Hil/wnorm; const wgap_Hil = wgap/wnorm;
+		
+		// for DFT
+		// Generate noise
+		var noise1_DFT = generateGaussianNoise(noiseLvl_DFT, time.length); // Noise for first channel
+		
+		// Generate sine waves
+		var sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT); // First sine wave
+		
+		var dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+		
+		// for Hilbert transform
+		// Generate noise
+		var noise1_Hil = generateGaussianNoise(noiseLvl_Hil, time.length); // Noise for first channel
+		
+		// Generate sine waves
+		var sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil); // First sine wave
+		
+		var zWave1 = analyticSignal(sineWave1_Hil);
+		
+		frequency_DFT.oninput = function () {
+			freq1_DFT = parseFloat(document.getElementById("frequency_DFT").value);
+			document.getElementById("freqValue_DFT").textContent = freq1_DFT + " Hz";
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		
+		phase_DFT.oninput = function () {
+			phase1_DFT = 2*Math.PI/360*parseFloat(document.getElementById("phase_DFT").value);
+			document.getElementById("phaseValue_DFT").textContent = phase1_DFT.toFixed(2) + " rad";
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		
+		noiseLevel_DFT.oninput = function () {
+			noiseLvl_DFT = parseFloat(document.getElementById("noiseLevel_DFT").value);
+			document.getElementById("noiseValue_DFT").textContent = noiseLvl_DFT.toFixed(2);
+			
+			noise1_DFT = generateGaussianNoise(noiseLvl_DFT, time.length);
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		
+		// for Hil
+		frequency_Hil.oninput = function () {
+			freq1_Hil = parseFloat(document.getElementById("frequency_Hil").value);
+			document.getElementById("freqValue_Hil").textContent = freq1_Hil + " Hz";
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		phase_Hil.oninput = function () {
+			phase1_Hil = 2*Math.PI/360*parseFloat(document.getElementById("phase_Hil").value);
+			document.getElementById("phaseValue_Hil").textContent = phase1_Hil.toFixed(2) + " rad";
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		noiseLevel_Hil.oninput = function () {
+			noiseLvl_Hil = parseFloat(document.getElementById("noiseLevel_Hil").value);
+			document.getElementById("noiseValue_Hil").textContent = noiseLvl_Hil.toFixed(2);
+			
+			noise1_Hil = generateGaussianNoise(noiseLvl_Hil, time.length);
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		time_Hil.oninput = function () {
+			timeIdx_Hil = parseFloat(document.getElementById("time_Hil_Hil").value);
+			document.getElementById("noiseValue_Hil").textContent = (time_Hil/sampleRate).toFixed(2);
+			updatePlots_Hil()
+		}
+
+        function updatePlots_DFT() {        
+            
+			// Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1_DFT,
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Sine Wave 1',
+                line: { color: 'black' }
+            };
+
+            // Create traces for frequency domain signals
+            const freqTrace1 = {
+                x: dftResult1_DFT.frequencies,
+                y: dftResult1_DFT.psd,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'lines',
+				type: 'scatter',
+                name: 'PSD of Sine Wave 1',
+                line: { color: 'black' },
+				showlegend: false,
+            };
+			
+			// Create traces for phase domain signals
+            const phaseTrace1 = {
+                x: dftResult1_DFT.frequencies,
+                y: dftResult1_DFT.phase,
+				xaxis: 'x3',
+				yaxis: 'y3',
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Phase of Sine Wave 1',
+                line: { color: 'black' },
+				showlegend: false,
+            };
+
+			// Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+                xaxis: { title: 'Time (s)', domain: [0, w1_DFT], anchor: 'y1'},
+                yaxis: { title: 'Amplitude', anchor: 'x1', range: [-2, 2]},
+				xaxis2: { domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y2', range: [0, 30]},
+                yaxis2: { title: 'PSD', domain: [.55, 1], anchor: 'x2', range: [0, 1]},
+				xaxis3: { title: 'Frequency (Hz)', domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y3', range: [0, 30]},
+                yaxis3: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x3', range: [-Math.PI, Math.PI],tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
+							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']},
+				shapes: [{type: 'line', line: { color: 'blue',dash: 'dashdot'}, x0: freq1_DFT, y0: 0, x1: freq1_DFT, y1: 1, xref: 'x2', yref: 'y2'}, {type: 'line', line: { color: 'blue',dash: 'dashdot'}, x0: freq1_DFT, y0:-Math.PI, x1: freq1_DFT, y1: Math.PI, xref: 'x3', yref: 'y3'}],
+                showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: -.3, orientation: "h", font: { size: 16 }}
+            };
+
+            // Combine all traces into a single data array
+            const combinedData = [
+                timeTrace1,
+                freqTrace1,
+				phaseTrace1
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot_DFT', combinedData, layout, {responsive: true});
+        }
+		
+		function updatePlots_Hil() {        
+            
+			const instPhase1 = zWave1.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			const hilWave = zWave1.map(([real, imag]) => imag);
+			const envelope = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			// Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1_Hil,
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Sine Wave 1',
+                line: { color: 'black' }
+            };
+			
+			const timeHilTrace1 = {
+                x: time,
+                y: hilWave,
+                mode: 'lines',
+				type: 'scatter',
+                name: 'H(Sine Wave 1)',
+                line: { color: 'blue', dash: 'dashdot'}
+            };
+			
+			const timeEnvTrace1 = {
+                x: time,
+                y: envelope,
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Envelope (S1)',
+                line: { color: 'brown' }
+            };
+
+            // Create traces for instantaneous phase signals
+            const instPhTrace1 = {
+                x: time,
+                y: instPhase1,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				type: 'scatter',
+                name: 'Inst. Phase, Wave 1',
+                line: { color: 'black' },
+				showlegend: false,
+            };
+			
+			// Create scatter plot trace
+            const scatterTrace = {
+				type: "scatterpolar",
+				r: new Array(N).fill(1),
+				theta: instPhase1,
+				mode: "markers",
+				marker: {
+					color: 'black',//"#2255ff",
+					size: 10,
+					line: {
+					  color: "white"
+					},
+					opacity: 0.1
+				},
+				thetaunit: "radians",
+				cliponaxis: true,
+				subplot: "polar",
+				name: "Inst. Phase",
+			};
+
+			// Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+				// time domain
+                xaxis: { domain: [0, w1_Hil], anchor: 'y1', matches: 'x2'},
+                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
+				xaxis2: { title: 'Time (s)', domain: [0, w1_Hil], anchor: 'y2'},
+                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
+							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
+							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']
+						},				
+				// polar scatter
+				polar: {domain: {x: [w1_Hil+wgap_Hil, w1_Hil+w2_Hil], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+				showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
+            };
+
+            // Combine all traces into a single data array
+            const combinedData = [
+                timeTrace1,
+				timeHilTrace1,
+				timeEnvTrace1,
+                instPhTrace1,
+				scatterTrace
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot_Hil', combinedData, layout, {responsive: true});
+        }
+
+        // Initial plot
+        updatePlots_DFT();
+		updatePlots_Hil();
+		
+
+    </script>
+</body>
+</html>
