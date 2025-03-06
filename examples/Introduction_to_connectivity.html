@@ -94,9 +94,9 @@
 			<span id="noiseValue_Hil">0.00</span>
 		</span>
 		<span style="padding: 5px">
-			<label for="time_Hil">\(\sigma\) :</label>
-			<input type="range" id="time_Hil" class="slider" min="0" max=256 value="0" step="1">
-			<span id="timeValue_Hil">0.00</span>
+			<label for="time_Hil">time :</label>
+			<input type="range" id="time_Hil" style="width:25%", class="slider" min="0" max=255 value="0" step="1">
+			<span id="timeValue_Hil">0.00 s</span>
 		</span>
     </div>
     <script type="module" async>
@@ -114,6 +114,7 @@
         const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
 		const N = time.length;
 		const envFreq = 2;
+		const envPhase = Math.PI;
 		const metricColours = ['orange', 'green', 'purple'];
 		
 		var w1_DFT = .65;
@@ -143,7 +144,7 @@
 		var noise1_Hil = generateGaussianNoise(noiseLvl_Hil, time.length); // Noise for first channel
 		
 		// Generate sine waves
-		var sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil); // First sine wave
+		var sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase); // First sine wave
 		
 		var zWave1 = analyticSignal(sineWave1_Hil);
 		
@@ -177,7 +178,7 @@
 		frequency_Hil.oninput = function () {
 			freq1_Hil = parseFloat(document.getElementById("frequency_Hil").value);
 			document.getElementById("freqValue_Hil").textContent = freq1_Hil + " Hz";
-			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil);
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
 			zWave1 = analyticSignal(sineWave1_Hil);
 			updatePlots_Hil()
 		}
@@ -185,7 +186,7 @@
 		phase_Hil.oninput = function () {
 			phase1_Hil = 2*Math.PI/360*parseFloat(document.getElementById("phase_Hil").value);
 			document.getElementById("phaseValue_Hil").textContent = phase1_Hil.toFixed(2) + " rad";
-			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil);
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
 			zWave1 = analyticSignal(sineWave1_Hil);
 			updatePlots_Hil()
 		}
@@ -195,14 +196,14 @@
 			document.getElementById("noiseValue_Hil").textContent = noiseLvl_Hil.toFixed(2);
 			
 			noise1_Hil = generateGaussianNoise(noiseLvl_Hil, time.length);
-			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil);
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
 			zWave1 = analyticSignal(sineWave1_Hil);
 			updatePlots_Hil()
 		}
 		
 		time_Hil.oninput = function () {
-			timeIdx_Hil = parseFloat(document.getElementById("time_Hil_Hil").value);
-			document.getElementById("noiseValue_Hil").textContent = (time_Hil/sampleRate).toFixed(2);
+			timeIdx_Hil = parseFloat(time_Hil.value);
+			timeValue_Hil.textContent = (timeIdx_Hil/sampleRate).toFixed(2) + ' s';
 			updatePlots_Hil()
 		}
 
@@ -243,6 +244,38 @@
                 line: { color: 'black' },
 				showlegend: false,
             };
+			const freqInd = dftResult1_DFT.frequencies.indexOf(freq1_DFT);
+			
+			const annot = [
+				{
+				  x: dftResult1_DFT.frequencies[freqInd],
+				  y: Math.min(dftResult1_DFT.psd[freqInd], 1.2),
+				  xref: 'x2',
+				  yref: 'y2',
+				  text: `freq. = ${dftResult1_DFT.frequencies[freqInd].toFixed(2)} Hz, psd = ${dftResult1_DFT.psd[freqInd].toFixed(2)}`,
+				  showarrow: true,
+				  arrowhead: 7,
+				  ax: 40,
+				  ay: -40,
+				  xanchor: 'left',
+				  bgcolor: 'rgba(255,255,255,.8)',
+				  arrowcolor: 'brown'
+				},
+				{
+				  x: dftResult1_DFT.frequencies[freqInd],
+				  y: dftResult1_DFT.phase[freqInd],
+				  xref: 'x3',
+				  yref: 'y3',
+				  text: `freq. = ${dftResult1_DFT.frequencies[freqInd].toFixed(2)} Hz, phase = ${dftResult1_DFT.phase[freqInd].toFixed(2)} rad`,
+				  showarrow: true,
+				  arrowhead: 7,
+				  ax: 40,
+				  ay: 40,
+				  xanchor: 'left',
+				  bgcolor: 'rgba(255,255,255,.8)',
+				  arrowcolor: 'brown'
+				}
+			];
 
 			// Define subplots layout
             const layout = {
@@ -250,14 +283,15 @@
                 xaxis: { title: 'Time (s)', domain: [0, w1_DFT], anchor: 'y1'},
                 yaxis: { title: 'Amplitude', anchor: 'x1', range: [-2, 2]},
 				xaxis2: { domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y2', range: [0, 30]},
-                yaxis2: { title: 'PSD', domain: [.55, 1], anchor: 'x2', range: [0, 1]},
+                yaxis2: { title: 'PSD', domain: [.55, 1], anchor: 'x2', range: [0, 1.3]},
 				xaxis3: { title: 'Frequency (Hz)', domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y3', range: [0, 30]},
                 yaxis3: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x3', range: [-Math.PI, Math.PI],tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
 							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']},
 				shapes: [{type: 'line', line: { color: 'blue',dash: 'dashdot'}, x0: freq1_DFT, y0: 0, x1: freq1_DFT, y1: 1, xref: 'x2', yref: 'y2'}, {type: 'line', line: { color: 'blue',dash: 'dashdot'}, x0: freq1_DFT, y0:-Math.PI, x1: freq1_DFT, y1: Math.PI, xref: 'x3', yref: 'y3'}],
+				annotations: annot,
                 showlegend: true,
 				font: { size: 16 },
-				legend: {x: 0, xanchor: 'left', y: -.3, orientation: "h", font: { size: 16 }}
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
             };
 
             // Combine all traces into a single data array
@@ -303,6 +337,16 @@
                 name: 'Envelope (S1)',
                 line: { color: 'brown' }
             };
+			
+			const timeMrkTrace1 = {
+                x: [timeIdx_Hil/sampleRate, timeIdx_Hil/sampleRate, timeIdx_Hil/sampleRate],
+                y: [sineWave1_Hil[timeIdx_Hil], hilWave[timeIdx_Hil], envelope[timeIdx_Hil]],
+                mode: 'markers',
+				type: 'scatter',
+                name: 'markers',
+                marker: { color: ['black', 'blue', 'brown'], size: 15, symbol: "square"},
+				showlegend: false
+            };
 
             // Create traces for instantaneous phase signals
             const instPhTrace1 = {
@@ -314,34 +358,113 @@
 				type: 'scatter',
                 name: 'Inst. Phase, Wave 1',
                 line: { color: 'black' },
-				showlegend: false,
+				showlegend: true,
+            };
+			
+			const timePhMrkTrace1 = {
+                x: [timeIdx_Hil/sampleRate],
+                y: [instPhase1[timeIdx_Hil]],
+                mode: 'markers',
+				type: 'scatter',
+                name: 'markersPh',
+				xaxis: 'x2',
+				yaxis: 'y2',
+                marker: { color: 'black', size: 15, symbol: "square"},
+				showlegend: false
             };
 			
 			// Create scatter plot trace
-            const scatterTrace = {
+            const scatterTrace = [{
 				type: "scatterpolar",
-				r: new Array(N).fill(1),
+				r: envelope,
 				theta: instPhase1,
 				mode: "markers",
 				marker: {
 					color: 'black',//"#2255ff",
 					size: 10,
-					line: {
-					  color: "white"
-					},
 					opacity: 0.1
 				},
 				thetaunit: "radians",
 				cliponaxis: true,
 				subplot: "polar",
 				name: "Inst. Phase",
-			};
+			},
+			{
+				type: "scatterpolar",
+				name: "projection",
+				r: [Math.abs(sineWave1_Hil[timeIdx_Hil]), envelope[timeIdx_Hil], Math.abs(hilWave[timeIdx_Hil])],
+				theta: [Math.PI/2*(1 - Math.sign(sineWave1_Hil[timeIdx_Hil])), instPhase1[timeIdx_Hil], Math.sign(hilWave[timeIdx_Hil])*Math.PI/2],
+				line: {
+					color: "rgba(0,0,0,.5)",
+					width: 3,
+					dash: 'dashdot'
+					},
+				thetaunit: "radians",
+				subplot: "polar",
+				showlegend: false,
+			},
+			{
+				type: "scatterpolar",
+				name: "Real part",
+				r: [0, Math.abs(sineWave1_Hil[timeIdx_Hil])],
+				theta: [0, Math.PI/2*(1 - Math.sign(sineWave1_Hil[timeIdx_Hil]))],
+				marker: {
+					color: "black",
+					symbol: "square",
+					size: 15,
+				},
+				line: {
+					color: "black",
+					width: 3},
+				thetaunit: "radians",
+				subplot: "polar",
+			},
+			{
+				type: "scatterpolar",
+				name: "Imag. part",
+				r: [0, Math.abs(hilWave[timeIdx_Hil])],
+				theta: [0, Math.sign(hilWave[timeIdx_Hil])*Math.PI/2],
+				marker: {
+					color: "blue",
+					symbol: "square",
+					size: 15,
+				},
+				line: {
+					color: "blue",
+					width: 3},
+				thetaunit: "radians",
+				subplot: "polar",
+			},
+			{
+				type: "scatterpolar",
+				name: "Analytic Sig.",
+				r: [0, envelope[timeIdx_Hil]],
+				theta: [0, instPhase1[timeIdx_Hil]],
+				marker: {
+					color: "brown",
+					symbol: "square",
+					size: 15,
+				},
+				line: {
+					color: "brown",
+					width: 5},
+				thetaunit: "radians",
+				subplot: "polar",
+			}
+			];
 
+
+			const shapesHilTime = [
+				{type: 'line+markers', line: { color: 'blue',dash: 'dashdot', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: hilWave[timeIdx_Hil], xref: 'x1', yref: 'y1'}, 
+				{type: 'line', line: { color: 'black', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: sineWave1_Hil[timeIdx_Hil], xref: 'x1', yref: 'y1'},
+				{type: 'line', line: { color: 'brown', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: envelope[timeIdx_Hil], xref: 'x1', yref: 'y1'},
+				{type: 'line', line: { color: 'black', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: instPhase1[timeIdx_Hil], xref: 'x2', yref: 'y2'},
+			];
 			// Define subplots layout
             const layout = {
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
 				// time domain
-                xaxis: { domain: [0, w1_Hil], anchor: 'y1', matches: 'x2'},
+                xaxis: { domain: [0, w1_Hil], range: [0, 1], anchor: 'y1', matches: 'x2'},
                 yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
 				xaxis2: { title: 'Time (s)', domain: [0, w1_Hil], anchor: 'y2'},
                 yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
@@ -350,6 +473,7 @@
 						},				
 				// polar scatter
 				polar: {domain: {x: [w1_Hil+wgap_Hil, w1_Hil+w2_Hil], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+				shapes: shapesHilTime,
 				showlegend: true,
 				font: { size: 16 },
 				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
@@ -360,8 +484,10 @@
                 timeTrace1,
 				timeHilTrace1,
 				timeEnvTrace1,
+				timeMrkTrace1,
                 instPhTrace1,
-				scatterTrace
+				timePhMrkTrace1,
+				...scatterTrace
             ];
 
             // Update the plot
