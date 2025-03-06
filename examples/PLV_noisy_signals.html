@@ -60,7 +60,7 @@
 	</section>
 	<section>
 	<h2>Example: Computing the Phase-Locking Value (PLV)</h2>
-	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are written as:
 	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
 	\(f_1\), \(\theta_1\) and \(A\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}, A=1\), \(t\) is the time. <br>
 	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
@@ -127,8 +127,8 @@
 	<section>
 	<h3>Case 2: amplitude modulated signal</h3>
 	Let us now investigate the PLV metric when the amplitude is not constant, but varies over time.
-	$$A_1(t) = \frac{1}{2}(a\cos(2\pi f_{A1}t + \theta_{A1}) + 1)$$ 
-	\(f_{A1}\) the frequency of the cosine amplitude modulation, \(\theta_{A1}\) the phase shift of the cosine amplitude modulation and \(a\) the amount of modulation. Let us set \(f_{A1} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(a = \frac{4}{5}\).<br>
+	$$A_1(t) = \frac{1}{2}(a\cos(2\pi f_{A_1}t + \theta_{A_1}) + 1)$$ 
+	\(f_{A_1}\) the frequency of the cosine amplitude modulation, \(\theta_{A_1}\) the phase shift of the cosine amplitude modulation and \(a\) the amount of modulation. Let us set \(f_{A_1} = 2\textrm{ Hz}\), \(\theta_{A_1} = 0\textrm{ rad}\) and \(a = \frac{4}{5}\).<br>
 	<br>
 	Interestingly, when \(\sigma = 0\), \(\text{PLV} = 1\), even if the amplitude/envelope of signal 1 is not constant anymore. This is because the computation of the \(\text{PLV}\) does not take the amplitude into account (and because the envelope is never 0 in our case, otherwise the phase could not be determine correctly).<br>
 	<br>

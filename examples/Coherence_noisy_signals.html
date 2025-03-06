@@ -59,7 +59,7 @@
 	</section>
 	<section>
 	<h2>Example: Computing the Coherence (Coh)</h2>
-	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are written as:
 	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
 	\(f_1\), \(\theta_1\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}\), \(t\) is the time. <br>
 	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
@@ -127,17 +127,17 @@
 	<section>
 	<h3>Case 2: amplitude modulated signal</h3>
 	Let us now investigate the coherence metric when the amplitude is not constant, but varies over time.
-	$$A_1(t) = \frac{1}{2}(m\cos(2\pi f_{A1}t + \theta_{A1}) + 1)$$ 
-	\(f_{A1}\) the frequency of the cosine amplitude modulation, \(\theta_{A1}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(f_{A1} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
+	$$A_1(t) = \frac{1}{2}(m\cos(2\pi f_{A_1}t + \theta_{A_1}) + 1)$$ 
+	\(f_{A_1}\) the frequency of the cosine amplitude modulation, \(\theta_{A_1}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(f_{A_1} = 2\textrm{ Hz}\), \(\theta_{A_1} = 0\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
 	<br>
 	Note that now when \(\sigma = 0\), \(\text{Coh} \neq 1\). This is because, even though the signals still have a consistent phase difference over time, their amplitude variations are not consistent anymore.<br>
 	<br>
 	Something strange happens when \(f_{2} = 8\textrm{ Hz}\) or \(f_{2} = 12\textrm{ Hz}\). For these frequencies, \(\text{Coh} \neq 0\) even if \(f_{1} \neq f_{2}\). Do you know why?<br>
 	<button onclick="answerDisp()">Answer</button><div id="answerDiv" style="padding: 5px; display: none">Using trigonometric identities, we write \(S_1\) as a sum of three cosine waves:
-	$$S_1(t) = \frac{1}{2}(m\cos(2\pi f_{A1}t + \theta_{A1}) + 1)\cos(2\pi f_1t + \theta_1)$$
-	$$S_1(t) = \frac{1}{2}\cos(2\pi f_1t + \theta_1) + \frac{1}{2}m\cos(2\pi f_{A1}t + \theta_{A1})\cos(2\pi f_1t + \theta_1)$$
-	$$S_1(t) = \frac{1}{2}\cos(2\pi f_1t + \theta_1) + \frac{1}{4}m\cos(2\pi (f_1 - f_{A1})t + \theta_1 - \theta_{A1}) + \frac{1}{4}m\cos(2\pi (f_1 + f_{A1})t + \theta_1 + \theta_{A1})$$ 
-	the carrier wave (\(S_1\) from case 1) which is unchanged in frequency (\(f_1\)), and two sidebands with frequencies slightly above and below the carrier frequency \(f_1\), i.e. \(f_{sb} = f_1 \pm f_{A1} = 10 \pm 2\textrm{ Hz}\).
+	$$S_1(t) = \frac{1}{2}(m\cos(2\pi f_{A_1}t + \theta_{A_1}) + 1)\cos(2\pi f_1t + \theta_1)$$
+	$$S_1(t) = \frac{1}{2}\cos(2\pi f_1t + \theta_1) + \frac{1}{2}m\cos(2\pi f_{A_1}t + \theta_{A_1})\cos(2\pi f_1t + \theta_1)$$
+	$$S_1(t) = \frac{1}{2}\cos(2\pi f_1t + \theta_1) + \frac{1}{4}m\cos(2\pi (f_1 - f_{A_1})t + \theta_1 - \theta_{A_1}) + \frac{1}{4}m\cos(2\pi (f_1 + f_{A_1})t + \theta_1 + \theta_{A_1})$$ 
+	the carrier wave (\(S_1\) from case 1) which is unchanged in frequency (\(f_1\)), and two sidebands with frequencies slightly above and below the carrier frequency \(f_1\), i.e. \(f_{sb} = f_1 \pm f_{A_1} = 10 \pm 2\textrm{ Hz}\).
 	</div>
 	</section>
 	<section>

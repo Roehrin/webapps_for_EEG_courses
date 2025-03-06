@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Introduction to connectivity</title>
+    <title>Introduction to functional connectivity</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script type="text/javascript" id="MathJax-script" async
 		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
@@ -49,19 +49,45 @@
 			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
 			<br>&copy; 2025 Dr Nicolas Roehri
 	</div>
-	<h1>Introduction to connectivity</h1>
+	<h1>Introduction to functional connectivity</h1>
 	<section>
-	<h2>Frequency domain</h2>
+	<h2>Definition of Functional Connectivity</h2>
+	Functional connectivity refers to the statistical relationship between signals recorded from different brain regions, reflecting their dynamic interactions over time. It can be assessed using various families of measures, including phase-based connectivity (e.g., Phase Locking Value, which quantifies phase synchronization), amplitude-based connectivity (e.g., Amplitude Envelope Correlation, which examines power co-modulations), and coherence, which captures both phase and amplitude relationships.<br><br>
+	Regardless of the chosen method, extracting meaningful connectivity information requires computing the amplitude and phase of signals, typically using the Fourier transform or the Hilbert transform (\(\mathcal{H}(.)\)).<br><br>
+	Since these transformations yield complex-valued representations of the signals, it is often useful to apply Euler’s formula, which expresses a complex number in terms of its magnitude and phase, making it easier to manipulate and interpret in functional connectivity analyses.
+	$$ z = a + ib = Re^{i\theta}$$
+	$$\text{with } \Re(z) = a,\quad \Im(z) = b,\quad \left|z\right| = R,\quad \arg(z) = \theta.$$
+	</section>
+	<section>
+	To illustrate the principle of the Fourier transform or Hilbert transform, we will define a simple signal.<br><br>
+	Let us assume a noisy oscillating signal \(S\) of amplitudes \(A\), frequencies \(f\), and phase shifts \(\theta\). This signal writen written as:
+	$$S(t) = A(t)\cos(2\pi ft + \theta) + \epsilon(t),$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$<br><br>
+	\(A\) takes the following form:
+	$$A(t) = \frac{1}{2}(m\cos(2\pi f_{A}t + \theta_{A}) + 1)$$ 
+	\(f_{A}\) the frequency of the cosine amplitude modulation, \(\theta_{A}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(\theta_{A} = \frac{\pi}{2}\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
+	\(f\), \(\theta\) and \(f_{A}\) can be tuned. Note that when \(f_{A} = 0\), \(A(t) = 1\)
+	</section>
+	<section>
+	<h2>Frequency domain (<em>spectral method</em>)</h2>
+	<ol>
+        <li><strong>Segment the Signal</strong> – Divide the continuous signal into <em>trials or epochs</em>, typically aligned to an event of interest or stimulus or a fixed time window.</li>
+        <li><strong>Compute the Fourier Transform</strong> – Apply the <em>Fourier Transform</em> to each trial/epoch to obtain the complex frequency representation of the signal. This provides the <em>amplitude and phase</em> information for each frequency component.</li>
+        <li><strong>Compute the Metric of Interest</strong> – across the epochs/trials</li>
+        <li><strong>Average Across Frequency Bands (Optional)</strong> – If interested in specific frequency bands (e.g., theta, alpha, beta), average the metric across the selected frequencies.</li>
+    </ol>
+	<br>
+	In the example below, \(f_{A} = 0\) and \(A(t) = 1\)
+	The Fourier transform gives us the amplitude \(A\) and the phase shift \(\theta\).
 	</section>
     <div id="plot_DFT" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_DFT">
 		<span style="padding: 5px">
-			<label for="frequency_DFT">\(f_1\) :</label>
+			<label for="frequency_DFT">\(f\) :</label>
 			<input type="range" id="frequency_DFT" class="slider" min="1" max="25" value="10">
 			<span id="freqValue_DFT">10 Hz</span>
 		</span>
 		<span style="padding: 5px">
-			<label for="phase_DFT">\(\theta_1\) :</label>
+			<label for="phase_DFT">\(\theta\) :</label>
 			<input type="range" id="phase_DFT" class="slider" min="-175" max="180" value="0" step="5">
 			<span id="phaseValue_DFT">0 rad</span>
 		</span>
@@ -75,16 +101,37 @@
 	
 	<section>
 	<h2>Time domain</h2>
+	<ol>
+        <li><strong>Bandpass Filter the Signal</strong> – Apply a <em>bandpass filter</em> to isolate the frequency range of interest (e.g., theta, alpha, beta). The Hilbert transform is meaningful only within a defined frequency band.</li>
+        <li><strong>Compute the Analytic Signal</strong> – Apply the <em>Hilbert Transform</em> to obtain the analytic signal, which consists of:
+            <ul>
+                <li><strong>Real part</strong>: The original band-limited signal.</li>
+                <li><strong>Imaginary part</strong>: The Hilbert transform of the real part, forming a complex representation.</li>
+            </ul>
+        </li>
+        <li><strong>Extract Amplitude and Phase</strong> – Compute:
+            <ul>
+                <li><strong>Instantaneous Amplitude (Envelope)</strong>: The magnitude of the analytic signal.</li>
+                <li><strong>Instantaneous Phase</strong>: The phase angle, obtained using the arctangent function.</li>
+            </ul>
+        </li>
+        <li><strong>Compute the Metric of Interest</strong> across the temporal dimension.</li>
+    </ol>
+	The analytic signal representation gives us the (instantaneous) amplitude of the envelope \(A(t)\) and the instantaneous phase \(\phi(t)\).
+	$$\widehat{S}(t)= S(t)+i\mathcal{H}(S(t)) = A(t)e^{i(2\pi ft + \theta)}$$
+	The instantaneous phase is defined as:
+	$$\phi(t)= 2\pi ft + \theta,$$
+	$$\textrm{so }\widehat{S}(t)= A(t)e^{i\phi(t)}.$$
 	</section>
     <div id="plot_Hil" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_Hil">
 		<span style="padding: 5px">
-			<label for="frequency_Hil">\(f_1\) :</label>
+			<label for="frequency_Hil">\(f\) :</label>
 			<input type="range" id="frequency_Hil" class="slider" min="1" max="25" value="10">
 			<span id="freqValue_Hil">10 Hz</span>
 		</span>
 		<span style="padding: 5px">
-			<label for="phase_Hil">\(\theta_1\) :</label>
+			<label for="phase_Hil">\(\theta\) :</label>
 			<input type="range" id="phase_Hil" class="slider" min="-175" max="180" value="0" step="5">
 			<span id="phaseValue_Hil">0 rad</span>
 		</span>
@@ -94,9 +141,14 @@
 			<span id="noiseValue_Hil">0.00</span>
 		</span>
 		<span style="padding: 5px">
+			<label for="envFreq_Hil">\(f_{A}\) :</label>
+			<input type="range" id="envFreq_Hil" class="slider" min="0" max="3" value="0" step=".2">
+			<span id="envFreqValue_Hil">0.00 Hz</span>
+		</span>
+		<span style="padding: 5px">
 			<label for="time_Hil">time :</label>
-			<input type="range" id="time_Hil" style="width:25%", class="slider" min="0" max=255 value="0" step="1">
-			<span id="timeValue_Hil">0.00 s</span>
+			<input type="range" id="time_Hil" style="width:25%", class="slider" min="0" max="255" value="64" step="1">
+			<span id="timeValue_Hil">0.25 s</span>
 		</span>
     </div>
     <script type="module" async>
@@ -111,9 +163,9 @@
 		var phase1_Hil = 2*Math.PI/360*parseFloat(document.getElementById("phase_Hil").value);
 		var noiseLvl_Hil = parseFloat(document.getElementById("noiseLevel_Hil").value);
 		var timeIdx_Hil = parseFloat(document.getElementById("time_Hil").value);
+		var envFreq = parseFloat(envFreq_Hil.value);
         const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
 		const N = time.length;
-		const envFreq = 2;
 		const envPhase = Math.PI;
 		const metricColours = ['orange', 'green', 'purple'];
 		
@@ -186,6 +238,14 @@
 		phase_Hil.oninput = function () {
 			phase1_Hil = 2*Math.PI/360*parseFloat(document.getElementById("phase_Hil").value);
 			document.getElementById("phaseValue_Hil").textContent = phase1_Hil.toFixed(2) + " rad";
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		envFreq_Hil.oninput = function () {
+			envFreq = parseFloat(envFreq_Hil.value);
+			envFreqValue_Hil.textContent = envFreq.toFixed(2) + " Hz";
 			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
 			zWave1 = analyticSignal(sineWave1_Hil);
 			updatePlots_Hil()
