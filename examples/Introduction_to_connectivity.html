@@ -56,7 +56,7 @@
 	Regardless of the chosen method, extracting meaningful connectivity information requires computing the amplitude and phase of signals, typically using the Fourier transform or the Hilbert transform (\(\mathcal{H}(.)\)).<br><br>
 	Since these transformations yield complex-valued representations of the signals, it is often useful to apply Euler’s formula, which expresses a complex number in terms of its magnitude and phase, making it easier to manipulate and interpret in functional connectivity analyses.
 	$$ z = a + ib = Re^{i\theta}$$
-	$$\text{with } \Re(z) = a,\quad \Im(z) = b,\quad \left|z\right| = R,\quad \arg(z) = \theta.$$
+	$$\text{with } \Re(z) = a,\quad \Im(z) = b,\quad \left|z\right| = R,\quad \arg(z) = \theta\text{, with } \theta \in \left]0, 2\pi\right]\text{ or }\theta \in \left]-\pi, \pi\right] \text{(this definition will be used).}$$
 	</section>
 	<section>
 	To illustrate the principle of the Fourier transform or Hilbert transform, we will define a simple signal.<br><br>
@@ -78,6 +78,8 @@
 	<br>
 	In the example below, \(f_{A} = 0\) and \(A(t) = 1\)
 	The Fourier transform gives us the amplitude \(A\) and the phase shift \(\theta\).
+	There are key values to keep in mind: 
+	\(\theta=0 \implies S(0)\) <strong>starts at</strong> its peak; \(\quad \theta=\frac{\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> in its up-to-down phase;\(\quad \theta=\pi\implies S(0)\) <strong>starts at</strong> its peak;\(\quad \theta=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> zero in its down-to-up phase.
 	</section>
     <div id="plot_DFT" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_DFT">
@@ -122,6 +124,8 @@
 	The instantaneous phase is defined as:
 	$$\phi(t)= 2\pi ft + \theta,$$
 	$$\textrm{so }\widehat{S}(t)= A(t)e^{i\phi(t)}.$$
+	There are key values to keep in mind: 
+	\(\phi(t)=0 \implies S(t)\) <strong>is at</strong> its peak; \(\quad \phi(t)=\frac{\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its up-to-down phase;\(\quad \phi(t)=\pi\implies S(t)\) <strong>is at</strong> its peak;\(\quad \phi(t)=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its down-to-up phase.
 	</section>
     <div id="plot_Hil" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_Hil">
