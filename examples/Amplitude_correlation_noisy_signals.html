@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amplitude-based connectivity</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script type="text/javascript" id="MathJax-script" async
+		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.banner {
+		  position: sticky;
+		  top: 0;
+		  background:#96004B;
+		  color: #f1f1f1;
+		  z-index: 1;
+		  text-align: right;
+		  padding: 10px
+		}
+		.divfooter {
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		}
+		.text {
+		  text-align: right;
+		}
+		.div {
+		  margin: 20px;
+		}
+		section {
+			margin: 30px;
+		}
+		h1 {
+			margin: 10px;
+		}
+    </style>
+</head>
+<body>
+	<div class="banner">
+			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
+			<br>&copy; 2025 Dr Nicolas Roehri
+	</div>
+	<h1>Amplitude-based connectivity.</h1>
+	<section>
+	<h2>Introduction</h2>
+	<h3>Definition</h3>
+	Amplitude-based connectivity refers to the statistical dependence between the amplitude or envelopes of two signals. Instead of focusing on phase relationships, this measure assesses how the fluctuations in signal power are correlated over time.
+	<h3>Key concept</h3>
+	Two signals are considered to be amplitude-coupled if their amplitude remain linearly over time. This suggests a functional interaction between the underlying sources that generate these signals.
+	</section>
+	<section>
+	<h2>Example: Pearson Correlation (Coh)</h2>
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
+	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
+	\(f_1\), \(\theta_1\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}\), \(t\) is the time. <br>
+	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
+	</section>
+	<section>
+	As for the \(\text{PLV}\), we need to estimate a phase, but this time we also need an amplitude. Here we will again use the instantaneous phase given by their analytic signal (\(\widehat{S_1}\) and \(\widehat{S_2}\)). Note, however, that the coherence is generally presented as a spectral measure obtained with the phase of the Fourier transform. Both implementation are valid, but it highly depends on the context. Thanks to the Hilbert transform (\(\mathcal{H}(.)\)) and <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
+	$$\widehat{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = A(t)e^{i(2\pi f_1t + \theta_1)} + \widehat{\epsilon_1}(t),$$
+	$$\widehat{S_2}(t)= A(t)e^{i(2\pi f_2t + \theta_2)} + \widehat{\epsilon_2}(t).$$
+	The instantaneous phase is defined as:
+	$$\phi_i(t)= 2\pi f_it + \theta_i,$$
+	$$\textrm{so }\widehat{S_i}(t)= A_i(t)e^{i\phi_i(t)} + \widehat{\epsilon_i}(t),$$
+	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
+	$$\widehat{S_i}(t)= \tilde{A}(t)e^{i\tilde{\phi_i}(t)}$$
+	where \(\tilde{A}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A} = A\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
+	For simplicity of the notation we will only use \(A\)  and \(\phi_i\).
+	<br>
+	The Pearson correlation coefficient is a statistical measure that evaluates the strength and direction of a linear relationship between two signals, with values ranging from -1 (perfect negative correlation) to +1 (perfect positive correlation). A value of 0 indicates no correlation between the variables.
+	$$\text{Coh}(S_1,S_2) = \frac{\left| \sum_{t=1}^{N} \widehat{S_1}(t) \widehat{S_2}^{*}(t) \right|}{\sqrt{\sum_{t=1}^{N} \left| \widehat{S_1}(t) \right|^2 \sum_{t=1}^{N} \left| \widehat{S_2}(t) \right|^2}}$$
+	$$\text{Coh}(S_1,S_2) = \frac{\left| \sum_{t=1}^{N} A_1(t)e^{i\phi_1(t)} A_2(t)e^{-i\phi_2(t)} \right|}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$
+	$$\text{Coh}(S_1,S_2) = \frac{\left| \sum_{t=1}^{N} A_1(t)A_2(t)e^{i\Delta\phi_{1,2}(t)} \right|}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$<br>
+	\(N\) is the total number of time points, \(\Delta\phi_{1,2}\) the phase difference, and \(\left| . \right|\)the absolute value. From the definition it is clear that the coherence is symmetrical or undirected, i.e. \(\text{Coh}(S_1,S_2) = \text{Coh}(S_2,S_1)\).<br>
+	$$\Phi_{\text{Coh}}(S_1,S_2) = \arg \left( \frac{ \sum_{t=1}^{N} A_1(t)A_2^*(t)e^{i\Delta\phi_{1,2}(t)}}{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}} \right)$$
+	\(\arg(.)\) is the argument function, which gives the phase angle of the complex mean phase difference.<br>
+	\(\Phi_{\text{Coh}}\) represents the preferred phase difference. Note that \(\Phi_{\text{Coh}}(S_1,S_2) = -\Phi_{\text{Coh}}(S_2,S_1)\)<br>
+	One can represent both information as a phasor, using the complex valued coherence (before applying \(\left| . \right|\)) in a polar plot, where its radius would be the \(\text{Coh}\) and \(\Phi_{\text{Coh}}\) its angle.
+	$$\mathcal{P}_{\text{Coh}}(S_1,S_2) = \frac{\sum_{t=1}^{N} A_1(t)A_2(t)e^{i\Delta\phi_{1,2}(t)} }{\sqrt{\sum_{t=1}^{N} A_1^2(t) \sum_{t=1}^{N} A_2^2(t)}}$$
+	<br>
+	<h3>Case 1: constant amplitude</h3>
+	As a first example, let us define \(A_1=A_2=A=1\).
+	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{Coh}\).<br>
+	First, you could test that when \(\sigma = 0\), \(\Phi_{\text{Coh}} = - \theta_2\) whatever the value of \(\theta_2\) and \(\text{Coh} = 1\).
+	When you change \(f_2\), \(\text{Coh}\) tends to zero, since the two signals are not phase consistent anymore.
+	</section>
+	<section>
+	<h2>Example: Pearson Correlation (Coh)</h2>
+	</section>
+    <div id="plot" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter">
+		<span style="padding: 5px">
+			<label for="frequency">\(f_2\) :</label>
+			<input type="range" id="frequency" class="slider" min="1" max="25" value="10">
+			<span id="freqValue">10 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="phase">\(\theta_2\) :</label>
+			<input type="range" id="phase" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue">0 rad</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="noiseLevel">\(\sigma\) :</label>
+			<input type="range" id="noiseLevel" class="slider" min="0" max="1" value="0.1" step="0.01">
+			<span id="noiseValue">0.10</span>
+		</span>
+		<span style="padding: 5px">
+		Show: 
+		<input type="checkbox" id="showCorr" checked /><label for="showCorr">Corr</label>
+		<input type="checkbox" id="showEnvCorr"/><label for="showEnvCorr">env. Corr</label>
+		<input type="checkbox" id="showOEnvCorr"/><label for="showOEnvCorr">ortho. env. Corr</label>
+		</span>
+		<span style="padding: 5px">
+		Cases: 
+		<input type="radio" id="case1Btn" name="caseID" checked>
+		<label for="case1Lbl">case 1</label>
+		<input type="radio" id="case2Btn" name="caseID">
+		<label for="case2Lbl"> case 2</label>
+		</span>
+    </div>
+	<section>
+	<h3>Case 2: amplitude modulated signal</h3>
+	Let us now investigate the coherence metric when the amplitude is not constant, but varies over time.
+	$$A_1(t) = \frac{1}{2}(m\cos(2\pi f_{A1}t + \theta_{A1}) + 1)$$ 
+	\(f_{A1}\) the frequency of the cosine amplitude modulation, \(\theta_{A1}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(f_{A1} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
+
+    <div id="plot" style="width:100%;height:600px;"></div>
+	
+    <script type="module" async>
+		import {computeDFT, inverseDFT, generateGaussianNoise, generateSineWave, analyticSignal, pearsonCorrelation} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
+        
+        const checkboxes = document.querySelectorAll('input[type=checkbox]');
+		const radiobuttons = document.querySelectorAll('input[type=radio]');
+		
+        const sampleRate = 256;
+		const freq1 = 10;
+		const phase1 = 0;
+		var freq2 = parseFloat(document.getElementById("frequency").value);
+		var phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+		var noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+        const time = Array.from({ length: 2*sampleRate }, (_, i) => i / sampleRate);
+		const N = time.length;
+		const envFreq = 2;
+		const metricColours = ['orange', 'green', 'purple'];
+		
+		var w1 = .65;
+		var w2 = .25;
+		var w3 = .05;
+		var wgap = .05;
+		// normalise the ws to ensure the sum equals 1
+		let wnorm = w1 + w2 + w3 + 2*wgap;
+		w1 = w1/wnorm; w2 = w2/wnorm; wgap = wgap/wnorm;
+		
+        
+		// Generate noise
+		var noise1 = generateGaussianNoise(noiseLvl, time.length); // Noise for first channel
+		var noise2 = generateGaussianNoise(noiseLvl, time.length); // Second sine wave
+		
+		// Generate sine waves
+		var sineWave1 = generateSineWave(time, freq1, phase1, noise1); // First sine wave
+		var sineWave2 = generateSineWave(time, freq2, phase2, noise2); // Second sine wave
+		
+		// compute analytic signal
+		var zWave1 = analyticSignal(sineWave1); // First sine wave
+		var zWave2 = analyticSignal(sineWave2); // Second sine wave
+		
+		frequency.oninput = function () {
+			freq2 = parseFloat(document.getElementById("frequency").value);
+			document.getElementById("freqValue").textContent = freq2 + " Hz";
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2);
+			zWave2 = analyticSignal(sineWave2);
+			updatePlots()
+		}
+		
+		phase.oninput = function () {
+			phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+			document.getElementById("phaseValue").textContent = phase2.toFixed(2) + " rad";
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2);
+			zWave2 = analyticSignal(sineWave2);
+			updatePlots()
+		}
+		
+		noiseLevel.oninput = function () {
+			noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+			document.getElementById("noiseValue").textContent = noiseLvl.toFixed(2);
+			
+			noise1 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave1 = generateSineWave(time, freq1, phase1, noise1, case2Btn.checked*envFreq);
+			zWave1 = analyticSignal(sineWave1);
+			
+			noise2 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2);
+			zWave2 = analyticSignal(sineWave2);
+			updatePlots()
+		}
+		
+		function computeEnvCorr(analytic1, analytic2) {
+			// compute envelop
+			const envp1 = analytic1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			const envp2 = analytic2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+
+			return pearsonCorrelation(envp1, envp2)
+		}
+		
+        function updatePlots() {  
+		
+            const { correlation, slope, intercept } = pearsonCorrelation(sineWave1, sineWave2);
+			//const { correlation, slope, intercept } = computeEnvCorr(zWave1, zWave2);
+			
+			// compute envelop
+			const envp1 = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			const envp2 = zWave2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2)); 
+			
+			// Generate regression line points
+			let xMin = 1.05*Math.min(...sineWave1);
+			let xMax = 1.05*Math.max(...sineWave1);
+			let regressionLineX = [xMin, xMax];
+			let regressionLineY = [slope * xMin + intercept, slope * xMax + intercept];
+			
+            // Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1,
+                mode: 'lines',
+				type: 'scatter',
+                name: 'Sine Wave 1',
+                line: { color: 'black' }
+            };
+
+            const timeTrace2 = {
+                x: time,
+                y: sineWave2,
+                mode: 'lines',
+                name: 'Sine Wave 2',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'}
+            };
+			
+			const timeEnv1 = {
+                x: time,
+                y: envp1,
+                mode: 'lines',
+                name: 'Envp 1',
+				type: 'scatter',
+                line: { color: 'black', dash: 'dashdot', width: 2},
+				visible: 'legendonly'
+            };
+			const timeEnv2 = {
+                x: time,
+                y: envp2,
+                mode: 'lines',
+                name: 'Envp 2',
+				type: 'scatter',
+                line: { color: 'blue', dash: 'dash', width: 2},
+				visible: 'legendonly'
+            };
+
+            // Create scatter plot trace
+            const scatterTrace = {
+                x: sineWave1,
+                y: sineWave2,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'markers',
+                name: 'Scatter Plot',
+				type: 'scatter',
+                marker: { color: 'black' },
+				showlegend: false,
+            };
+			
+			// Add regression line to scatter plot
+			let regressionTrace = {
+				x: regressionLineX,
+				y: regressionLineY,
+				mode: 'lines',
+				type: 'scatter',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				name: `Linear Regression (r = ${correlation.toFixed(2)})`,
+				line: { color: 'red', width: 2, dash: 'solid' }
+			};
+			
+			// Create bar plot for correlation
+			const barPlot = {
+				x: ['correlation'],
+				y: [correlation],
+				type: 'bar',
+				xaxis: 'x3',
+				yaxis: 'y3',
+				name: 'Bar Plot',
+				showlegend: false,
+			};
+			
+            // Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+                xaxis: { title: 'Time (s)', domain: [0, w1], anchor: 'y1'},
+                yaxis: { title: 'Amplitude', anchor: 'x1', range: [-2, 2]},
+				
+				xaxis2: { title: 'Sine Wave 1 Amplitude', side: 'bottom', domain: [w1+wgap, w1+w2], anchor: 'y2', range: [-2, 2]},
+                yaxis2: { title: 'Sine Wave 2 Amplitude', domain: [0, 1], anchor: 'x2', range: [-2, 2]},
+				
+				xaxis3: { domain: [w1+w2+wgap, 1], anchor: 'y3'},
+                yaxis3: { title: 'correlation', side: 'right', domain: [0, 1], anchor: 'x3', range: [-1.2, 1.2]},
+				showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
+            };
+
+            // Combine all traces into a single data array
+            const combinedData = [
+                timeTrace1,
+                timeTrace2,
+                scatterTrace,
+				regressionTrace,
+				barPlot
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot', combinedData, layout, {responsive: true});
+        }
+
+        // Initial plot
+        updatePlots();
+				
+    </script>
+</body>
+</html>
