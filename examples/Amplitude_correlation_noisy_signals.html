@@ -64,17 +64,6 @@
 	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
 	</section>
 	<section>
-	As for the \(\text{PLV}\), we need to estimate a phase, but this time we also need an amplitude. Here we will again use the instantaneous phase given by their analytic signal (\(\widehat{S_1}\) and \(\widehat{S_2}\)). Note, however, that the coherence is generally presented as a spectral measure obtained with the phase of the Fourier transform. Both implementation are valid, but it highly depends on the context. Thanks to the Hilbert transform (\(\mathcal{H}(.)\)) and <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
-	$$\widehat{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = A(t)e^{i(2\pi f_1t + \theta_1)} + \widehat{\epsilon_1}(t),$$
-	$$\widehat{S_2}(t)= A(t)e^{i(2\pi f_2t + \theta_2)} + \widehat{\epsilon_2}(t).$$
-	The instantaneous phase is defined as:
-	$$\phi_i(t)= 2\pi f_it + \theta_i,$$
-	$$\textrm{so }\widehat{S_i}(t)= A_i(t)e^{i\phi_i(t)} + \widehat{\epsilon_i}(t),$$
-	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
-	$$\widehat{S_i}(t)= \tilde{A}(t)e^{i\tilde{\phi_i}(t)}$$
-	where \(\tilde{A}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A} = A\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
-	For simplicity of the notation we will only use \(A\)  and \(\phi_i\).
-	<br>
 	The Pearson correlation coefficient is a statistical measure that evaluates the strength and direction of a linear relationship between two signals, with values ranging from -1 (perfect negative correlation) to +1 (perfect positive correlation). A value of 0 indicates no correlation between the variables.
 	$$Corr(S_1,S_2) = \frac{\frac{1}{N-1}\sum_{t=1}^{N} (S_1(t) - \bar{S_1}) (S_2(t) - \bar{S_2})}{\sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (S_1(t) - \bar{S_1})^2} \sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (S_2(t) - \bar{S_2})^2}}$$
 	$$Corr(S_1,S_2) = \frac{Cov(S_1,S_2)}{\sigma_{S_1}\sigma_{S_2}}$$
@@ -85,11 +74,9 @@
 	<h3>Case 1: constant amplitude</h3>
 	As a first example, let us define \(A_1=A_2=A=1\).
 	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{Corr}\).<br>
-	First, you could test that when \(\sigma = 0\), \(\Phi_{\text{Corr}} = - \theta_2\) whatever the value of \(\theta_2\) and \(\text{Corr} = 1\).
-	When you change \(f_2\), \(\text{Corr}\) tends to zero, since the two signals are not phase consistent anymore.
-	</section>
-	<section>
-	<h2>Example: Pearson Correlation (Corr)</h2>
+	First, you could test that when \(\sigma = 0\), \(Corr(S_1,S_2) = 1\) only when \(\theta_2 = \theta_1\) and \(f_2 = f_1\).<br><br> This means that sinusoidal from different frequency bands cannot be correlated. For signals of the same frequency, correlation is sensitive to the phase shift because a phase shift introduces a time lag, which affects the correlation. If the phase shift is (90°), the correlation is zero. If it's phase difference is \(\Delta\theta = \theta_2-theta_1 = frac{\pi}{2}\) the correlation is zero.  If \(\Delta\theta = \pi\) the correlation is -1 (perfect anti-correlation).
+	Again in our case without noise, 
+	$$ Corr(S_1,S_2) = \cos(\Delta\theta).$$
 	</section>
     <div id="plot" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter">
@@ -137,7 +124,16 @@
 	</section>
 	<section>
 	<h2>Example: Envelope Correlation (envCorr)</h2>
-	The Envelope Correlation (envCorr) is based on the Pearson correlation. Instead of estimating the correlation between the amplitude of two signals \(Corr(S_1, S_2)\), envCorr estimates the correlation between the amplitude of the envelope of two signals \(Corr(A_1, A_2)\).
+	The Envelope Correlation (envCorr) is based on the Pearson correlation. Instead of estimating the correlation between the amplitude of two signals \(Corr(S_1, S_2)\), envCorr estimates the correlation between the amplitude of the envelope of two signals \(Corr(A_1, A_2)\).<br> 
+	The envelope of the signal is given by the absolute value of the analytic signal \(\widehat{S_1}\) computed with the Hilbert transform (\(\mathcal{H}(.)\)). Thanks to <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
+	$$\widehat{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = A(t)e^{i(2\pi f_1t + \theta_1)} + \widehat{\epsilon_1}(t),$$
+	$$\widehat{S_2}(t)= A(t)e^{i(2\pi f_2t + \theta_2)} + \widehat{\epsilon_2}(t).$$
+	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
+	$$\widehat{S_i}(t)= \tilde{A_i}(t)e^{i\tilde{\phi_i}(t)}$$
+	where \(\tilde{A_i}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A_i\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A_i} = A_i\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
+	For simplicity of the notation we will only use \(A_i\)  and \(\phi_i\).
+	<br>
+	The envelope correlation is thus:
 	$$envCorr(S_1,S_2) = Corr(A_1,A_2)$$
 	$$envCorr(S_1,S_2) = \frac{\frac{1}{N-1}\sum_{t=1}^{N} (A_1(t) - \bar{A_1}) (A_2(t) - \bar{A_2})}{\sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (A_1(t) - \bar{A_1})^2} \sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (A_2(t) - \bar{A_2})^2}}$$
 	$$envCorr(S_1,S_2) = \frac{Cov(A_1,A_2)}{\sigma_{A_1}\sigma_{A_2}}$$
@@ -167,7 +163,7 @@
 		}
 	</script>
     <script type="module" async>
-		import {computeDFT, inverseDFT, generateGaussianNoise, generateSineWave, analyticSignal, pearsonCorrelation} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
+		import {computeDFT, inverseDFT, generateGaussianNoise, generateSineWave, analyticSignal, pearsonCorrelation, computeEnvCorr, OrthoEnvCorr} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
         
         const checkboxes = document.querySelectorAll('input[type=checkbox]');
 		const radiobuttons = document.querySelectorAll('input[type=radio]');
@@ -224,48 +220,22 @@
 			noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
 			document.getElementById("noiseValue").textContent = noiseLvl.toFixed(2);
 			
-			noise1 = generateGaussianNoise(noiseLvl, time.length);
+			noise1 = (noiseLvl === 0 ) ? new Array(N).fill(0) : generateGaussianNoise(noiseLvl, time.length);
 			sineWave1 = generateSineWave(time, freq1, phase1, noise1, case2Btn.checked*envFreq);
 			zWave1 = analyticSignal(sineWave1);
 			
-			noise2 = generateGaussianNoise(noiseLvl, time.length);
+			noise2 = (noiseLvl === 0 ) ? new Array(N).fill(0) : generateGaussianNoise(noiseLvl, time.length);
 			sineWave2 = generateSineWave(time, freq2, phase2, noise2, case2Btn.checked*envFreq);
 			zWave2 = analyticSignal(sineWave2);
 			updatePlots()
-		}
-		
-		function computeEnvCorr(analytic1, analytic2) {
-			// compute envelop
-			const envp1 = analytic1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
-			const envp2 = analytic2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
-
-			return pearsonCorrelation(envp1, envp2)
-		}
-		
-		function OrhtoEnvCorr(signal1, signal2) {
-			// Compute the dot product of signal1 and signal2
-			let dotXY = signal1.reduce((sum, x, i) => sum + x * signal2[i], 0);
-			let dotXX = signal1.reduce((sum, x) => sum + x * x, 0);
-
-			// Compute the orthogonalized version of signal2 with respect to signal1
-			let s2_ortho = signal2.map((y, i) => y - (dotXY / dotXX) * signal1[i]);
-
-			// Compute analytic signals using the Hilbert transform
-			let z1 = analyticSignal(signal1);
-			let zY_ortho = analyticSignal(s2_ortho);
-			
-			// Compute and return the orthogonalized envelope correlation
-			let {correlation, slope, intercept} = computeEnvCorr(z1, zY_ortho)
-			// Compute and return the orthogonalized envelope correlation
-			return {correlation, slope, intercept, s2_ortho, zY_ortho};
 		}
 		
         function updatePlots() {  
 		
             const corr = pearsonCorrelation(sineWave1, sineWave2); //  correlation, slope, intercept
 			const envCorr = computeEnvCorr(zWave1, zWave2); //  correlation, slope, intercept
-			const oEnvCorr12 = OrhtoEnvCorr(sineWave1, sineWave2)
-			const oEnvCorr21 = OrhtoEnvCorr(sineWave2, sineWave1)
+			const oEnvCorr12 = OrthoEnvCorr(sineWave1, sineWave2)
+			const oEnvCorr21 = OrthoEnvCorr(sineWave2, sineWave1)
 			// compute envelop
 			const envp1 = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
 			const envp2 = zWave2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));

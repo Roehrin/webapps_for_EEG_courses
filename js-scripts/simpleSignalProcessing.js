@@ -86,7 +86,7 @@ export function pearsonCorrelation(x, y) {
 
 	let numerator = (n * sumXY) - (sumX * sumY);
 	let denominator = Math.sqrt((n * sumX2 - sumX ** 2) * (n * sumY2 - sumY ** 2));
-	let correlation = (denominator === 0) ? 0 : (numerator / denominator);
+	let correlation = (denominator < 1e-10) ? 0 : (numerator / denominator);
 	
 	// Compute Linear Regression inside the same function
     let slope = numerator / (n * sumX2 - sumX ** 2);
@@ -101,6 +101,24 @@ export function computeEnvCorr(analytic1, analytic2) {
 	const envp2 = analytic2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
 
 	return pearsonCorrelation(envp1, envp2)
+}
+
+export function OrthoEnvCorr(signal1, signal2) {
+	// Compute the dot product of signal1 and signal2
+	let dotXY = signal1.reduce((sum, x, i) => sum + x * signal2[i], 0);
+	let dotXX = signal1.reduce((sum, x) => sum + x * x, 0);
+
+	// Compute the orthogonalized version of signal2 with respect to signal1
+	let s2_ortho = signal2.map((y, i) => y - (dotXY / dotXX) * signal1[i]);
+
+	// Compute analytic signals using the Hilbert transform
+	let z1 = analyticSignal(signal1);
+	let zY_ortho = analyticSignal(s2_ortho);
+	
+	// Compute and return the orthogonalized envelope correlation
+	let {correlation, slope, intercept} = computeEnvCorr(z1, zY_ortho)
+	// Compute and return the orthogonalized envelope correlation
+	return {correlation, slope, intercept, s2_ortho, zY_ortho};
 }
 
 export function computePLV(phase1, phase2) {
