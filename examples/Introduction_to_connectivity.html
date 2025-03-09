@@ -165,7 +165,12 @@
 			<span id="timeValue_Hil">0.25 s</span>
 		</span>
     </div>
-    <script type="module" async>
+    <section>
+	<h2>Summing complex numbers</h2>
+	</section>
+	<button onclick="javascript:randomize();" style="margin: 45px">Randomise!</button>
+	<div id="graph"></div>
+	<script type="module" async>
 		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computeCoherence, computecImCoh, computeImCoh} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
 			
 		const sampleRate = 256;
@@ -574,5 +579,105 @@
 		
 
     </script>
+	<script>
+		function makeData(){
+			var theta = [Math.random(), Math.random(), Math.random(), Math.random()];
+			theta = theta.map( (val,i) => 2*Math.PI*val);
+			var mag = [Math.random(), Math.random(), Math.random(), Math.random()];
+			//mag = mag.map( (val,i) => 3*val+1);
+			mag = mag.map( (val,i) => 1);
+			
+			const reMag = mag.map((val,i) => val*Math.cos(theta[i]))
+			const imMag = mag.map((val,i) => val*Math.sin(theta[i]))
+			
+			const cumRe = reMag.reduce((acc, value, i) => {
+					acc[i] = (i === 0 ? value : acc[i - 1] + value);
+					return acc;
+				}, []);;
+			const cumIm = imMag.reduce((acc, value, i) => {
+					acc[i] = (i === 0 ? value : acc[i - 1] + value);
+					return acc;
+				}, []);
+			const cumMag = cumRe.map((val,i) => Math.sqrt(val ** 2 + cumIm[i] ** 2));
+			const cumTh = cumRe.map((val,i) => Math.atan2(cumIm[i], val));
+		// Create scatter plot trace
+		const scatterTrace = [{
+			type: "scatterpolar",
+			r: mag,
+			theta: theta,
+			mode: "markers",
+			marker: {
+				color: ['black', 'orange', 'purple', 'green'],//"#2255ff",
+				symbol: "square",
+				size: 15,
+			},
+			thetaunit: "radians",
+			cliponaxis: true,
+			subplot: "polar1",
+			name: '$\\theta[i]$',
+		},{
+			type: "scatterpolar",
+			name: "$\\sum\\theta[i]$",
+			r: [0, ...cumMag],
+			theta: [0, ...cumTh],
+			marker: {
+				color: ['', 'black', 'orange', 'purple', 'green'],
+				symbol: "square",
+				size: [0, 15, 15, 15, 15],
+			},
+			line: {
+				color: 'black',
+				width: 5},
+			thetaunit: "radians",
+			subplot: "polar2",
+		},{
+			type: "scatterpolar",
+			name: "$\\frac{1}{N}\\sum\\theta[i]$",
+			r: [0, 1/4*cumMag[3]],
+			theta: [0, cumTh[3]],
+			marker: {
+				color: ['', 'brown'],
+				symbol: "square",
+				size: [0, 15],
+			},
+			line: {
+				color: 'brown',
+				width: 5},
+			thetaunit: "radians",
+			subplot: "polar3",
+		}];
+		return scatterTrace
+		}
+		
+		var scatterTrace = makeData()
+		
+		const layout = {
+			polar1: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}, 
+			title: 'complex numbers'},
+			polar2: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, scatterTrace[0].r.length*1]}, title: 'sum of complex numbers'},
+			polar3: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}, title: 'average of complex numbers'},
+			showlegend: true,
+			font: { size: 16 },
+			legend: {x: 0, xanchor: 'left', y: 1.3, orientation: "h", font: { size: 16 }}
+		};
+		
+		Plotly.newPlot('graph', scatterTrace, layout, {showSendToCloud:false});
+
+		function randomize() {
+			scatterTrace = makeData()
+			Plotly.animate('graph', {
+				data: scatterTrace,
+				layout: layout
+			  }, {
+				transition: {
+				  duration: 500,
+				  easing: 'cubic-in-out'
+				},
+				  frame: {
+					  duration: 500
+				  }
+			})
+		}
+	</script>
 </body>
 </html>
