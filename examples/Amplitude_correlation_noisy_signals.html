@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amplitude-based connectivity</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-	<script type="text/javascript" id="MathJax-script" async
-		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -130,7 +129,7 @@
 	$$\widehat{S_2}(t)= A(t)e^{i(2\pi f_2t + \theta_2)} + \widehat{\epsilon_2}(t).$$
 	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
 	$$\widehat{S_i}(t)= \tilde{A_i}(t)e^{i\tilde{\phi_i}(t)}$$
-	where \(\tilde{A_i}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A_i\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A_i} = A_i\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
+	where \(\tilde{A_i}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A_i\) and \(\phi_i\). In other word, when the noise becomes null, \(\lim_{\sigma\to0} \tilde{A_i} = A_i\) and \(\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
 	For simplicity of the notation we will only use \(A_i\)  and \(\phi_i\).
 	<br>
 	The envelope correlation is thus:
@@ -148,9 +147,10 @@
 	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\langle S_1, S_2 \rangle}{\langle S_1, S_1 \rangle} S_1(t)$$
 	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\sum_{t=1}^{N} S_1(t) S_2(t)}{\sum_{t=1}^{N} S_1(t)^2} S_1(t)$$
 	\(S_2^{\perp S_1}\) is the orthogonalised version of \(S_2\) with respect to \(S_1\).
-	using the Hilbert transform one can estimate the envelope of \(S_2^{\perp S_1}\): \(A_{S_1^{\perp S_2}}\)
-	because \(Corr(A_1,A_{S_2^{\perp S_1}}) \ne Corr(A_2,A_{S_1^{\perp S_2}})\)
+	using the Hilbert transform one can estimate the envelope of \(S_2^{\perp S_1}\): \(A_{S_1^{\perp S_2}}\).<br>
+	Because the orthogonalisation of \(S_2^{\perp S_1}\) and \(S_1^{\perp S_2}\) yields  different correlation (\(Corr(A_1,A_{S_2^{\perp S_1}}) \ne Corr(A_2,A_{S_1^{\perp S_2}})\)), The OEC is defined as the average of the two:
 	$$OEC(S_1,S_2) = \frac{1}{2}\left(Corr(A_1,A_{S_2^{\perp S_1}}) + Corr(A_2,A_{S_1^{\perp S_2}})\right)$$
+	This average makes the OEC symmetric: \(OEC(S_1,S_2) = OEC(S_2,S_1)\).
 	</section>
 	<script>
 	function answerDisp() {
@@ -263,20 +263,20 @@
                 y: sineWave1,
                 mode: 'lines',
 				type: 'scatter',
-                name: 'Sine Wave 1',
+                name: '$S_1(t)$',
                 line: { color: 'black' }
             },{
                 x: time,
                 y: sineWave2,
                 mode: 'lines',
-                name: 'Sine Wave 2',
+                name: '$S_2(t)$',
 				type: 'scatter',
                 line: { color: 'blue',dash: 'dashdot'}
             },{
                 x: time,
                 y: oEnvCorr12.s2_ortho,
                 mode: 'lines',
-                name: 'S2 \\ S1',
+                name: '$S_2^{\\perp S_1}(t)$',
 				type: 'scatter',
                 line: { color: 'brown',dash: 'solid', width: 4},
 				visible: (showOEnvCorr.checked) ? true : 'legendonly',
@@ -286,7 +286,7 @@
                 x: time,
                 y: envp1,
                 mode: 'lines',
-                name: 'Envp 1',
+                name: '$A_1(t)$',
 				type: 'scatter',
                 line: { color: 'black', dash: 'dashdot', width: 2},
 				visible: (showEnvCorr.checked) ? true : 'legendonly',
@@ -294,7 +294,7 @@
                 x: time,
                 y: envp2,
                 mode: 'lines',
-                name: 'Envp 2',
+                name: '$A_2(t)$',
 				type: 'scatter',
                 line: { color: 'blue', dash: 'dash', width: 2},
 				visible: (showEnvCorr.checked) ? true : 'legendonly',
@@ -302,7 +302,7 @@
                 x: time,
                 y: envp2_1,
                 mode: 'lines',
-                name: 'Envp 2\\1',
+                name: '$A_{S_2^{\\perp S_1}}(t)$',
 				type: 'scatter',
                 line: { color: 'brown', dash: 'dash', width: 4},
 				visible: (showOEnvCorr.checked) ? true : 'legendonly',
@@ -315,7 +315,7 @@
 				xaxis: 'x2',
 				yaxis: 'y2',
                 mode: 'markers',
-                name: 'S1 vs. S2',
+                name: '$S_1 vs. S_2$',
 				type: 'scatter',
 				opacity: 0.5,
                 marker: { color: metricColours[0] },
@@ -327,7 +327,7 @@
 				xaxis: 'x2',
 				yaxis: 'y2',
                 mode: 'markers',
-                name: 'env1 vs. env2',
+                name: '$A_1 vs. A_2$',
 				type: 'scatter',
 				opacity: 0.5,
                 marker: { color: metricColours[1] },
@@ -338,7 +338,7 @@
 				xaxis: 'x2',
 				yaxis: 'y2',
                 mode: 'markers',
-                name: 'env1 vs. env2\\1',
+                name: '$A_1 vs. A_{S_2^{\\perp S_1}}$',
 				type: 'scatter',
 				opacity: 0.5,
                 marker: { color: metricColours[2] },

@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coherence-based connectivity</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-	<script type="text/javascript" id="MathJax-script" async
-		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-	</script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -267,7 +265,7 @@
                 y: sineWave1,
                 mode: 'lines',
 				type: 'scatter',
-                name: 'Signal 1',
+                name: '$S_1(t)$',
                 line: { color: 'black' }
             };
 
@@ -275,7 +273,7 @@
                 x: time,
                 y: sineWave2,
                 mode: 'lines',
-                name: 'Signal 2',
+                name: '$S_2(t)$',
 				type: 'scatter',
                 line: { color: 'blue',dash: 'dashdot'}
             };
@@ -284,7 +282,7 @@
                 x: time,
                 y: envp1,
                 mode: 'lines',
-                name: 'Envp 1',
+                name: '$A_1(t)$',
 				type: 'scatter',
                 line: { color: 'black', dash: 'dashdot', width: 2},
 				visible: 'legendonly'
@@ -293,7 +291,7 @@
                 x: time,
                 y: envp2,
                 mode: 'lines',
-                name: 'Envp 2',
+                name: '$A_2(t)$',
 				type: 'scatter',
                 line: { color: 'blue', dash: 'dash', width: 2},
 				visible: 'legendonly'
@@ -307,9 +305,9 @@
 				xaxis: 'x2',
 				yaxis: 'y2',
 				type: 'scatter',
-                name: 'Inst. Phase, Wave 1',
+                name: '$\\phi_1(t)$',
                 line: { color: 'black' },
-				showlegend: false,
+				showlegend: true,
             };
 
             const instPhTrace2 = {
@@ -318,10 +316,10 @@
                 mode: 'lines',
 				xaxis: 'x2',
 				yaxis: 'y2',
-                name: 'Inst. Phase, Wave 2',
+                name: '$\\phi_2(t)$',
 				type: 'scatter',
                 line: { color: 'blue',dash: 'dashdot'},
-				showlegend: false,
+				showlegend: true,
             };
 			
 			const instPhDiffTrace = {
@@ -330,7 +328,7 @@
                 mode: 'lines',
 				xaxis: 'x2',
 				yaxis: 'y2',
-                name: 'Phase diff.',
+                name: '$\\Delta\\phi(t)$',
 				type: 'scatter',
                 line: { color: 'brown', dash: 'solid', width:2},
 				showlegend: true,
@@ -365,7 +363,7 @@
 				marker: {
 					color: "orange",
 					symbol: "square",
-					size: 15,
+					size: [0, 15],
 				},
 				line: {
 					color: "black",
@@ -385,7 +383,7 @@
 					line: {
 						width: 3
 					},
-					size: 15,
+					size: [0, 15],
 				},
 				line: {
 					color: "black",
@@ -405,7 +403,7 @@
 					line: {
 						width: 3
 					},
-					size: 15,
+					size: [0, 15],
 				},
 				line: {
 					color: "black",

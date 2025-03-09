@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Introduction to functional connectivity</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-	<script type="text/javascript" id="MathJax-script" async
-		src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-	</script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,8 +58,8 @@
 	</section>
 	<section>
 	To illustrate the principle of the Fourier transform or Hilbert transform, we will define a simple signal.<br><br>
-	Let us assume a noisy oscillating signal \(S\) of amplitudes \(A\), frequencies \(f\), and phase shifts \(\theta\). This signal writen written as:
-	$$S(t) = A(t)\cos(2\pi ft + \theta) + \epsilon(t),$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$<br><br>
+	Let us assume a noisy oscillating signal \(S\) of amplitude(t) \(A\), frequency \(f\), and phase shift \(\theta\) and \(\epsilon(t)\) the noise, drawn from a centered Normal distribution of standard deviation \(\sigma\). This signal is written as:
+	$$S(t) = A(t)\cos(2\pi ft + \theta) + \epsilon(t),$$ $$\epsilon \sim \mathcal{N}(0,\sigma^{2}).$$<br><br>
 	\(A\) takes the following form:
 	$$A(t) = \frac{1}{2}(m\cos(2\pi f_{A}t + \theta_{A}) + 1)$$ 
 	\(f_{A}\) the frequency of the cosine amplitude modulation, \(\theta_{A}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(\theta_{A} = \frac{\pi}{2}\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
@@ -70,16 +68,22 @@
 	<section>
 	<h2>Frequency domain (<em>spectral method</em>)</h2>
 	<ol>
-        <li><strong>Segment the Signal</strong> – Divide the continuous signal into <em>trials or epochs</em>, typically aligned to an event of interest or stimulus or a fixed time window.</li>
+        <li><strong>Segment the Signal</strong> – Divide the continuous signal into <em>trials</em> (typically aligned to an event of interest or stimulus) or <em>epochs</em> (several time windowa of a fixed duration).</li>
         <li><strong>Compute the Fourier Transform</strong> – Apply the <em>Fourier Transform</em> to each trial/epoch to obtain the complex frequency representation of the signal. This provides the <em>amplitude and phase</em> information for each frequency component.</li>
-        <li><strong>Compute the Metric of Interest</strong> – across the epochs/trials</li>
+        <li><strong>Compute the Metric of Interest</strong> – across the epochs/trials. This yields	 a connectivity metric for each frequency bin.</li>
         <li><strong>Average Across Frequency Bands (Optional)</strong> – If interested in specific frequency bands (e.g., theta, alpha, beta), average the metric across the selected frequencies.</li>
     </ol>
 	<br>
 	In the example below, \(f_{A} = 0\) and \(A(t) = 1\)
-	The Fourier transform gives us the amplitude \(A\) and the phase shift \(\theta\).
-	There are key values to keep in mind: 
-	\(\theta=0 \implies S(0)\) <strong>starts at</strong> its peak; \(\quad \theta=\frac{\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> in its up-to-down phase;\(\quad \theta=\pi\implies S(0)\) <strong>starts at</strong> its peak;\(\quad \theta=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> zero in its down-to-up phase.
+	The Fourier transform gives us the amplitude \(A\) and the phase shift \(\theta\).<br><br>
+	There are <em>key values</em> to keep in mind: 
+	<ul>
+		<li>\(\theta=0 \implies S(0)\) <strong>starts at</strong> its peak;</li>
+		<li>\(\theta=\frac{\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> in its up-to-down phase;</li>
+		<li>\(\theta=\pi\implies S(0)\) <strong>starts at</strong> its peak;</li>
+		<li>\(\theta=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> zero in its down-to-up phase.</li>
+	</ul>
+	 The plot below let you modify \(f\), \(\theta\) and \(\sigma\) and see their effect on the Fourier transform. You could start by modifying \(\theta\) to verify the above list.
 	</section>
     <div id="plot_DFT" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_DFT">
@@ -124,8 +128,14 @@
 	The instantaneous phase is defined as:
 	$$\phi(t)= 2\pi ft + \theta,$$
 	$$\textrm{so }\widehat{S}(t)= A(t)e^{i\phi(t)}.$$
-	There are key values to keep in mind: 
-	\(\phi(t)=0 \implies S(t)\) <strong>is at</strong> its peak; \(\quad \phi(t)=\frac{\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its up-to-down phase;\(\quad \phi(t)=\pi\implies S(t)\) <strong>is at</strong> its peak;\(\quad \phi(t)=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its down-to-up phase.
+	There are <em>key values</em> to keep in mind: 
+	<ul>
+		<li>\(\phi(t)=0 \implies S(t)\) <strong>is at</strong> its peak;</li>
+		<li>\(\phi(t)=\frac{\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its up-to-down phase;</li>
+		<li>\(\phi(t)=\pi\implies S(t)\) <strong>is at</strong> its peak;</li>
+		<li>\(\phi(t)=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its down-to-up phase.</li>
+	</ul>
+	 The plot below let you modify \(f\), \(\theta\), \(\sigma\), \(f_A\) and the time instant \(t\) to evaluate their effect on the envelope \(A(t)\) and instantaneous phase \(\phi(t)\). You could start by modifying spanning the different time instant \(t\) to verify that the above list is true regarless of the values of \(f\), \(\theta\) and \(f_A\).
 	</section>
     <div id="plot_Hil" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_Hil">
@@ -279,7 +289,7 @@
                 y: sineWave1_DFT,
                 mode: 'lines',
 				type: 'scatter',
-                name: 'Sine Wave 1',
+                name: '$S(t)$',
                 line: { color: 'black' }
             };
 
@@ -291,9 +301,9 @@
 				yaxis: 'y2',
                 mode: 'lines',
 				type: 'scatter',
-                name: 'PSD of Sine Wave 1',
-                line: { color: 'black' },
-				showlegend: false,
+                name: '$A^2_t(f)$',
+                line: { color: 'brown' },
+				showlegend: true,
             };
 			
 			// Create traces for phase domain signals
@@ -304,9 +314,9 @@
 				yaxis: 'y3',
                 mode: 'lines',
 				type: 'scatter',
-                name: 'Phase of Sine Wave 1',
-                line: { color: 'black' },
-				showlegend: false,
+                name: '$\\theta(f)$',
+                line: { color: 'purple' },
+				showlegend: true,
             };
 			const freqInd = dftResult1_DFT.frequencies.indexOf(freq1_DFT);
 			
@@ -380,7 +390,7 @@
                 y: sineWave1_Hil,
                 mode: 'lines',
 				type: 'scatter',
-                name: 'Sine Wave 1',
+                name: '$S(t)$',
                 line: { color: 'black' }
             };
 			
@@ -389,7 +399,7 @@
                 y: hilWave,
                 mode: 'lines',
 				type: 'scatter',
-                name: 'H(Sine Wave 1)',
+                name: '$\\mathcal{H}(S(t))$',
                 line: { color: 'blue', dash: 'dashdot'}
             };
 			
@@ -398,7 +408,7 @@
                 y: envelope,
                 mode: 'lines',
 				type: 'scatter',
-                name: 'Envelope (S1)',
+                name: '$A(t)$',
                 line: { color: 'brown' }
             };
 			
@@ -408,7 +418,7 @@
                 mode: 'markers',
 				type: 'scatter',
                 name: 'markers',
-                marker: { color: ['black', 'blue', 'brown'], size: 15, symbol: "square"},
+                marker: { color: ['black', 'blue', 'brown'], size: 15, symbol: "x"},
 				showlegend: false
             };
 
@@ -420,7 +430,7 @@
 				xaxis: 'x2',
 				yaxis: 'y2',
 				type: 'scatter',
-                name: 'Inst. Phase, Wave 1',
+                name: '$\\phi(t)$',
                 line: { color: 'black' },
 				showlegend: true,
             };
@@ -433,7 +443,7 @@
                 name: 'markersPh',
 				xaxis: 'x2',
 				yaxis: 'y2',
-                marker: { color: 'black', size: 15, symbol: "square"},
+                marker: { color: 'black', size: 15, symbol: "x"},
 				showlegend: false
             };
 			
@@ -451,7 +461,7 @@
 				thetaunit: "radians",
 				cliponaxis: true,
 				subplot: "polar",
-				name: "Inst. Phase",
+				name: '$\\phi(t)$',
 			},
 			{
 				type: "scatterpolar",
@@ -469,13 +479,13 @@
 			},
 			{
 				type: "scatterpolar",
-				name: "Real part",
+				name: "$\\Re(\\widehat{S}(t))$",
 				r: [0, Math.abs(sineWave1_Hil[timeIdx_Hil])],
 				theta: [0, Math.PI/2*(1 - Math.sign(sineWave1_Hil[timeIdx_Hil]))],
 				marker: {
 					color: "black",
 					symbol: "square",
-					size: 15,
+					size: [0, 15],
 				},
 				line: {
 					color: "black",
@@ -485,13 +495,13 @@
 			},
 			{
 				type: "scatterpolar",
-				name: "Imag. part",
+				name: "$\\Im(\\widehat{S}(t))$",
 				r: [0, Math.abs(hilWave[timeIdx_Hil])],
 				theta: [0, Math.sign(hilWave[timeIdx_Hil])*Math.PI/2],
 				marker: {
 					color: "blue",
 					symbol: "square",
-					size: 15,
+					size: [0, 15],
 				},
 				line: {
 					color: "blue",
@@ -501,13 +511,13 @@
 			},
 			{
 				type: "scatterpolar",
-				name: "Analytic Sig.",
+				name: "$\\widehat{S}(t)$",
 				r: [0, envelope[timeIdx_Hil]],
 				theta: [0, instPhase1[timeIdx_Hil]],
 				marker: {
 					color: "brown",
 					symbol: "square",
-					size: 15,
+					size: [0, 15],
 				},
 				line: {
 					color: "brown",
