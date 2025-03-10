@@ -166,10 +166,41 @@
 		</span>
     </div>
     <section>
-	<h2>Summing complex numbers</h2>
+		<h2>Average of complex numbers</h2>
+		When summing complex numbers, you can visualize each number as a vector in the complex plane.<br>
+		In the cartesian coordinate system \((x,y)\) you have: 
+		$$x = \Re(z) = a = R\cos(\theta),\quad y = \Im(z) = b = R\sin(\theta)$$
+		In the polar coordinate system \((r,\theta)\), where \(r)\) is the length of the vector and \(\theta)\) the angle/phase of the vector, you have: 
+		$$r = \left|z\right|, \quad \theta = \arg(z)$$
+		For the purpose of this course, we will mainly use the polar form.
+		Given two complex numbers in polar form:
+		$$z_1= r_1e^{i\theta_1},\quad z_2= r_2e^{i\theta_2}.$$
+		You can visualise their sum as placing the tip of \(z_1\) at the origin, then placing \(z_2\) starting at the tip of \(z_1\). The resultant vector goes from the origin to the new tip. When the sum has more element you continue adding each element to the tip of the last resultant vector. If you want to compute the average you simply need to divide the resultant vector by the number of element. 
+		<ul>
+			<li>If the vectors are aligned (same phase), they add constructively, making the magnitude larger.</li>
+			<li>If they are in opposite directions \(\theta_1 - \theta_2 = \pi\), they add destructively, reducing the magnitude.</li>
+			<li>If they have different angles, the sum results in a new angle and magnitude.</li>
+		</u>
+		Below, 3 cases are illustrated:
+		<ol>
+			<li>the vectors have a length of 1 <strong>with similar angles</strong>, therefore the average resultant vector points to <strong>the same direction with a length close to 1</strong>,</li>
+			<li>the vectors have a length of 1 <strong>but with different angles</strong>, therefore the average resultant vector is <strong>small and points toward another direction</strong>,</li>
+			<li>the vectors have a length of 1 <strong>with random orientations</strong>. You can click the <em>'Randomize' button</em> to generate new samples.</li>
+		</ol>
 	</section>
-	<button onclick="javascript:randomize();" style="margin: 45px">Randomise!</button>
-	<div id="graph"></div>
+	<section>
+		<h3>Vectors with consistent phase</h3>
+	</section>
+	<div id="consistentPh"></div>
+	<section>
+		<h3>Vectors with inconsistent phase</h3>
+	</section>
+	<div id="inconsistentPh"></div>
+	<section>
+		<h3>Vectors with random phase</h3>
+		<button onclick="javascript:randomize();" style="margin: 45px">Randomise!</button>
+	</section>
+	<div id="randPh"></div>
 	<script type="module" async>
 		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computeCoherence, computecImCoh, computeImCoh} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
 			
@@ -580,8 +611,8 @@
 
     </script>
 	<script>
-		function makeData(){
-			var theta = [Math.random(), Math.random(), Math.random(), Math.random()];
+		function makeData(theta = []){
+			if (theta.length === 0) theta = [Math.random(), Math.random(), Math.random(), Math.random()];
 			theta = theta.map( (val,i) => 2*Math.PI*val);
 			var mag = [Math.random(), Math.random(), Math.random(), Math.random()];
 			//mag = mag.map( (val,i) => 3*val+1);
@@ -600,83 +631,118 @@
 				}, []);
 			const cumMag = cumRe.map((val,i) => Math.sqrt(val ** 2 + cumIm[i] ** 2));
 			const cumTh = cumRe.map((val,i) => Math.atan2(cumIm[i], val));
-		// Create scatter plot trace
-		const scatterTrace = [{
-			type: "scatterpolar",
-			r: mag,
-			theta: theta,
-			mode: "markers",
-			marker: {
-				color: ['black', 'orange', 'purple', 'green'],//"#2255ff",
-				symbol: "square",
-				size: 15,
-			},
-			thetaunit: "radians",
-			cliponaxis: true,
-			subplot: "polar1",
-			name: '$\\theta[i]$',
-		},{
-			type: "scatterpolar",
-			name: "$\\sum\\theta[i]$",
-			r: [0, ...cumMag],
-			theta: [0, ...cumTh],
-			marker: {
-				color: ['', 'black', 'orange', 'purple', 'green'],
-				symbol: "square",
-				size: [0, 15, 15, 15, 15],
-			},
-			line: {
-				color: 'black',
-				width: 5},
-			thetaunit: "radians",
-			subplot: "polar2",
-		},{
-			type: "scatterpolar",
-			name: "$\\frac{1}{N}\\sum\\theta[i]$",
-			r: [0, 1/4*cumMag[3]],
-			theta: [0, cumTh[3]],
-			marker: {
-				color: ['', 'brown'],
-				symbol: "square",
-				size: [0, 15],
-			},
-			line: {
-				color: 'brown',
-				width: 5},
-			thetaunit: "radians",
-			subplot: "polar3",
-		}];
-		return scatterTrace
+			// Create scatter plot trace
+			const scatterTrace = [{
+				type: "scatterpolar",
+				r: mag,
+				theta: theta,
+				mode: "markers",
+				marker: {
+					color: ['black', 'orange', 'purple', 'green'],//"#2255ff",
+					symbol: "square",
+					size: 15,
+				},
+				thetaunit: "radians",
+				cliponaxis: true,
+				subplot: "polar1",
+				name: '$e^{i\\theta[j]}$',
+			},{
+				type: "scatterpolar",
+				name: "$\\sum e^{i\\theta[j]}$",
+				r: [0, ...cumMag],
+				theta: [0, ...cumTh],
+				marker: {
+					color: ['', 'black', 'orange', 'purple', 'green'],
+					symbol: "square",
+					size: [0, 15, 15, 15, 15],
+				},
+				line: {
+					color: 'black',
+					width: 5},
+				thetaunit: "radians",
+				subplot: "polar2",
+			},{
+				type: "scatterpolar",
+				name: "$\\frac{1}{N}\\sum e^{i\\theta[j]}$",
+				r: [0, 1/4*cumMag[3]],
+				theta: [0, cumTh[3]],
+				marker: {
+					color: ['', 'brown'],
+					symbol: "square",
+					size: [0, 15],
+				},
+				line: {
+					color: 'brown',
+					width: 5},
+				thetaunit: "radians",
+				subplot: "polar3",
+			}];
+			return scatterTrace
 		}
 		
-		var scatterTrace = makeData()
+		var randPhPLot = makeData();
+		
+		var constPhPLot = makeData([1.01*Math.PI/3, 1.005*Math.PI/3, 0.985*Math.PI/3, Math.PI/3]);
+		var inconstPhPLot = makeData([Math.PI/3, 5*Math.PI/3, Math.PI/2, -Math.PI/2]);
+		
+		const annot = [{
+			text: "4 complex numbers",
+			  font: {
+			  size: 18,
+			},
+			showarrow: false,
+			xanchor: 'center',
+			x: 1/6, //position in x domain
+			y: -.2, //position in y domain
+			xref: 'paper',
+			yref: 'paper',
+			},
+			{
+			  text: "sum as vectors",
+			  font: {
+			  size: 18,
+			},
+			showarrow: false,
+			xanchor: 'center',
+			x: 3/6, //position in x domain
+			y: -.2,  // position in y domain
+			xref: 'paper',
+			yref: 'paper',
+			},
+			{
+			  text: "average resultant vector",
+			  font: {
+			  size: 18,
+			},
+			showarrow: false,
+			xanchor: 'center',
+			x: 5/6, //position in x domain
+			y: -.2,  // position in y domain
+			xref: 'paper',
+			yref: 'paper',
+			}
+		];
 		
 		const layout = {
-			polar1: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}, 
-			title: 'complex numbers'},
-			polar2: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, scatterTrace[0].r.length*1]}, title: 'sum of complex numbers'},
-			polar3: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}, title: 'average of complex numbers'},
+			polar1: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}},
+			polar2: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, randPhPLot[0].r.length*1]}},
+			polar3: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}},
+			annotations: annot,
 			showlegend: true,
 			font: { size: 16 },
 			legend: {x: 0, xanchor: 'left', y: 1.3, orientation: "h", font: { size: 16 }}
 		};
 		
-		Plotly.newPlot('graph', scatterTrace, layout, {showSendToCloud:false});
+		Plotly.newPlot('consistentPh', constPhPLot, layout, {showSendToCloud:false});
+		Plotly.newPlot('inconsistentPh', inconstPhPLot, layout, {showSendToCloud:false});
+		Plotly.newPlot('randPh', randPhPLot, layout, {showSendToCloud:false});
 
 		function randomize() {
-			scatterTrace = makeData()
-			Plotly.animate('graph', {
-				data: scatterTrace,
+			randPhPLot = makeData()
+			Plotly.animate('randPh', {
+				data: randPhPLot,
 				layout: layout
-			  }, {
-				transition: {
-				  duration: 500,
-				  easing: 'cubic-in-out'
-				},
-				  frame: {
-					  duration: 500
-				  }
-			})
+			  }, {})
 		}
 	</script>
 </body>
