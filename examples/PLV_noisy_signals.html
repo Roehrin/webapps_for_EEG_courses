@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phase Locking Value correlation of two noisy signals</title>
+    <title>Phase-based connectivity</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     <style>
@@ -54,7 +54,7 @@
 	<h3>Definition</h3>
 	Phase-based connectivity is a measure of the functional connectivity between two or more signals based on the synchronisation of their instantaneous phase dynamics rather than their amplitude or power. It is commonly used in neuroscience and signal processing to analyse oscillatory interactions between brain regions, usually using EEG, MEG or LFP signals.
 	<h3>Key concept</h3>
-	Two signals are considered to be coupled in amplitude if their amplitude or envelope fluctuations show a consistent correlation over time. This means that when the amplitude of one signal increases or decreases, the amplitude of the other signal tends to follow a similar pattern. This suggests a functional interaction between the underlying sources that generate these signals.
+	Two signals are considered to be phase-coupled if their instantaneous phase differences remain coherent over time, even if their amplitudes fluctuate. This suggests a functional interaction between the underlying sources that generate these signals.
 	</section>
 	<section>
 	<h2>Example: Computing the Phase-Locking Value (PLV)</h2>
