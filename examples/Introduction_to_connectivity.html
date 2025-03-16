@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Introduction to functional connectivity</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.0.min.js"></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     <style>
         body {
@@ -165,6 +165,13 @@
 			<span id="timeValue_Hil">0.25 s</span>
 		</span>
     </div>
+	<section>
+		<h2>Time-frequency domain</h2>
+		Time-frequency analysis decomposes a signal into its frequency components at different time points. This is commonly achieved using either the <strong>Short-Time Fourier Transform (STFT)</strong> or <strong>Analytic Continuous Wavelet Transform (CWT)</strong>.<br>
+		For the <strong>STFT</strong>, the signal is divided into short overlapping time windows (epochs) to capture local frequency changes. The Fourier Transform is computed within each window, providing a spectrogram with frequency resolution dependent on window size. The connectivity metric is then computed the same way as explained above in the frequency domain section.<br>
+		<strong>CWT</strong> adapts the frequency resolution dynamically, offering better time resolution for high frequencies and better frequency resolution for low frequencies. Using analytic wavelets (e.g., complex Morlet or Morse wavelets) allows for the extraction of the analytic signal at each frequency bin, making it conceptually similar to the Hilbert Transform applied after bandpass filtering.
+		The connectivity metric is then computed the same way as explained above in the time domain section.
+	</section>
     <section>
 		<h2>Average of complex numbers</h2>
 		When summing complex numbers, you can visualize each number as a vector in the complex plane.<br>
@@ -198,9 +205,11 @@
 	<div id="inconsistentPh"></div>
 	<section>
 		<h3>Vectors with random phase</h3>
-		<button onclick="javascript:randomize();" style="margin: 45px">Randomise!</button>
 	</section>
 	<div id="randPh"></div>
+	<div class="divfooter" id="myDivFooter_DFT">
+		<button onclick="javascript:randomize();" style="margin: 10px">Randomise!</button>
+	</div>
 	<script type="module" async>
 		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computeCoherence, computecImCoh, computeImCoh} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
 			
@@ -687,7 +696,7 @@
 		var constPhPLot = makeData([1.01*Math.PI/3, 1.005*Math.PI/3, 0.985*Math.PI/3, Math.PI/3]);
 		var inconstPhPLot = makeData([Math.PI/3, 5*Math.PI/3, Math.PI/2, -Math.PI/2]);
 		
-		const annot = [{
+		var annot = [{
 			text: "4 complex numbers",
 			  font: {
 			  size: 18,
@@ -700,7 +709,7 @@
 			yref: 'paper',
 			},
 			{
-			  text: "sum as vectors",
+			  text: "",
 			  font: {
 			  size: 18,
 			},
@@ -712,7 +721,7 @@
 			yref: 'paper',
 			},
 			{
-			  text: "average resultant vector",
+			  text: "",
 			  font: {
 			  size: 18,
 			},
@@ -725,7 +734,8 @@
 			}
 		];
 		
-		const layout = {
+		
+		var layout = {
 			polar1: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}},
 			polar2: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, randPhPLot[0].r.length*1]}},
 			polar3: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}},
@@ -735,12 +745,26 @@
 			legend: {x: 0, xanchor: 'left', y: 1.3, orientation: "h", font: { size: 16 }}
 		};
 		
+		annot[1].text = `sum as vectors (length: ${constPhPLot[1].r[4].toFixed(2)})`;
+		annot[2].text = `sum as vectors (length: ${constPhPLot[2].r[1].toFixed(2)})`;
+		layout.annotations = annot;
 		Plotly.newPlot('consistentPh', constPhPLot, layout, {showSendToCloud:false});
+		
+		annot[1].text = `sum as vectors (length: ${inconstPhPLot[1].r[4].toFixed(2)})`;
+		annot[2].text = `sum as vectors (length: ${inconstPhPLot[2].r[1].toFixed(2)})`;
+		layout.annotations = annot;
 		Plotly.newPlot('inconsistentPh', inconstPhPLot, layout, {showSendToCloud:false});
+		
+		annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
+		annot[2].text = `sum as vectors (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+		layout.annotations = annot;
 		Plotly.newPlot('randPh', randPhPLot, layout, {showSendToCloud:false});
 
 		function randomize() {
 			randPhPLot = makeData()
+			annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
+			annot[2].text = `sum as vectors (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+			layout.annotations = annot;
 			Plotly.animate('randPh', {
 				data: randPhPLot,
 				layout: layout

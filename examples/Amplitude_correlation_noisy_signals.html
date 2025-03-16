@@ -51,7 +51,7 @@
 	<section>
 	<h2>Introduction</h2>
 	<h3>Definition</h3>
-	Amplitude-based connectivity refers to the statistical dependence between the amplitude or envelopes of two signals. Instead of focusing on phase relationships, this measure assesses how the fluctuations in signal power are correlated over time.
+	Amplitude-based connectivity refers to the statistical dependence between the amplitude or envelopes of two signals. Instead of focusing on phase relationships, this measure assesses how the fluctuations in signal power are correlated over time. It is commonly used in neuroscience and signal processing to analyse oscillatory interactions between brain regions, usually using EEG, MEG or LFP signals.
 	<h3>Key concept</h3>
 	Two signals are considered to be coupled in amplitude if their amplitude or envelope fluctuations show a consistent correlation over time. This means that when the amplitude of one signal increases or decreases, the amplitude of the other signal tends to follow a similar pattern. This suggests a functional interaction between the underlying sources that generate these signals.
 	</section>
@@ -141,9 +141,9 @@
 	</section>
 	<section>
 	<h2>Version of the Envelope Correlation robust to spatial leakage.</h2>
-	The orthogonalized envelope correlation (OEC) is a method designed to reduce the effects of source leakage when measuring amplitude-based connectivity. Source leakage, common in EEG and MEG analyses, can cause spurious correlations due to volume conduction. The OEC addresses this issue by orthogonalizing one signal with respect to the other before computing the envelope correlation.
+	The orthogonalised envelope correlation (OEC) is a method designed to reduce the effects of source leakage when measuring amplitude-based connectivity. Source leakage, common in EEG and MEG analyses, can cause spurious correlations due to volume conduction. The OEC addresses this issue by orthogonalising one signal with respect to the other before computing the envelope correlation.
 	Given two signals, their amplitude envelopes can be extracted using the Hilbert transform. To mitigate leakage effects, one signal is regressed out from the other before computing the envelope correlation.<br>
-	Regressing out means to remove the contribution of one signal from another signal to mitigate source leakage (0-lag).
+	Regressing out means to remove the (linear) contribution of one signal from another signal to mitigate source leakage (0-lag) (<a href="https://doi.org/10.1073/pnas.1112685108" target="_blank" rel="noopener noreferrer">Brookes et al., 2011</a>, <a href="https://doi.org/10.1038/nn.3101" target="_blank" rel="noopener noreferrer">Hipp et al., 2012</a>).
 	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\langle S_1, S_2 \rangle}{\langle S_1, S_1 \rangle} S_1(t)$$
 	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\sum_{t=1}^{N} S_1(t) S_2(t)}{\sum_{t=1}^{N} S_1(t)^2} S_1(t)$$
 	\(S_2^{\perp S_1}\) is the orthogonalised version of \(S_2\) with respect to \(S_1\).

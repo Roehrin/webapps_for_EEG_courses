@@ -52,7 +52,7 @@
 	<section>
 	<h2>Introduction</h2>
 	<h3>Definition</h3>
-	Phase-based connectivity is a measure of the functional connectivity between two or more signals based on the synchronisation of their instantaneous phase dynamics rather than their amplitude or power. It is commonly used in neuroscience and signal processing to analyse oscillatory interactions between brain regions, usually using EEG, MEG or LFP signals.
+	Phase-based connectivity is a measure of the functional connectivity between two signals based on the synchronisation of their instantaneous phase dynamics rather than their amplitude or power. It is commonly used in neuroscience and signal processing to analyse oscillatory interactions between brain regions, usually using EEG, MEG or LFP signals.
 	<h3>Key concept</h3>
 	Two signals are considered to be phase-coupled if their instantaneous phase differences remain coherent over time, even if their amplitudes fluctuate. This suggests a functional interaction between the underlying sources that generate these signals.
 	</section>
@@ -75,7 +75,7 @@
 	where \(\tilde{A}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A} = A\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
 	For simplicity of the notation we will only use \(A\)  and \(\phi_i\).
 	<p>	
-	The Phase Locking Value (PLV) is a measure of phase synchrony between two signals, independent of the amplitude of the signal.
+	The Phase Locking Value (PLV) is a measure of phase synchrony between two signals, independent of the amplitude of the signal (<a href=" https://doi.org/10.1002/(SICI)1097-0193(1999)8:4<194::AID-HBM4>3.0.CO;2-C" target="_blank" rel="noopener noreferrer">Lachaux et al., 1999</a>).
 	$$\text{PLV}(S_1,S_2) = \left| \frac{1}{N} \sum_{t=1}^{N} e^{i (\phi_1(t) - \phi_2(t))} \right|$$
 	$$\text{or, PLV}(S_1,S_2) = \left| \frac{1}{N} \sum_{t=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right|$$<br>
 	\(N\) is the total number of time points, \(\Delta\phi_{1,2}\) the phase difference, and \(\left| . \right|\)the absolute value. From the definition it is clear that the coherence is symmetrical or undirected, i.e. \(\text{PLV}(S_1,S_2) = \text{PLV}(S_2,S_1)\)<br>
@@ -134,13 +134,13 @@
 	</section>
 	<section>
 	<h2>Version of the Phase Locking Value robust to spatial leakage.</h2>
-	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can be spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensate for that is by removing the contribution to the 0-lag in the computation of the PLV. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the PLV is defined as:
+	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can be spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensate for that is by removing the contribution to the 0-lag in the computation of the PLV. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the PLV (\(\text{iPLV}\)) is defined as (<a href="https://doi.org/10.1088/1741-2552/aacfe4" target="_blank" rel="noopener noreferrer">Bruña et al., 2018</a>):
 	$$\text{iPLV} = \Im\left( \mathcal{P}_{\text{PLV}} \right)$$<br>
 	\(\Im\) is the imaginary part. 
 	This metric is now robust to spurious 0-lag but also removes any genuine 0-lag. We cannot, however, estimate the true preferred phase due to the mixing. Intuitively, \(\text{iPLV}\) is the projection of the \(\text{PLV}\) phasor onto the imaginary axis. Check the \(\text{iPLV}\) box, and see how this metric behaves according to different changes in phase and noise.
 	<br>
 	<br>
-	Unfortunately, \(\text{iPLV}\) is sensitive to the preferred phase difference \(\Phi_{\text{PLV}}\). A corrected version of \(\text{iPLV}\), named corrected iPLV, mitigates this effect and is defined as:
+	Unfortunately, \(\text{iPLV}\) is sensitive to the preferred phase difference \(\Phi_{\text{PLV}}\). A corrected version of \(\text{iPLV}\), named corrected iPLV, mitigates this effect and is defined as (<a href="https://doi.org/10.1088/1741-2552/aacfe4" target="_blank" rel="noopener noreferrer">Bruña et al., 2018</a>):
 	$$\text{ciPLV} = \frac{\Im\left( \mathcal{P}_{\text{PLV}}\right)}{\sqrt{1-\Re\left( \mathcal{P}_{\text{PLV}} \right)^2}}$$<br>
 	\(\Re\) is the real part.<br>
 	Check the \(\text{ciPLV}\) box, and see how this metric behaves according to different changes in phase and noise.
