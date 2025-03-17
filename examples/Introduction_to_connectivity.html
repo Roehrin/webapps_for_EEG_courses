@@ -179,11 +179,11 @@
 		When summing complex numbers, you can visualize each number as a vector in the complex plane.<br>
 		In the cartesian coordinate system \((x,y)\) you have: 
 		$$x = \Re(z) = a = R\cos(\theta),\quad y = \Im(z) = b = R\sin(\theta)$$
-		In the polar coordinate system \((r,\theta)\), where \(r)\) is the length of the vector and \(\theta)\) the angle/phase of the vector, you have: 
-		$$r = \left|z\right|, \quad \theta = \arg(z)$$
+		In the polar coordinate system \((R,\theta)\), where \(R)\) is the length of the vector and \(\theta)\) the angle/phase of the vector, you have: 
+		$$R = \left|z\right|, \quad \theta = \arg(z)$$
 		For the purpose of this course, we will mainly use the polar form.
 		Given two complex numbers in polar form:
-		$$z_1= r_1e^{i\theta_1},\quad z_2= r_2e^{i\theta_2}.$$
+		$$z_1= R_1e^{i\theta_1},\quad z_2= R_2e^{i\theta_2}.$$
 		You can visualise their sum as placing the tip of \(z_1\) at the origin, then placing \(z_2\) starting at the tip of \(z_1\). The resultant vector goes from the origin to the new tip. When the sum has more element you continue adding each element to the tip of the last resultant vector. If you want to compute the average you simply need to divide the resultant vector by the number of element. 
 		<ul>
 			<li>If the vectors are aligned (same phase), they add constructively, making the magnitude larger.</li>
@@ -748,24 +748,24 @@
 		};
 		
 		annot[1].text = `sum as vectors (length: ${constPhPLot[1].r[4].toFixed(2)})`;
-		annot[2].text = `sum as vectors (length: ${constPhPLot[2].r[1].toFixed(2)})`;
+		annot[2].text = `average resultant vector (length: ${constPhPLot[2].r[1].toFixed(2)})`;
 		layout.annotations = annot;
 		Plotly.newPlot('consistentPh', constPhPLot, layout, {showSendToCloud:false});
 		
 		annot[1].text = `sum as vectors (length: ${inconstPhPLot[1].r[4].toFixed(2)})`;
-		annot[2].text = `sum as vectors (length: ${inconstPhPLot[2].r[1].toFixed(2)})`;
+		annot[2].text = `average resultant vector (length: ${inconstPhPLot[2].r[1].toFixed(2)})`;
 		layout.annotations = annot;
 		Plotly.newPlot('inconsistentPh', inconstPhPLot, layout, {showSendToCloud:false});
 		
 		annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
-		annot[2].text = `sum as vectors (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+		annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
 		layout.annotations = annot;
 		Plotly.newPlot('randPh', randPhPLot, layout, {showSendToCloud:false});
 
 		function randomize() {
 			randPhPLot = makeData()
 			annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
-			annot[2].text = `sum as vectors (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+			annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
 			layout.annotations = annot;
 			Plotly.animate('randPh', {
 				data: randPhPLot,
