@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Introduction to functional connectivity</title>
-    <script src="https://cdn.plot.ly/plotly-3.0.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     <style>
         body {
@@ -51,31 +51,33 @@
 	<section>
 	<h2>Definition of Functional Connectivity</h2>
 	Functional connectivity refers to the statistical relationship between signals recorded from different brain regions, reflecting their dynamic interactions over time. It can be assessed using various families of measures, including phase-based connectivity (e.g., Phase Locking Value, which quantifies phase synchronization), amplitude-based connectivity (e.g., Amplitude Envelope Correlation, which examines power co-modulations), and coherence, which captures both phase and amplitude relationships.<br><br>
-	Regardless of the chosen method, extracting meaningful connectivity information requires computing the amplitude and phase of signals, typically using the Fourier transform or the Hilbert transform (\(\mathcal{H}(.)\)).<br><br>
+	Regardless of the chosen method, extracting meaningful connectivity information requires computing the amplitude and phase of signals, typically using the Fourier transform \(\left(\mathcal{F}(.)\right)\) or the Hilbert transform \(\left(\mathcal{H}(.)\right)\).<br><br>
 	Since these transformations yield complex-valued representations of the signals, it is often useful to apply Euler’s formula, which expresses a complex number in terms of its magnitude and phase, making it easier to manipulate and interpret in functional connectivity analyses.
 	$$ z = a + ib = Re^{i\theta}$$
-	$$\text{with } \Re(z) = a,\quad \Im(z) = b,\quad \left|z\right| = R,\quad \arg(z) = \theta\text{, with } \theta \in \left]0, 2\pi\right]\text{ or }\theta \in \left]-\pi, \pi\right] \text{(this definition will be used).}$$
+	with \(\Re(z) = a = R\cos(\theta)\) the real part, \( \Im(z) = b= R\sin(\theta)\) the imaginary part, \(\left|z\right| = R = \sqrt{a^2 + b^2}\) the absolute value or magnitude, \(\arg(z) = \theta = \arctan\left(\frac{b}{a}\right)\) the phase angle, with \(\theta \in \left[0, 2\pi\right[\) or \(\theta \in \left]-\pi, \pi\right]\) (the second definition will be used).
 	</section>
 	<section>
 	To illustrate the principle of the Fourier transform or Hilbert transform, we will define a simple signal.<br><br>
-	Let us assume a noisy oscillating signal \(S\) of amplitude(t) \(A\), frequency \(f\), and phase shift \(\theta\) and \(\epsilon(t)\) the noise, drawn from a centered Normal distribution of standard deviation \(\sigma\). This signal is written as:
-	$$S(t) = A(t)\cos(2\pi ft + \theta) + \epsilon(t),$$ $$\epsilon \sim \mathcal{N}(0,\sigma^{2}).$$<br><br>
+	Let us assume a noisy oscillating signal \(S\) of amplitude \(A(t)\), frequency \(f_S\), and phase shift \(\theta\) and \(\epsilon(t)\) the noise, drawn from a centered Normal distribution of standard deviation \(\sigma\). This signal is written as:
+	$$S(t) = A(t)\cos(2\pi f_St + \theta) + \epsilon(t),$$ $$\epsilon \sim \mathcal{N}(0,\sigma^{2}).$$<br><br>
 	\(A\) takes the following form:
 	$$A(t) = \frac{1}{2}(m\cos(2\pi f_{A}t + \theta_{A}) + 1)$$ 
 	\(f_{A}\) the frequency of the cosine amplitude modulation, \(\theta_{A}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(\theta_{A} = \frac{\pi}{2}\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
-	\(f\), \(\theta\) and \(f_{A}\) can be tuned. Note that when \(f_{A} = 0\), \(A(t) = 1\)
+	\(f_S\), \(\theta\) and \(f_{A}\) can be tuned. Note that when \(f_{A} = 0\), \(A(t) = 1\)
 	</section>
 	<section>
 	<h2>Frequency domain (<em>spectral method</em>)</h2>
 	<ol>
-        <li><strong>Segment the Signal</strong> – Divide the continuous signal into <em>trials</em> (typically aligned to an event of interest or stimulus) or <em>epochs</em> (several time windowa of a fixed duration).</li>
+        <li><strong>Segment the Signal</strong> – Divide the continuous signal into <em>trials</em> (typically aligned to an event of interest or stimulus) or <em>epochs</em> (several time window of a fixed duration).</li>
         <li><strong>Compute the Fourier Transform</strong> – Apply the <em>Fourier Transform</em> to each trial/epoch to obtain the complex frequency representation of the signal. This provides the <em>amplitude and phase</em> information for each frequency component.</li>
         <li><strong>Compute the Metric of Interest</strong> – across the epochs/trials. This yields	 a connectivity metric for each frequency bin.</li>
         <li><strong>Average Across Frequency Bands (Optional)</strong> – If interested in specific frequency bands (e.g., theta, alpha, beta), average the metric across the selected frequencies.</li>
     </ol>
+	The Fourier transform provides the frequency content of a signal, as a complex number as:
+	$$\mathcal{F}_S(f)=\tilde{S}(f) = A'(f)e^{i\theta'(f)}$$
 	<br>
-	In the example below, \(f_{A} = 0\) and \(A(t) = 1\)
-	The Fourier transform gives us the amplitude \(A\) and the phase shift \(\theta\).<br><br>
+	The Fourier transform gives us the amplitude \(A'(f)\) and the phase shift \(\theta'(f)\) for each frequency bin. Usually, one represents the power density across frequency bins (i.e. \(A'(f)/\Delta T\), with \(\Delta T\) the duration of the signal) referred to as the <strong>power spectral density</strong> (<strong>PSD</strong>) in \(V^2/Hz\).<br><br>
+	In the example below, \(f_{A} = 0\) and \(A(t) = A =1\). This means that \(A^2 = A'^2(f_S)/\Delta T = 1\) and \(\theta=\theta'(f_S)\) in absence  of noise (\(\sigma = 0\)).<br>
 	There are <em>key values</em> to keep in mind: 
 	<ul>
 		<li>\(\theta=0 \implies S(0)\) <strong>starts at</strong> its peak;</li>
@@ -83,12 +85,12 @@
 		<li>\(\theta=\pi\implies S(0)\) <strong>starts at</strong> its peak;</li>
 		<li>\(\theta=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> zero in its down-to-up phase.</li>
 	</ul>
-	 The plot below let you modify \(f\), \(\theta\) and \(\sigma\) and see their effect on the Fourier transform. You could start by modifying \(\theta\) to verify the above list.
+	 The plot below let you modify \(f_S\), \(\theta\) and \(\sigma\) and see their effect on the Fourier transform. You could start by modifying \(\theta\) to verify the above list.
 	</section>
     <div id="plot_DFT" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_DFT">
 		<span style="padding: 5px">
-			<label for="frequency_DFT">\(f\) :</label>
+			<label for="frequency_DFT">\(f_S\) :</label>
 			<input type="range" id="frequency_DFT" class="slider" min="1" max="25" value="10">
 			<span id="freqValue_DFT">10 Hz</span>
 		</span>
@@ -124,9 +126,9 @@
         <li><strong>Compute the Metric of Interest</strong> across the temporal dimension.</li>
     </ol>
 	The analytic signal representation gives us the (instantaneous) amplitude of the envelope \(A(t)\) and the instantaneous phase \(\phi(t)\).
-	$$\widehat{S}(t)= S(t)+i\mathcal{H}(S(t)) = A(t)e^{i(2\pi ft + \theta)}$$
+	$$\widehat{S}(t)= S(t)+i\mathcal{H}(S(t)) = A(t)e^{i(2\pi f_St + \theta)}$$
 	The instantaneous phase is defined as:
-	$$\phi(t)= 2\pi ft + \theta,$$
+	$$\phi(t)= 2\pi f_St + \theta,$$
 	$$\textrm{so }\widehat{S}(t)= A(t)e^{i\phi(t)}.$$
 	There are <em>key values</em> to keep in mind: 
 	<ul>
@@ -135,12 +137,12 @@
 		<li>\(\phi(t)=\pi\implies S(t)\) <strong>is at</strong> its peak;</li>
 		<li>\(\phi(t)=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its down-to-up phase.</li>
 	</ul>
-	 The plot below let you modify \(f\), \(\theta\), \(\sigma\), \(f_A\) and the time instant \(t\) to evaluate their effect on the envelope \(A(t)\) and instantaneous phase \(\phi(t)\). You could start by modifying spanning the different time instant \(t\) to verify that the above list is true regarless of the values of \(f\), \(\theta\) and \(f_A\).
+	 The plot below let you modify \(f_S\), \(\theta\), \(\sigma\), \(f_A\) and the time instant \(t\) to evaluate their effect on the envelope \(A(t)\) and instantaneous phase \(\phi(t)\). You could start by modifying spanning the different time instant \(t\) to verify that the above list is true regarless of the values of \(f_S\), \(\theta\) and \(f_A\).
 	</section>
     <div id="plot_Hil" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_Hil">
 		<span style="padding: 5px">
-			<label for="frequency_Hil">\(f\) :</label>
+			<label for="frequency_Hil">\(f_S\) :</label>
 			<input type="range" id="frequency_Hil" class="slider" min="1" max="25" value="10">
 			<span id="freqValue_Hil">10 Hz</span>
 		</span>
@@ -346,7 +348,7 @@
 				yaxis: 'y2',
                 mode: 'lines',
 				type: 'scatter',
-                name: '$A^2_t(f)$',
+                name: "$A'^2(f)/\\Delta T$",
                 line: { color: 'brown' },
 				showlegend: true,
             };
@@ -359,7 +361,7 @@
 				yaxis: 'y3',
                 mode: 'lines',
 				type: 'scatter',
-                name: '$\\theta(f)$',
+                name: "$\\theta'(f)$",
                 line: { color: 'purple' },
 				showlegend: true,
             };
@@ -400,9 +402,9 @@
             const layout = {
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
                 xaxis: { title: 'Time (s)', domain: [0, w1_DFT], anchor: 'y1'},
-                yaxis: { title: 'Amplitude', anchor: 'x1', range: [-2, 2]},
+                yaxis: { title: 'Amplitude (V)', anchor: 'x1', range: [-2, 2]},
 				xaxis2: { domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y2', range: [0, 30]},
-                yaxis2: { title: 'PSD', domain: [.55, 1], anchor: 'x2', range: [0, 1.3]},
+                yaxis2: { title: 'PSD (V^2/Hz)', domain: [.55, 1], anchor: 'x2', range: [0, 1.3]},
 				xaxis3: { title: 'Frequency (Hz)', domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y3', range: [0, 30]},
                 yaxis3: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x3', range: [-Math.PI, Math.PI],tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
 							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']},
@@ -411,7 +413,7 @@
                 showlegend: true,
 				font: { size: 16 },
 				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }},
-				title: '$\\text{Fourier representation of }S(t) = A(t)\\cos(2\\pi ft + \\theta) + \\epsilon(t)$'
+				title: '$\\text{Fourier representation of }S(t) = A(t)\\cos(2\\pi f_St + \\theta) + \\epsilon(t)$'
             };
 
             // Combine all traces into a single data array
@@ -585,7 +587,7 @@
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
 				// time domain
                 xaxis: { domain: [0, w1_Hil], range: [0, 1], anchor: 'y1', matches: 'x2'},
-                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
+                yaxis: { title: 'Amplitude (V)', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
 				xaxis2: { title: 'Time (s)', domain: [0, w1_Hil], anchor: 'y2'},
                 yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
 							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
