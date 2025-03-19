@@ -73,7 +73,7 @@
 	<h3>Case 1: constant amplitude</h3>
 	As a first example, let us define \(A_1=A_2=A=1\).
 	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{Corr}\).<br>
-	First, you could test that when \(\sigma = 0\), \(Corr(S_1,S_2) = 1\) only when \(\theta_2 = \theta_1\) and \(f_2 = f_1\).<br><br> This means that sinusoidal from different frequency bands cannot be correlated. For signals of the same frequency, correlation is sensitive to the phase shift because a phase shift introduces a time lag, which affects the correlation. If the phase shift is (90°), the correlation is zero. If it's phase difference is \(\Delta\theta = \theta_2-theta_1 = frac{\pi}{2}\) the correlation is zero.  If \(\Delta\theta = \pi\) the correlation is -1 (perfect anti-correlation).
+	First, you could test that when \(\sigma = 0\), \(Corr(S_1,S_2) = 1\) only when \(\theta_2 = \theta_1\) and \(f_2 = f_1\).<br><br> This means that sinusoidal from different frequency bands cannot be correlated. For signals of the same frequency, correlation is sensitive to the phase shift because a phase shift introduces a time lag, which affects the correlation. If the phase shift is (90°), the correlation is zero. If it's phase difference is \(\Delta\theta = \theta_2-\theta_1 = \frac{\pi}{2}\) the correlation is zero.  If \(\Delta\theta = \pi\) the correlation is -1 (perfect anti-correlation).
 	Again in our case without noise, 
 	$$ Corr(S_1,S_2) = \cos(\Delta\theta).$$
 	</section>
@@ -140,17 +140,18 @@
 	The envelope Correlation is a symmetric measure: \(envCorr(S_1,S_2) = envCorr(S_2,S_1)\).
 	</section>
 	<section>
-	<h2>Version of the Envelope Correlation robust to spatial leakage.</h2>
-	The orthogonalised envelope correlation (OEC) is a method designed to reduce the effects of source leakage when measuring amplitude-based connectivity. Source leakage, common in EEG and MEG analyses, can cause spurious correlations due to volume conduction. The OEC addresses this issue by orthogonalising one signal with respect to the other before computing the envelope correlation.
+	<h2>Version of the Envelope Correlation Coefficient robust to spatial leakage.</h2>
+	The orthogonalised envelope correlation (oCC) is a method designed to reduce the effects of spatial leakage when measuring amplitude-based connectivity. Spatial leakage, common in EEG and MEG analyses, can cause spurious correlations due to volume conduction (sensor level) or ill-posed problem of the inverse solution (source level). The oCC addresses this issue by orthogonalising one signal with respect to the other before computing the envelope correlation.
 	Given two signals, their amplitude envelopes can be extracted using the Hilbert transform. To mitigate leakage effects, one signal is regressed out from the other before computing the envelope correlation.<br>
-	Regressing out means to remove the (linear) contribution of one signal from another signal to mitigate source leakage (0-lag) (<a href="https://doi.org/10.1073/pnas.1112685108" target="_blank" rel="noopener noreferrer">Brookes et al., 2011</a>, <a href="https://doi.org/10.1038/nn.3101" target="_blank" rel="noopener noreferrer">Hipp et al., 2012</a>).
+	Regressing out means to remove the (linear) contribution of one signal from another signal to mitigate leakage (0-lag) (<a href="https://doi.org/10.1073/pnas.1112685108" target="_blank" rel="noopener noreferrer">Brookes et al., 2011</a>, <a href="https://doi.org/10.1038/nn.3101" target="_blank" rel="noopener noreferrer">Hipp et al., 2012</a>).
 	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\langle S_1, S_2 \rangle}{\langle S_1, S_1 \rangle} S_1(t)$$
 	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\sum_{t=1}^{N} S_1(t) S_2(t)}{\sum_{t=1}^{N} S_1(t)^2} S_1(t)$$
 	\(S_2^{\perp S_1}\) is the orthogonalised version of \(S_2\) with respect to \(S_1\).
 	using the Hilbert transform one can estimate the envelope of \(S_2^{\perp S_1}\): \(A_{S_1^{\perp S_2}}\).<br>
-	Because the orthogonalisation of \(S_2^{\perp S_1}\) and \(S_1^{\perp S_2}\) yields  different correlation (\(Corr(A_1,A_{S_2^{\perp S_1}}) \ne Corr(A_2,A_{S_1^{\perp S_2}})\)), The OEC is defined as the average of the two:
-	$$OEC(S_1,S_2) = \frac{1}{2}\left(Corr(A_1,A_{S_2^{\perp S_1}}) + Corr(A_2,A_{S_1^{\perp S_2}})\right)$$
-	This average makes the OEC symmetric: \(OEC(S_1,S_2) = OEC(S_2,S_1)\).
+	Because the orthogonalisation of \(S_2^{\perp S_1}\) and \(S_1^{\perp S_2}\) yields  different correlation (\(Corr(A_1,A_{S_2^{\perp S_1}}) \ne Corr(A_2,A_{S_1^{\perp S_2}})\)), The oCC is defined as the average of the two:
+	$$oCC(S_1,S_2) = \frac{1}{2}\left(envCorr(S_1,S_2^{\perp S_1}) + Corr(S_2,S_1^{\perp S_2})\right)$$
+	$$oCC(S_1,S_2) = \frac{1}{2}\left(Corr(A_1,A_{S_2^{\perp S_1}}) + Corr(A_2,A_{S_1^{\perp S_2}})\right)$$
+	This average makes the oCC symmetric: \(oCC(S_1,S_2) = oCC(S_2,S_1)\).
 	</section>
 	<script>
 	function answerDisp() {
@@ -374,7 +375,7 @@
 				type: 'scatter',
 				xaxis: 'x2',
 				yaxis: 'y2',
-				name: `OEC = ${oEnvCorr12.correlation.toFixed(2)}`,
+				name: `oCC = ${oEnvCorr12.correlation.toFixed(2)}`,
 				line: { color: metricColours[2], width: 5, dash: 'solid'},
 				visible: showOEnvCorr.checked,
 			}];
@@ -418,10 +419,10 @@
             const layout = {
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
                 xaxis: { title: 'Time (s)', domain: [0, w1], anchor: 'y1'},
-                yaxis: { title: 'Amplitude', anchor: 'x1', range: [-2, 2]},
+                yaxis: { title: 'Amplitude (V)', anchor: 'x1', range: [-2, 2]},
 				
-				xaxis2: { title: 'Sine Wave 1 Amplitude', side: 'bottom', domain: [w1+wgap, w1+w2], anchor: 'y2', range: [-2, 2]},
-                yaxis2: { title: 'Sine Wave 2 Amplitude', domain: [0, 1], anchor: 'x2', range: [-2, 2]},
+				xaxis2: { title: 'Amplitude 1 (V)', side: 'bottom', domain: [w1+wgap, w1+w2], anchor: 'y2', range: [-2, 2]},
+                yaxis2: { title: 'Amplitude 2 (V)', domain: [0, 1], anchor: 'x2', range: [-2, 2]},
 				
 				xaxis3: { domain: [w1+w2+wgap, 1], anchor: 'y3'},
                 yaxis3: { title: 'correlation', side: 'right', domain: [0, 1], anchor: 'x3', range: [-1.2, 1.2]},

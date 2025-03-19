@@ -71,7 +71,7 @@
 	$$\textrm{so }\widehat{S_i}(t)= A_i(t)e^{i\phi_i(t)} + \widehat{\epsilon_i}(t),$$
 	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
 	$$\widehat{S_i}(t)= \tilde{A}(t)e^{i\tilde{\phi_i}(t)}$$
-	where \(\tilde{A}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\\lim_{\sigma\to0} \tilde{A} = A\) and \(\\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
+	where \(\tilde{A}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A\) and \(\phi_i\). In other word, when the noise becomes null, \(\lim_{\sigma\to0} \tilde{A} = A\) and \(\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
 	For simplicity of the notation we will only use \(A\)  and \(\phi_i\).
 	<br>
 	The Coherence (Coh) measures the consistency of both phase and power correlations between two signals, ranging from 0 (no synchrony) to 1 (perfect synchrony)(<a href="https://doi.org/10.1016/S0013-4694(97)00066-7" target="_blank" rel="noopener noreferrer">Nunez et al., 1997</a>).
@@ -144,7 +144,7 @@
 	<section>
 	<h2>Version of the Coherence robust to spatial leakage.</h2>
 	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can be spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensate for that is by removing the contribution to the 0-lag in the computation of the Coh. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the Coh \(\text{imCoh}\) is defined as (<a href="https://doi.org/10.1016/j.clinph.2004.04.029" target="_blank" rel="noopener noreferrer">Nolte et al., 2004</a>):
-	$$\text{imCoh} = \Im\left( \mathcal{P}_{\text{Coh}} \right)$$<br>
+	$$\text{imCoh} = \left|\Im\left( \mathcal{P}_{\text{Coh}} \right)\right|$$<br>
 	\(\Im\) is the imaginary part. 
 	This metric is now robust to spurious 0-lag but also removes any genuine 0-lag. We cannot, however, estimate the true preferred phase due to the mixing. Intuitively, \(\text{imCoh}\) is the projection of the \(\text{Coh}\) phasor onto the imaginary axis. Check the \(\text{imCoh}\) box, and see how this metric behaves according to different changes in phase and noise.
 	<br>
@@ -453,7 +453,7 @@
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
 				// time domain
                 xaxis: { domain: [0, w1], anchor: 'y1', matches: 'x2'},
-                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
+                yaxis: { title: 'Amplitude (V)', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
 				// inst phase axis
 				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
                 yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 

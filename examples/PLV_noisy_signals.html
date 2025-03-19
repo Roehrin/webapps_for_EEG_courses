@@ -80,7 +80,7 @@
 	$$\text{or, PLV}(S_1,S_2) = \left| \frac{1}{N} \sum_{t=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right|$$<br>
 	\(N\) is the total number of time points, \(\Delta\phi_{1,2}\) the phase difference, and \(\left| . \right|\)the absolute value. From the definition it is clear that the coherence is symmetrical or undirected, i.e. \(\text{PLV}(S_1,S_2) = \text{PLV}(S_2,S_1)\)<br>
 	This measure quantifies how consistent the phase difference between two signals is over time, ranging from 0 (no phase synchrony) to 1 (perfect synchrony). Noteworthy, \(A\) is not used in the defition of the \(\text{PLV}\) rendering this metric independent of the amplitude. Beware, that it is still dependent on the signal-to-noise ratio, but not the amplitude of the signal per se.
-	$$\Phi_{\text{PLV}}(S_1,S_2) = \arg \left( \frac{1}{N} \sum_{n=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right)$$
+	$$\Phi_{\text{PLV}}(S_1,S_2) = \arg \left( \frac{1}{N} \sum_{t=1}^{N} e^{i \Delta\phi_{1,2}(t)} \right)$$
 	\(\arg(.)\) is the argument function, which gives the phase angle of the complex mean phase difference.<br>
 	\(\Phi_{\text{PLV}}\) represents the preferred phase difference. Note that \(\Phi_{\text{PLV}}(S_1,S_2) = -\Phi_{\text{PLV}}(S_2,S_1)\)<br>
 	One can represent both information as a phasor in a polar plot, where its radius would be the \(\text{PLV}\) and \(\Phi_{\text{PLV}}\) its angle, that is:
@@ -135,7 +135,7 @@
 	<section>
 	<h2>Version of the Phase Locking Value robust to spatial leakage.</h2>
 	In case of spatial leakage (signal mixing), such in Electrical Source Imaging, \(S_1\) and \(S_2\) can be spuriously correlated. However, this spurious correlation is instantaneous and thus occurs at 0-lag. One way to compensate for that is by removing the contribution to the 0-lag in the computation of the PLV. Importantly, 0-lag means that the phase difference equals 0. Any contribution at 0-lag happens on the real axis. Therefore the imaginary part of the PLV (\(\text{iPLV}\)) is defined as (<a href="https://doi.org/10.1088/1741-2552/aacfe4" target="_blank" rel="noopener noreferrer">Bruña et al., 2018</a>):
-	$$\text{iPLV} = \Im\left( \mathcal{P}_{\text{PLV}} \right)$$<br>
+	$$\text{iPLV} = \left|\Im\left( \mathcal{P}_{\text{PLV}} \right)\right|$$<br>
 	\(\Im\) is the imaginary part. 
 	This metric is now robust to spurious 0-lag but also removes any genuine 0-lag. We cannot, however, estimate the true preferred phase due to the mixing. Intuitively, \(\text{iPLV}\) is the projection of the \(\text{PLV}\) phasor onto the imaginary axis. Check the \(\text{iPLV}\) box, and see how this metric behaves according to different changes in phase and noise.
 	<br>
@@ -406,7 +406,7 @@
                 //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
 				// time domain
                 xaxis: { domain: [0, w1], anchor: 'y1', matches: 'x2'},
-                yaxis: { title: 'Amplitude', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
+                yaxis: { title: 'Amplitude (V)', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
 				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
                 yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
 							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
