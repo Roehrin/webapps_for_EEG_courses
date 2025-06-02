@@ -107,7 +107,7 @@
 			<label for="prec1Btn" style="padding-right: 10px;">1%</label>
 		</div>
 		<div style="padding-left: 10px;">
-			<button id="reset" style="width:40px"; >reset</button>
+			<button id="reset" style="width:40px">reset</button>
 		</div>
 	</div>
 	<div class="row">
@@ -253,17 +253,17 @@
 		nv1.updateGLVolume();
 	}
 	function toggleGroup(id) {
-	let buttons = document.getElementsByClassName("viewBtn");
-	let char0 = id.charAt(0);
-	let char03 = id.slice(0,3);
-	
-	for (let i = 0; i < buttons.length; i++) {
-		if (buttons[i].id.charAt(0) !== char0) continue;
-		if ((char03 === "!Ed" || char03 === "!Nd") && (buttons[i].id.slice(0,3) !== char03)) continue;
-		buttons[i].classList.remove("dropdown-item-checked");
-		if (buttons[i].id === id)
-		buttons[i].classList.add("dropdown-item-checked");
-	}
+		let buttons = document.getElementsByClassName("viewBtn");
+		let char0 = id.charAt(0);
+		let char03 = id.slice(0,3);
+		
+		for (let i = 0; i < buttons.length; i++) {
+			if (buttons[i].id.charAt(0) !== char0) continue;
+			if ((char03 === "!Ed" || char03 === "!Nd") && (buttons[i].id.slice(0,3) !== char03)) continue;
+			buttons[i].classList.remove("dropdown-item-checked");
+			if (buttons[i].id === id)
+			buttons[i].classList.add("dropdown-item-checked");
+		}
 	} // toggleGroup()
 	timeSlider.oninput = async function () {
 		currTimeIdx = this.valueAsNumber;

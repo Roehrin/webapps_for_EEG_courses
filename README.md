@@ -22,3 +22,8 @@ Collections of interactive web applications for the visualisation, teaching and 
 
 ### [Seizure Network Dynamics from intracranial EEG](https://roehrin.github.io/webapps_for_EEG_courses/examples/ictal_connectivity.html)
 ![atlas](./images/fig_iEEGconn.png "Dynamical seizure connectivity")  
+
+## Running in local environment (Python version)
+1. Open the terminal at the project root folder
+2. enter `python3 -m http.server 8080`
+3. go to `http://localhost:8080`
