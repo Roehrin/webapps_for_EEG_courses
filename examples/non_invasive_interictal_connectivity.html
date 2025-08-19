@@ -64,7 +64,8 @@
           <a class="viewBtn" id="_coh">coherence</a> 
 		  <a class="viewBtn" id="_env">envelope correlation</a>
 		  <a class="viewBtn divider" id="_ciPLV">corrected imaginary PLV</a> 
-          <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a> 
+          <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a>
+		  <a class="viewBtn" id="_OAEC">orthogonalized env. correlation</a> 
         </div>
     </div>
 	<div class="dropdown">
@@ -134,7 +135,7 @@
   let plotlyColorscales = await response.json()
   
   const freqList = ['delta', 'theta', 'alpha', 'beta'];
-  const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh"];
+  const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh", "OAEC"];
   const measStr = ['strength', 'CC', 'eigCent'];
   var connMap = []; // variable with the current heatmap
   var currFreqId = 0; // variable with the current frequency index (linked to freqList)

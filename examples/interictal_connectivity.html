@@ -70,7 +70,8 @@
           <a class="viewBtn" id="_coh">coherence</a> 
 		  <a class="viewBtn" id="_env">envelope correlation</a>
 		  <a class="viewBtn divider" id="_ciPLV">corrected imaginary PLV</a> 
-          <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a> 
+          <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a>
+		  <a class="viewBtn" id="_OAEC">orthogonalized env. correlation</a> 
         </div>
     </div>
 	<div class="dropdown">
@@ -141,11 +142,11 @@
 </html>
 <script type="module" async>
   import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
-  let response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/plotlyColorscale4niiVue.json", {})
+  let response = await fetch("../ictal_connectivity/plotlyColorscale4niiVue.json", {})
   let plotlyColorscales = await response.json()
   
   const freqList = ['delta', 'theta', 'alpha', 'beta', 'gamma'];
-  const connList = ["spike_cooc", "gamma_cooc", "ripple_cooc", "norm_spike_cooc", "norm_gamma_cooc", "norm_ripple_cooc", "PLV", "coh", "envCorr", "ciPLV", "cicoh"];
+  const connList = ["spike_cooc", "gamma_cooc", "ripple_cooc", "norm_spike_cooc", "norm_gamma_cooc", "norm_ripple_cooc", "PLV", "coh", "envCorr", "ciPLV", "cicoh", "OAEC"];
   const measStr = ['EI', 'spike', 'gamma', 'ripple', 'strength', 'CC', 'eigCent'];
   var connMap = []; // variable with the current heatmap
   var currFreqId = 0; // variable with the current frequency index (linked to freqList)
@@ -160,10 +161,10 @@
   async function loadConnMaP(uploadData = 'all'){
 		let fname = '';
 		if (currConn > 5){
-			fname = "https://roehrin.github.io/webapps_for_EEG_courses/interictal_connectivity/connectivity_"  + connList[currConn].toLowerCase() + 
+			fname = "../interictal_connectivity/connectivity_"  + connList[currConn].toLowerCase() + 
 							"_" + freqList[currFreqId] + ".json"
 		} else{
-			fname = "https://roehrin.github.io/webapps_for_EEG_courses/interictal_connectivity/connectivity_"  + connList[currConn].toLowerCase() + ".json"
+			fname = "../interictal_connectivity/connectivity_"  + connList[currConn].toLowerCase() + ".json"
 		}
 		let response = await fetch(fname, {})
 		let connectivity = await response.json()
@@ -361,7 +362,7 @@
   }
   var volumeList1 = [
     {
-      url: "https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/patient_mri.nii", 
+      url: "../ictal_connectivity/patient_mri.nii", 
       colormap: "gray",
       visible: true,
       opacity: 1
@@ -385,15 +386,15 @@
   nv1.opts.multiplanarShowRender = niivue.SHOW_RENDER.ALWAYS;
   nv1.opts.isColorbar = true;
   nv1.opts.isOrientCube = true;
-  //await nv1.loadConnectomeFromUrl("https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/pat_elec.jcon");
+  //await nv1.loadConnectomeFromUrl("../ictal_connectivity/pat_elec.jcon");
   await nv1.loadMeshes([
     {
-      url: "https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/pat_elec.jcon",
+      url: "../ictal_connectivity/pat_elec.jcon",
     },
   ]);
   nv1.meshes[0].colorbarVisible = false;
   nv1.opts.showLegend = false;
-  response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/ictal_connectivity/pat_bipelec.jcon", {})
+  response = await fetch("../ictal_connectivity/pat_bipelec.jcon", {})
   const bipElec = await response.json()
   bipElec.edges = edges;
   bipElec.edgeMin = .5;
