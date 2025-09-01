@@ -65,6 +65,7 @@
 		  <a class="viewBtn" id="_env">envelope correlation</a>
 		  <a class="viewBtn divider" id="_ciPLV">corrected imaginary PLV</a> 
           <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a>
+		  <a class="viewBtn" id="_wPLI">weighted phase lag index</a> 
 		  <a class="viewBtn" id="_OAEC">orthogonalized env. correlation</a> 
         </div>
     </div>
@@ -135,7 +136,7 @@
   let plotlyColorscales = await response.json()
   
   const freqList = ['delta', 'theta', 'alpha', 'beta'];
-  const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh", "OAEC"];
+  const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh", "wPLI", "OAEC"];
   const measStr = ['strength', 'CC', 'eigCent'];
   var connMap = []; // variable with the current heatmap
   var currFreqId = 0; // variable with the current frequency index (linked to freqList)
@@ -410,7 +411,30 @@
 		  //dtick: 1,
 		  automargin: true,
 		  autorange: 'reversed'
-	  }
+	  },
+	  shapes: [{
+		type: 'line',
+		x0: 118/2+.5-1,
+		y0: 0-.5,
+		x1: 118/2+.5-1,
+		y1: 118-1+.5,
+		line: {
+		  color: 'white',
+		  width: 2,
+		  dash: 'dot'
+		}},
+		{
+		type: 'line',
+		y0: 118/2+.5-1,
+		x0: 0-.5,
+		y1: 118/2+.5-1,
+		x1: 118-1+.5,
+		line: {
+		  color: 'white',
+		  width: 2,
+		  dash: 'dot'
+		}
+	  }]
 	};
 	Plotly.newPlot('matrixDiv', data, layout, {responsive: true});
 	matrixDiv.on('plotly_hover', function(data){

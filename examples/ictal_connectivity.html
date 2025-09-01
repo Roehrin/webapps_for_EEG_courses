@@ -75,6 +75,7 @@
 		  <a class="viewBtn" id="_env">envelope correlation</a>
 		  <a class="viewBtn divider" id="_ciPLV">corrected imaginary PLV</a> 
           <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a>
+		  <a class="viewBtn" id="_wPLI">weighted phase lag index</a> 
 		  <a class="viewBtn" id="_OAEC">orthogonalized env. correlation</a> 
         </div>
     </div>
@@ -365,7 +366,7 @@
   var hdr = await vhdrReader.readVHDRfromURL(fileUrl.replace(".eeg", ".vhdr"));
   var iEEGdata = await vhdrReader.readBrainvisionEEGData(fileUrl,hdr, 0.0064/2, true);
   const freqList = ['delta', 'theta', 'alpha', 'beta', 'gamma'];
-  const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh", "OAEC"];
+  const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh", "wPLI", "OAEC"];
   const measStr = ['EI', 'spike', 'gamma', 'ripple', 'strength', 'CC', 'eigCent'];
    
   function updateLabel(){
