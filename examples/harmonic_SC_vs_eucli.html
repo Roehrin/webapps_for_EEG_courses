@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>4D Meshes - Network measures</title>
+	<link rel="stylesheet" href="../niivue_dualview.css" />
+  </head>
+  <body>
+    <noscript>
+      <strong
+        >niivue doesn't work properly without JavaScript enabled. Please enable
+        it to continue.</strong
+      >
+    </noscript>
+    <header>
+	<h3>Network Harmonics</h3>
+	<div class='row'>
+			<div style="outline: #505050 2px solid; padding: 2px 10px; width:50%;">
+			<label for="harmonicID">harmonic ID</label>
+			<input
+				type="range"
+				min="0"
+				max="117"
+				value="0"
+				class="slider"
+				style="width:80%"
+				id="harmonicID"
+			/>
+			</div>
+			<div style="outline: #505050 2px solid; padding: 2px 10px;">
+				Show:
+				<input type="checkbox"  id="leftCheck" checked />
+				<label for="leftCheck">Left hemishpere</label>
+				<input type="checkbox"  id="rightCheck" checked />
+				<label for="rightCheck">Right hemishpere</label>
+			</div>
+			<div style="outline: #505050 2px solid; padding: 2px 10px;">
+				<label for="harmSC">Structural</label>
+				<input type="radio" id="harmSC" name="harmMetric" checked>
+				<label for="harmEC">Euclidean</label>
+				<input type="radio" id="harmEC" name="harmMetric">
+			</div>	
+	</div>
+	</header>
+	<main id="container">
+		  <canvas id="gl1" height=600>
+	</main>
+  </body>
+</html>
+<script type="module" async>
+  import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
+  let response = await fetch("../ictal_connectivity/plotlyColorscale4niiVue.json", {})
+  let plotlyColorscales = await response.json()
+  document.getElementById("harmSC").addEventListener("input", changeLayer);
+  document.getElementById("harmEC").addEventListener("input", changeLayer);
+  
+  var harmID = document.getElementById("harmonicID");
+  var lhBtn = document.getElementById("leftCheck");
+  var rhBtn = document.getElementById("rightCheck");
+  lhBtn.oninput = function () {
+	let nvList = [nv1];
+	for (let i = 0; i < nvList.length; i++) {
+		nvList[i].setMeshProperty(nvList[i].meshes[1].id, "visible", lhBtn.checked);  
+	}
+  }
+  rhBtn.oninput = function () {
+	let nvList = [nv1];
+	for (let i = 0; i < nvList.length; i++) {
+		nvList[i].setMeshProperty(nvList[i].meshes[0].id, "visible", rhBtn.checked);  
+	}
+  }
+  harmID.oninput = function () {
+    let nvList = [nv1];
+	for (let i = 0; i < nvList.length; i++) {
+		let metric = "EC";
+		if (harmSC.checked){metric = "SC"}
+		nvList[i].document.labels[0].text = 'Network Harm. ' + metric + ' ' + this.value;
+		nvList[i].setMeshLayerProperty(nvList[i].meshes[0].id, 0, "frame4D", this.value);
+		nvList[i].setMeshLayerProperty(nvList[i].meshes[1].id, 0, "frame4D", this.value);  
+	}
+  };
+  async function changeLayer(){
+	let metric = "EC";
+	if (harmSC.checked){metric = "SC"}
+	let fname = "../network_harmonics/" + "rh_" + metric + "_harmonic_mesh.gii";
+	console.log(fname)
+	meshLayersR[0].url = fname;
+	meshLayersL[0].url = fname.replace("rh_", "lh_");
+	let nvList = [nv1];
+	for (let i = 0; i < nvList.length; i++) {
+		nvList[i].drawThumbnail();
+		nvList[i].meshes[0].layers = []; // remove current layer
+		nvList[i].meshes[1].layers = []; // remove current layer
+		await niivue.NVMesh.loadLayer(meshLayersR[0], nvList[i].meshes[0]);
+		await niivue.NVMesh.loadLayer(meshLayersL[0], nvList[i].meshes[1]);
+	}
+	harmID.oninput();
+  }
+  
+  
+  var opt = {
+	show3Dcrosshair: false,
+	isColorbar: false,
+	showLegend: true,
+	backColor: [0.9, 0.9, 1, 1],
+	meshXRay: 0,
+	isOrientCube: true,
+	dragAndDropEnabled: true,
+  }
+  var nv1 = new niivue.Niivue(opt);
+  nv1.attachTo("gl1");
+  var meshLayersR = [{
+      url: "../network_harmonics/rh_SC_harmonic_mesh.gii",
+	  colormap: "hot",
+	  colormapNegative: "electric_blue",
+	  cal_min: 0,
+      cal_max: .71,
+      useNegativeCmap: true,
+      opacity: 1,
+    }];
+  var meshLayersL = [{
+      url: "../network_harmonics/lh_SC_harmonic_mesh.gii",
+	  colormap: "hot",
+	  colormapNegative: "electric_blue",
+	  cal_min: 0,
+      cal_max: .71,
+      useNegativeCmap: true,
+      opacity: 1,
+  }];
+  var MeshList = [
+    {
+      url: "../network_harmonics/rh_SC_harmonic_mesh.gii",
+	  layers: meshLayersR,
+    },
+	{
+      url: "../network_harmonics/lh_SC_harmonic_mesh.gii",
+	  layers: meshLayersL,
+    },
+  ];
+  await nv1.loadMeshes(MeshList);
+  Object.keys(plotlyColorscales).map(function(item) {nv1.addColormap(item, plotlyColorscales[item])})
+  
+  var modality = "eucli";
+  var allValuesR = nv1.meshes[0].layers[0].values;
+  var allValuesL = nv1.meshes[1].layers[0].values;
+  const nFrame4D = nv1.meshes[1].layers[0].nFrame4D;
+  const nVerticesR = allValuesR.length/nFrame4D;
+  const nVerticesL = allValuesL.length/nFrame4D;
+  var maxList = [];
+  nv1.addLabel('Network Harm. SC 0', 
+    		{ textScale: 1.2, textAlignment: niivue.LabelTextAlignment.CENTER },undefined, niivue.LabelAnchorPoint.NONE);
+  nv1.updateGLVolume()
+
+</script>
