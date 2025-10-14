@@ -6,8 +6,38 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>4D Meshes - EEG topography</title>
-	<script src="../src/nav-banner-smart.js"></script>
 	<link rel="stylesheet" href="../niivue_dualview.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      header {
+        display: none;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+      .page-wrapper {
+        width: 100%;
+        height: 100%;
+      }
+      .row {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+      .column {
+        flex: 1;
+        height: 100%;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
   </head>
   <body>
     <noscript>
@@ -98,10 +128,10 @@
 	<div class='page-wrapper'>
         <div class='row'>
           <div class='column'>
-              <canvas id="gl1">
+              <canvas id="gl1"></canvas>
           </div>
           <div class='column' style="pointer-events: none">
-              <canvas id="gl2">
+              <canvas id="gl2"></canvas>
           </div>
         </div>
     </div>
@@ -120,6 +150,10 @@
   var yBtn = document.getElementById('oriY')
   var zBtn = document.getElementById('oriZ')
   var custBtn = document.getElementById('oriCust')
+  const srcnmbr = parseFloat(urlParams.get('srcnmbr')) || 0;
+  const elevation = parseFloat(urlParams.get('elevation')) || 0;
+  const azimuth = parseFloat(urlParams.get('srcnmbr')) || 0;
+  
   var nElec = 208;
   var layIdx = 0;
   var azi = 0; var elev = 0; const R = 10;// variable for the custom dipole orientation  
@@ -259,7 +293,7 @@
 	nv2.setMeshProperty(0, "edgeMin", 0)
   };
   var nv1 = new niivue.Niivue({
-    show3Dcrosshair: true,
+    show3Dcrosshair: false,
 	isColorbar: false,
 	showLegend: false,
     backColor: [0.9, 0.9, 1, 1],
@@ -338,7 +372,7 @@
   ]);
   
   //await nv1.loadConnectome(dipole)
-  nv1.addMesh(nv1.loadConnectomeAsMesh(dipole))
+  //nv1.addMesh(nv1.loadConnectomeAsMesh(dipole))
   nv1.drawScene()
   nv1.setMeshShader(nv1.meshes[0].id, "Diffuse");
   updateCrosshairPos()
@@ -346,7 +380,7 @@
   var nv2 = new niivue.Niivue({
     show3Dcrosshair: false,
 	dragAndDropEnabled: false,
-	isColorbar: true,
+	isColorbar: false,
 	showLegend: false,
     backColor: [0.9, 0.9, 1, 1],
 	meshXRay: 0,

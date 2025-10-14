@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Connectivity during seizure recorded by iEEG.</title>
+	<script src="../src/nav-banner-smart.js"></script>
     <link rel="stylesheet" href="../niivue_dualview.css" />
   </head>
   <body>
@@ -75,6 +76,7 @@
 		  <a class="viewBtn" id="_env">envelope correlation</a>
 		  <a class="viewBtn divider" id="_ciPLV">corrected imaginary PLV</a> 
           <a class="viewBtn" id="_cicoh">corrected imaginary coherence</a>
+
 		  <a class="viewBtn" id="_wPLI">weighted phase lag index</a> 
 		  <a class="viewBtn" id="_OAEC">orthogonalized env. correlation</a> 
         </div>
@@ -113,10 +115,11 @@
 			  <i class="fa fa-caret-down"></i>
 			</button>
 			<div class="dropdown-content">
-				<a class="viewBtn dropdown" id="-Help">Help</a>
+
 				<a class="viewBtn dropdown" id="-Authors">Authors</a>
 				<a class="viewBtn dropdown" href="https://github.com/niivue/niivue" target="_blank">Niivue</a>
 				<a class="viewBtn dropdown" href="https://plotly.com/javascript/" target="_blank">Plotly</a>
+				<a class="viewBtn dropdown" id="-ToggleIframe">Toggle Documentation</a>
 			</div>
 		</div>
   </header>
@@ -143,6 +146,14 @@
     <label for="nodeSlider">Node Size</label>
     <input type="range" min="1" max="200" value="100" class="slider" id="nodeSlider" />
   </footer>
+   <div class="iframe-section" id="iframeSection">
+			<div class="iframe-header">
+				<span>Documentation Viewer</span>
+				<a class="viewBtn dropdown divider" id="-ToggleIframe">Close documentation</a>
+			</div>
+			
+			<iframe class="iframe-container" id="documentationFrame" src="docs.html"></iframe>
+		</div>
   </body>
 </html>
 <script type="module" async>
@@ -222,6 +233,10 @@
 			} else if (event.target.id.substr(1) == "Authors"){
 				alert("The data were curated and selected by Dr Stanislas Lagarde.\nThe data were processed by Dr Nicolas Roehri, using Fieldtrip.\nThe webpage was written by Dr Nicolas Roehri, using Niivue and Plotly.");
 			}
+
+				else if (event.target.id.substr(1) == "ToggleIframe") {
+				toggleIframeDisplay();
+				}
 			return
 		}
 	document.body.style.cursor = 'wait'	
@@ -367,6 +382,8 @@
   var iEEGdata = await vhdrReader.readBrainvisionEEGData(fileUrl,hdr, 0.0064/2, true);
   const freqList = ['delta', 'theta', 'alpha', 'beta', 'gamma'];
   const connList = ["PLV", "coh", "envCorr", "ciPLV", "cicoh", "wPLI", "OAEC"];
+
+
   const measStr = ['EI', 'spike', 'gamma', 'ripple', 'strength', 'CC', 'eigCent'];
    
   function updateLabel(){
@@ -658,4 +675,7 @@
 	//	}
 	//}
 	document.body.style.cursor = 'default';
+
 </script>
+
+<script src="../js-scripts/iFrames.js" data-caller="ictal_connectivity"></script>

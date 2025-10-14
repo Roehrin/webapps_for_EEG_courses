@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>4D Meshes - EEG topography</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      header {
+        display: none;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+      .page-wrapper {
+        width: 100%;
+        height: 100%;
+      }
+      .row {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+      .column {
+        flex: 1;
+        height: 100%;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+      .column:nth-child(2) {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <strong>niivue doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <header>
+      <h3>Investigate the effect of single brain sources on the EEG voltage map</h3>
+      <p>EEG electrodes are represented as yellow spheres, the voltage map is colour coded (red: positive values, blue: negative values).</p>
+      <div class='row'>
+        <div style="outline: #505050 2px solid; padding: 2px 10px;">
+          <label for="meshXRay">XRay</label>
+          <input type="range" min="0" max="10" value="3" class="slider" id="meshXRay" />
+        </div>
+        <div style="outline: #505050 2px solid; padding: 2px 10px;">
+          <label for="meshMinSlider">Min threshold</label>
+          <input type="range" min="0" max="1000" value="0" class="slider" id="meshMinSlider" />
+        </div>
+        <div style="outline: #505050 2px solid; padding: 2px 10px;">
+          <label for="meshMaxSlider">Max threshold</label>
+          <input type="range" min="100" max="1000" value="100" class="slider" id="meshMaxSlider" />
+        </div>
+        <div style="outline: #505050 2px solid; padding: 2px 10px;">
+          <label for="gammaSlider">Gamma</label>
+          <input type="range" min="10" max="400" value="100" class="slider" id="gammaSlider" />
+        </div>
+        <div style="outline: #505050 2px solid; padding: 2px 10px;">
+          <label for="normLeadfield">Normalised Leadfield</label>
+          <input type="checkbox" id="normLeadfield" checked />
+        </div>
+      </div>
+      <div class='row'>
+        <div style="outline: #505050 2px solid; padding: 2px 10px;">
+          Source orientation:
+          <label for="oriX">X</label>
+          <input type="radio" id="oriX" name="sourceOri" checked>
+          <label for="oriY">Y</label>
+          <input type="radio" id="oriY" name="sourceOri">
+          <label for="oriZ">Z</label>
+          <input type="radio" id="oriZ" name="sourceOri">
+          <label for="oriCust" style="border-left: 2px solid grey; padding-left: 10px">custom:</label>
+          <input type="radio" id="oriCust" name="sourceOri">
+          <label for="aziSlider">azimuth</label>
+          <input type="range" min="0" max="100" value="0" class="slider" disabled="true" id="aziSlider"/>
+          <label for="elevSlider">elevation</label>
+          <input type="range" min="0" max="100" value="0" class="slider" disabled="true" id="elevSlider"/>
+        </div>
+      </div>
+      <label for="srcSlider">Brain source</label>
+      <button id="prevSource">previous</button>
+      <input type="range" min="0" max="1156" value="0" class="slider" style="width:50%" id="srcSlider" />
+      <button id="nextSource">next</button>
+    </header>
+    <main id="container">
+      <div class='page-wrapper'>
+        <div class='row'>
+          <div class='column'>
+            <canvas id="gl1"></canvas>
+          </div>
+          <div class='column' style="pointer-events: none">
+            <canvas id="gl2"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+<script type="module" async>
+  import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
+  
+  var srcSlider = document.getElementById("srcSlider");
+  var minSlider = document.getElementById("meshMinSlider");
+  var maxSlider = document.getElementById("meshMaxSlider");
+  var aziSlider = document.getElementById("aziSlider");
+  var eleSlider = document.getElementById("elevSlider");
+  var xBtn = document.getElementById('oriX');
+  var yBtn = document.getElementById('oriY');
+  var zBtn = document.getElementById('oriZ');
+  var custBtn = document.getElementById('oriCust');
+  var meshXRay = document.getElementById('meshXRay');
+  var normLeadfield = document.getElementById('normLeadfield');
+  var prevSource = document.getElementById('prevSource');
+  var nextSource = document.getElementById('nextSource');
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const srcnmbr = parseFloat(urlParams.get('srcnmbr')) || 0;
+  const elevation = parseFloat(urlParams.get('elevation')) || 0;
+  const azimuth = parseFloat(urlParams.get('azimuth')) || 0;
+  const shellcolor = 120;
+  
+  var nElec = 208;
+  var layIdx = 0;
+  var azi = azimuth * 2 * Math.PI * 0.01;
+  var elev = elevation * 2 * Math.PI * 0.01;
+  const R = 10;
+  
+  // Set slider values from URL params
+  srcSlider.value = srcnmbr;
+  aziSlider.value = azimuth;
+  eleSlider.value = elevation;
+  
+  // If custom orientation params are provided, enable custom mode
+  if (azimuth !== 0 || elevation !== 0) {
+    custBtn.checked = true;
+    eleSlider.disabled = false;
+    aziSlider.disabled = false;
+  }
+  
+  const response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/src/source_points.jcon", {});
+  const srcPos = await response.json();
+  var currSrcPos = [srcPos.nodes.X[5*srcnmbr], srcPos.nodes.Y[5*srcnmbr], srcPos.nodes.Z[5*srcnmbr]];
+  
+  var nv1 = new niivue.Niivue({
+    show3Dcrosshair: true,
+    isColorbar: false,
+    showLegend: false,
+    backColor: [0.9, 0.9, 1, 1],
+    meshXRay: 0.3,
+    isOrientCube: true,
+    dragAndDropEnabled: false,
+  });
+  nv1.setSliceType(nv1.sliceTypeRender);
+  nv1.attachTo("gl1");
+  
+  var meshLayersList = [
+    {
+      url: "../src/testleadfield100.gii",
+	  colormap: "hot",
+	  colormapNegative: "electric_blue",
+	  cal_min: 0,
+      cal_max: shellcolor,
+      useNegativeCmap: true,
+      opacity: 0.4,
+    },
+	{
+      url: "../src/testleadfield100.gii",
+	  colormap: "hot",
+	  colormapNegative: "electric_blue",
+	  cal_min: 0,
+      cal_max: shellcolor,
+      useNegativeCmap: true,
+      opacity: 0,
+    }
+  ];
+  
+  const offset = [
+    R * Math.cos(elev) * Math.cos(azi),
+    R * Math.cos(elev) * Math.sin(azi),
+    R * Math.sin(elev)
+  ];
+  
+  var dipole = {
+    name: "dipole",
+    nodeColormap: "red",
+    nodeColormapNegative: "",
+    nodeMinColor: 0,
+    nodeMaxColor: 1,
+    nodeScale: 1,
+    edgeColormap: "red",
+    edgeColormapNegative: "",
+    edgeMin: 0,
+    edgeMax: 2.5,
+    edgeScale: 1,
+    legendLineThickness: 0,
+    nodes: [
+      {
+        name: "source",
+        x: currSrcPos[0],
+        y: currSrcPos[1],
+        z: currSrcPos[2],
+        colorValue: 1,
+        sizeValue: 5
+      },
+      {
+        name: "target",
+        x: currSrcPos[0] + 1.4 * offset[0],
+        y: currSrcPos[1] + 1.4 * offset[1],
+        z: currSrcPos[2] + 1.4 * offset[2],
+        colorValue: 1,
+        sizeValue: 2.5
+      }
+    ],
+    edges: [{
+      first: 0,
+      second: 1,
+      colorValue: 2.5
+    }],
+  };
+  
+   await nv1.loadMeshes([
+    {
+      url: "../src/testleadfield100.gii",
+	  layers: meshLayersList,
+    },
+	{
+      url: "https://roehrin.github.io/webapps_for_EEG_courses/src/EGI257_electrodes.jcon",
+    },
+  ]);
+  
+  nv1.addMesh(nv1.loadConnectomeAsMesh(dipole));
+  nv1.setMeshShader(nv1.meshes[0].id, "Diffuse");
+  
+  const nFrame4D = nv1.meshes[0].layers[0].nFrame4D;
+  nv1.meshes[0].layers[0].nFrame4D = nFrame4D + 1;
+  nv1.meshes[0].layers[1].nFrame4D = nFrame4D + 1;
+  
+  let currNormV = nv1.meshes[0].layers[0].values;
+  let currV = nv1.meshes[0].layers[1].values;
+  let newNormV = new Float32Array(currNormV.length + nElec);
+  let newV = new Float32Array(currV.length + nElec);
+  newNormV.set(currNormV, 0);
+  newV.set(currV, 0);
+  nv1.meshes[0].layers[0].values = newNormV;
+  nv1.meshes[0].layers[1].values = newV;
+  
+  function updateCrosshairPos() {
+    let dPos = nv1.mm2frac(currSrcPos);
+    nv1.scene.crosshairPos = dPos;
+    nv1.createOnLocationChange();
+    nv1.drawScene();
+  }
+  
+  meshXRay.oninput = function () {
+    nv1.opts.meshXRay = this.value * 0.1;
+    if (this.value === "0") {
+      nv1.opts.show3Dcrosshair = false;
+      nv1.meshes[2].visible = false;
+    } else {
+      nv1.opts.show3Dcrosshair = true;
+      nv1.meshes[2].visible = true;
+    }
+    nv1.drawScene();
+  };
+  
+  aziSlider.oninput = function () {
+    if (!custBtn.checked) return;
+    azi = 2 * Math.PI * 0.01 * this.value;
+    srcSlider.oninput();
+  };
+  
+  eleSlider.oninput = function () {
+    if (!custBtn.checked) return;
+    elev = 2 * Math.PI * 0.01 * this.value;
+    srcSlider.oninput();
+  };
+  
+  custBtn.onclick = function () {
+    eleSlider.disabled = false;
+    aziSlider.disabled = false;
+    srcSlider.oninput();
+  };
+  
+  xBtn.onclick = function () {
+    eleSlider.disabled = true;
+    aziSlider.disabled = true;
+    srcSlider.oninput();
+  };
+  
+  yBtn.onclick = function () {
+    eleSlider.disabled = true;
+    aziSlider.disabled = true;
+    srcSlider.oninput();
+  };
+  
+  zBtn.onclick = function () {
+    eleSlider.disabled = true;
+    aziSlider.disabled = true;
+    srcSlider.oninput();
+  };
+  
+  minSlider.oninput = function () {
+    nv1.setMeshLayerProperty(nv1.meshes[0].id, layIdx, "cal_min", this.value * 0.1);
+  };
+  
+  maxSlider.oninput = function () {
+    nv1.setMeshLayerProperty(nv1.meshes[0].id, layIdx, "cal_max", this.value * 0.1);
+  };
+  
+  srcSlider.oninput = function () {
+    let oriIdx = 1 * yBtn.checked + 2 * zBtn.checked;
+    let currentSrcNmbr = parseInt(this.value);
+    currSrcPos = [srcPos.nodes.X[5*currentSrcNmbr], srcPos.nodes.Y[5*currentSrcNmbr], srcPos.nodes.Z[5*currentSrcNmbr]];
+    updateCrosshairPos();
+    
+    // Recalculate offset based on current azi/elev values
+    let offset = [
+      R * Math.cos(elev) * Math.cos(azi),
+      R * Math.cos(elev) * Math.sin(azi),
+      R * Math.sin(elev)
+    ];
+    
+    nv1.meshes[2].nodes = [
+      {
+        name: "source",
+        x: currSrcPos[0],
+        y: currSrcPos[1],
+        z: currSrcPos[2],
+        colorValue: 1,
+        sizeValue: 5
+      },
+      {
+        name: "target",
+        x: currSrcPos[0] + 1.4 * offset[0],
+        y: currSrcPos[1] + 1.4 * offset[1],
+        z: currSrcPos[2] + 1.4 * offset[2],
+        colorValue: 1,
+        sizeValue: 2.5
+      }
+    ];
+    nv1.meshes[2].updateMesh(nv1.gl);
+    
+    if (custBtn.checked) {
+      let values = nv1.meshes[0].layers[1].values;
+      let currTopoX = values.slice(3*currentSrcNmbr*nElec, 3*currentSrcNmbr*nElec + nElec);
+      let currTopoY = values.slice(3*currentSrcNmbr*nElec + nElec, 3*currentSrcNmbr*nElec + 2*nElec);
+      let currTopoZ = values.slice(3*currentSrcNmbr*nElec + 2*nElec, 3*currentSrcNmbr*nElec + 3*nElec);
+      
+      let normOffset = offset.map(o => o / R);
+      let currTopo = currTopoX.map((num, idx) => 
+        normOffset[0] * num + normOffset[1] * currTopoY[idx] + normOffset[2] * currTopoZ[idx]
+      );
+      
+      nv1.meshes[0].layers[1].values.set(currTopo, nFrame4D * nElec);
+      
+      let maxV = Math.max(...currTopo.map(Math.abs));
+      let currTopoNorm = currTopo.map(v => 90 * v / maxV);
+      nv1.meshes[0].layers[0].values.set(currTopoNorm, nFrame4D * nElec);
+      
+      nv1.setMeshLayerProperty(nv1.meshes[0].id, layIdx, "frame4D", nFrame4D);
+    } else {
+      nv1.setMeshLayerProperty(nv1.meshes[0].id, layIdx, "frame4D", 3*currentSrcNmbr + oriIdx);
+    }
+  };
+  
+  normLeadfield.onclick = function() {
+    layIdx = 1 * !normLeadfield.checked;
+    nv1.setMeshLayerProperty(nv1.meshes[0].id, 0, "opacity", normLeadfield.checked ? 1 : 0);
+    nv1.setMeshLayerProperty(nv1.meshes[0].id, 1, "opacity", !normLeadfield.checked ? 1 : 0);
+    minSlider.oninput();
+    maxSlider.oninput();
+    srcSlider.oninput();
+  };
+  
+  var gamSlider = document.getElementById("gammaSlider");
+  gamSlider.oninput = function () {
+    nv1.setGamma(this.value * 0.01);
+    nv1.setMeshProperty(0, "edgeMin", 0);
+  };
+  
+  prevSource.onclick = function () {
+    srcSlider.value = String(srcSlider.valueAsNumber - 1);
+    srcSlider.oninput();
+  };
+  
+  nextSource.onclick = function () {
+    srcSlider.value = String(srcSlider.valueAsNumber + 1);
+    srcSlider.oninput();
+  };
+  
+  updateCrosshairPos();
+  nv1.setRenderAzimuthElevation(0, 90);
+  nv1.drawScene();
+  srcSlider.oninput();
+</script>

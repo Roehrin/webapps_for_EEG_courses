@@ -40,6 +40,16 @@ footer {
 	align-items: stretch;
 	background: #404040;
 }
+.columnpl {
+	display: flex;
+	flex-direction: column;
+	flex-basis: 100%;
+	flex: 1;
+	
+	align-items: center;
+	background: #FFFFFF;
+}
+
 .dropdown {
   float: left;
   overflow: hidden;
@@ -106,4 +116,45 @@ footer {
   display: flex;
   align-items: center;
   flex: 0 0 auto;
+
 }
+
+ .iframe-section {
+        display: none; /* Hidden by default */
+        margin: 10px;
+        border: 1px solid #606060;
+        border-radius: 5px;
+        background: #303030;
+        overflow: hidden;
+      }
+      
+      .iframe-header {
+        background: #404040;
+        padding: 10px;
+        color: white;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .iframe-close-btn {
+        background: #606060;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      
+      .iframe-close-btn:hover {
+        background: #808080;
+      }
+      
+      .iframe-container {
+        width: 100%;
+        height: 800px;
+        border: none;
+      }
+

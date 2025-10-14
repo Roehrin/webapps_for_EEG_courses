@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+	<script src="../src/nav-banner-smart.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MNE / wMNE / eLORETA Quiz</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  color: #333;
+}
+
+.quiz-container {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  margin: 20px 0;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.quiz-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.quiz-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.quiz-subtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  font-weight: 400;
+}
+
+.image-container {
+  text-align: center;
+  margin: 30px 0;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background: #f8f9fa;
+  padding: 20px;
+}
+
+#target iframe {
+  width: 100%;
+  max-width: 450px;
+  height: 400px;
+  border: none;
+  border-radius: 10px;
+}
+
+.choices-section {
+  margin: 30px 0;
+}
+
+.choices-label {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.options {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.choice-btn {
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 100px;
+}
+
+.choice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.choice-btn:active {
+  transform: translateY(0);
+}
+
+.choice-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.choice-btn:hover::before {
+  left: 100%;
+}
+
+.feedback {
+  margin: 25px 0;
+  font-weight: 600;
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.feedback.correct {
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: white;
+  animation: pulse 0.6s ease-out;
+}
+
+.feedback.incorrect {
+  background: linear-gradient(135deg, #e17055, #fdcb6e);
+  color: white;
+  animation: shake 0.6s ease-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.refresh-section {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.refresh-btn {
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+  color: white;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(253, 121, 168, 0.4);
+}
+
+.refresh-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.refresh-btn:hover::before {
+  left: 100%;
+}
+
+.stats {
+  text-align: center;
+  margin-top: 20px;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .quiz-container {
+    padding: 25px;
+    margin: 10px;
+  }
+  
+  .quiz-title {
+    font-size: 1.6rem;
+  }
+  
+  .options {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .choice-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="quiz-container">
+  <div class="quiz-header">
+    <h1 class="quiz-title">Source Localization Quiz</h1>
+    <p class="quiz-subtitle">Which solver generated this brain activity pattern?</p>
+  </div>
+  
+  <div class="image-container">
+    <div id="target"></div>
+  </div>
+  
+  <div class="choices-section">
+    <h3 class="choices-label">Select your answer:</h3>
+    <div class="options" id="choices"></div>
+  </div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <div class="refresh-section">
+    <button class="refresh-btn" onclick="refreshQuiz()">
+      🔄 Next Question
+    </button>
+  </div>
+  
+  <div class="stats">
+    <p>New question generated with random solver and source location</p>
+  </div>
+</div>
+
+<script>
+// --- Configuration ---
+const solvers = ["MNE", "wMNE", "eLORETA"];
+const baseURL = "../examples/display_Point_Spread_Functions_on_MRI_hidden.html";
+let correctSolver;
+let answered = false;
+
+function initializeQuiz() {
+  // Pick random correct solver
+  correctSolver = solvers[Math.floor(Math.random() * solvers.length)];
+  let srcnmbr = Math.floor(Math.random() * 116);
+  
+  document.getElementById("target").innerHTML =
+    `<iframe src="${baseURL}?method=${correctSolver}&srcnmbr=${srcnmbr}"></iframe>`;
+  
+  // Clear previous feedback
+  const feedback = document.getElementById("feedback");
+  feedback.textContent = "";
+  feedback.className = "feedback";
+  
+  // Build choice buttons dynamically
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+  
+  // Shuffle solvers for random button order
+  const shuffledSolvers = [...solvers].sort(() => Math.random() - 0.5);
+  
+  shuffledSolvers.forEach(solver => {
+    const btn = document.createElement("button");
+    btn.textContent = solver;
+    btn.className = "choice-btn";
+    btn.addEventListener("click", () => checkAnswer(solver));
+    choicesDiv.appendChild(btn);
+  });
+  
+  answered = false;
+}
+
+// Check answer
+function checkAnswer(selected) {
+  if (answered) return; // Prevent multiple answers
+  answered = true;
+  
+  const feedback = document.getElementById("feedback");
+  const buttons = document.querySelectorAll(".choice-btn");
+  
+  // Disable all buttons
+  buttons.forEach(btn => {
+    btn.style.opacity = "0.6";
+    btn.style.cursor = "not-allowed";
+  });
+  
+  if (selected === correctSolver) {
+    feedback.textContent = `✅ Excellent! The correct answer is ${correctSolver}`;
+    feedback.className = "feedback correct";
+  } else {
+    feedback.textContent = `❌ Not quite right. The correct answer was ${correctSolver}`;
+    feedback.className = "feedback incorrect";
+  }
+}
+
+function refreshQuiz() {
+  // Add a subtle loading animation
+  const container = document.querySelector('.quiz-container');
+  container.style.opacity = '0.7';
+  
+  setTimeout(() => {
+    initializeQuiz();
+    container.style.opacity = '1';
+  }, 200);
+}
+
+// Initialize quiz on page load
+initializeQuiz();
+</script>
+</body>
+</html>

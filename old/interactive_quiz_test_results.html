@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EEG Analysis Quiz</title>
+	<link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1 class="quiz-title" id="quizTitle">Loading Quiz...</h1>
+            <p class="quiz-description" id="quizDescription"></p>
+        </div>
+
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText"></div>
+        </div>
+
+        <div class="question-container" id="questionContainer">
+            <div id="questionContent"></div>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">Previous</button>
+            <div class="timer" id="timer"></div>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data (embedded JSON)
+        const quizData = {
+            "quiz": {
+                "title": "EEG Analysis and Visualization Quiz",
+                "description": "Test your understanding of EEG concepts using interactive visualizations",
+                "settings": {
+                    "timeLimit": 1000,
+                    "showProgress": true,
+                    "randomizeQuestions": true,
+                    "randomizeAnswers": true,
+                    "allowReview": true,
+                    "passingScore": 20
+                },
+                "questions": [
+                    {
+                        "id": "q1",
+                        "type": "multiple_choice",
+                        "title": "EEG Electrode Positioning",
+                        "content": {
+                            "html_reference": {
+                                "url": "https://roehrin.github.io/webapps_for_EEG_courses/examples/EEG_mesh_with_topo.html",
+                                "display_mode": "iframe",
+                                "height": "500px",
+                                "instructions": "Examine the 3D EEG visualization above. Use the sliders and controls to explore the interface."
+                            },
+                            "question_text": "Based on the interactive EEG visualization, what do the yellow spheres represent?",
+                            "options": [
+                                {"id": "a", "text": "Brain tissue regions"},
+                                {"id": "b", "text": "EEG electrode positions"},
+                                {"id": "c", "text": "Signal artifacts"},
+                                {"id": "d", "text": "Dipole sources"}
+                            ],
+                            "correct_answer": "b",
+                            "explanation": "The yellow spheres represent EEG electrode positions on the scalp, as stated in the visualization description."
+                        },
+                        "points": 10
+                    },
+                    {
+                        "id": "q2",
+                        "type": "multiple_select",
+                        "title": "Voltage Mapping Analysis",
+                        "content": {
+                            "html_reference": {
+                                "url": "https://roehrin.github.io/webapps_for_EEG_courses/examples/EEG_mesh_with_topo.html",
+                                "display_mode": "iframe",
+                                "height": "500px",
+                                "instructions": "Manipulate the 'Brain source' slider and observe the color changes in the voltage map."
+                            },
+                            "question_text": "According to the color coding system in the EEG visualization, which statements are correct? (Select all that apply)",
+                            "options": [
+                                {"id": "a", "text": "Red colors indicate positive voltage values"},
+                                {"id": "b", "text": "Blue colors indicate negative voltage values"},
+                                {"id": "c", "text": "Green colors indicate neutral voltage values"},
+                                {"id": "d", "text": "The gamma slider affects color contrast"}
+                            ],
+                            "correct_answers": ["a", "b", "d"],
+                            "explanation": "Red represents positive values, blue represents negative values, and the gamma slider controls contrast. Green is not mentioned in the color coding system."
+                        },
+                        "points": 10
+                    },
+
+                    {
+                        "id": "q3",
+                        "type": "multiple_choice",
+                        "title": "EEG Interface Controls",
+                        "content": {					
+							"question_text": "The 'Brain source' slider can be controlled using keyboard arrow keys after clicking on it.",
+                            "options": [
+                                {"id": "T", "text": "True"},
+                                {"id": "F", "text": "False"}
+                            ],
+                            "correct_answer": "T",
+                            "explanation": "According to the interface description, clicking the Brain source slider enables keyboard arrow key control."
+                        },
+                        "points": 10
+                    },
+                    {
+                        "id": "q4",
+                        "type": "external_html",
+                        "title": "Custom EEG Analysis",
+                        "content": {
+                            "html_content": "<div style='padding: 20px; border: 2px solid #333; border-radius: 8px; background: white;'><h3>EEG Signal Properties</h3><p>Consider the following EEG characteristics:</p><ul><li>Frequency range: 0.5-100 Hz</li><li>Amplitude: 10-100 µV</li><li>Spatial resolution: Limited by electrode spacing</li></ul><canvas id='eegDemo' width='400' height='200' style='border: 1px solid #ccc; margin: 10px 0; display: block;'></canvas></div>",
+                            "question_text": "Based on the EEG properties shown above and the simulated signal, what is the typical amplitude range of EEG signals?",
+                            "options": [
+                                {"id": "a", "text": "1-10 µV"},
+                                {"id": "b", "text": "10-100 µV"},
+                                {"id": "c", "text": "100-1000 µV"},
+                                {"id": "d", "text": "1-10 mV"}
+                            ],
+                            "correct_answer": "b"
+                        },
+                        "points": 10
+                    },
+					{
+					   "id": "q6",
+                        "type": "drag_drop_match",
+                        "title": "EEG Wave Pattern Matching",
+                        "content": {
+                            "question_text": "Match each EEG wave pattern with its corresponding frequency range and characteristics:",
+                            "drag_items": [
+                                {
+                                    "id": "alpha",
+                                    "text": "Alpha Waves",
+                                    "image": "data:image/svg+xml,%3Csvg width='60' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 20 Q15 10 25 20 T45 20' stroke='%23ff6b6b' stroke-width='2' fill='none'/%3E%3C/svg%3E"
+                                },
+                                {
+                                    "id": "beta",
+                                    "text": "Beta Waves",
+                                    "image": "data:image/svg+xml,%3Csvg width='60' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 20 Q10 10 15 20 T25 20 T35 20 T45 20' stroke='%234ecdc4' stroke-width='2' fill='none'/%3E%3C/svg%3E"
+                                },
+                                {
+                                    "id": "theta",
+                                    "text": "Theta Waves",
+                                    "image": "data:image/svg+xml,%3Csvg width='60' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 20 Q20 5 35 20 Q50 35 55 20' stroke='%23a8e6cf' stroke-width='2' fill='none'/%3E%3C/svg%3E"
+                                },
+                                {
+                                    "id": "delta",
+                                    "text": "Delta Waves",
+                                    "image": "data:image/svg+xml,%3Csvg width='60' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 20 Q30 5 55 20' stroke='%23ffd93d' stroke-width='3' fill='none'/%3E%3C/svg%3E"
+                                }
+                            ],
+                            "drop_zones": [
+                                {
+                                    "id": "range1",
+                                    "text": "8-13 Hz - Relaxed, eyes closed"
+                                },
+                                {
+                                    "id": "range2",
+                                    "text": "13-30 Hz - Active thinking, concentration"
+                                },
+                                {
+                                    "id": "range3",
+                                    "text": "4-8 Hz - Light sleep, meditation"
+                                },
+                                {
+                                    "id": "range4",
+                                    "text": "0.5-4 Hz - Deep sleep"
+                                }
+                            ],
+                            "correct_matches": {
+                                "alpha": "range1",
+                                "beta": "range2",
+                                "theta": "range3",
+                                "delta": "range4"
+                            }
+                        },
+                        "points": 25
+                    }
+                ],
+                "scoring": {
+                    "total_points": 65,
+                    "grade_scale": {"A": 40, "B": 30, "C": 20, "D": 10, "F": 0}
+                }
+            }
+        };
+
+        // Quiz state
+        let currentQuestion = 0;
+        let answers = {};
+        let startTime;
+        let timerInterval;
+        let shuffledQuestions = [];
+        let shuffledAnswers = {}; // Store shuffled answer orders for each question
+
+        // Utility function to shuffle array
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize quiz
+        function initializeQuiz() {
+            document.getElementById('quizTitle').textContent = quizData.quiz.title;
+            document.getElementById('quizDescription').textContent = quizData.quiz.description;
+            
+            // Shuffle questions if enabled
+            if (quizData.quiz.settings.randomizeQuestions) {
+                shuffledQuestions = shuffleArray(quizData.quiz.questions);
+            } else {
+                shuffledQuestions = [...quizData.quiz.questions];
+            }
+            
+            // Pre-shuffle answers for all questions if enabled
+            if (quizData.quiz.settings.randomizeAnswers) {
+                shuffledQuestions.forEach(question => {
+                    if (question.content.options) {
+                        shuffledAnswers[question.id] = shuffleArray(question.content.options);
+                    }
+                });
+            }
+            
+            if (quizData.quiz.settings.showProgress) {
+                document.getElementById('progressContainer').style.display = 'block';
+            }
+            
+            startTime = Date.now();
+            if (quizData.quiz.settings.timeLimit) {
+                startTimer();
+            }
+            
+            showQuestion(0);
+            document.getElementById('controls').style.display = 'flex';
+        }
+
+        function startTimer() {
+            const timeLimit = quizData.quiz.settings.timeLimit;
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = timeLimit - elapsed;
+                
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                    return;
+                }
+                
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                document.getElementById('timer').textContent = 
+                    `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function showQuestion(index) {
+            const question = shuffledQuestions[index];
+            const container = document.getElementById('questionContent');
+            
+            // Check if this is the same question (to avoid iframe reload)
+            const isSameQuestion = container.dataset.currentQuestionId === question.id;
+            
+            // Update progress
+            if (quizData.quiz.settings.showProgress) {
+                const progress = ((index + 1) / shuffledQuestions.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent = 
+                    `Question ${index + 1} of ${shuffledQuestions.length}`;
+            }
+            
+            // If same question, just update selections without rebuilding HTML
+            if (isSameQuestion) {
+                updateQuestionSelections(question);
+                updateNavigationButtons(index);
+                return;
+            }
+            
+            let html = `<h2 class="question-title">${question.title}</h2>`;
+            
+            // Add HTML reference (iframe or custom HTML)
+            if (question.content.html_reference) {
+                const ref = question.content.html_reference;
+                if (ref.instructions) {
+                    html += `<div class="embed-instructions">${ref.instructions}</div>`;
+                }
+                html += `<div class="html-embed">
+                    <iframe src="${ref.url}" height="${ref.height}" sandbox="allow-scripts allow-same-origin"></iframe>
+                </div>`;
+            } else if (question.content.html_content) {
+                html += `<div class="custom-html-content">${question.content.html_content}</div>`;
+            }
+            
+            html += `<div class="question-text">${question.content.question_text}</div>`;
+            
+            // Get options (shuffled or original)
+            const optionsToUse = quizData.quiz.settings.randomizeAnswers && shuffledAnswers[question.id] 
+                ? shuffledAnswers[question.id] 
+                : question.content.options;
+            
+            // Render question based on type
+            if (question.type === 'multiple_choice' || question.type === 'external_html') {
+                html += '<div class="options-container">';
+                if (optionsToUse) {
+                    optionsToUse.forEach(option => {
+                        const checked = answers[question.id] === option.id ? 'checked' : '';
+                        html += `
+                            <div class="option ${checked ? 'selected' : ''}" onclick="selectOption('${question.id}', '${option.id}', 'radio')">
+                                <input type="radio" name="${question.id}" value="${option.id}" ${checked}>
+                                <span class="option-text">${option.text}</span>
+                            </div>`;
+                    });
+                }
+                html += '</div>';
+            } else if (question.type === 'multiple_select') {
+                html += '<div class="options-container">';
+                if (optionsToUse) {
+                    optionsToUse.forEach(option => {
+                        const checked = answers[question.id] && answers[question.id].includes(option.id) ? 'checked' : '';
+                        html += `
+                            <div class="option ${checked ? 'selected' : ''}" onclick="selectOption('${question.id}', '${option.id}', 'checkbox')">
+                                <input type="checkbox" name="${question.id}" value="${option.id}" ${checked}>
+                                <span class="option-text">${option.text}</span>
+                            </div>`;
+                    });
+                }
+                html += '</div>';
+            } else if (question.type === 'interactive_task') {
+                const value = answers[question.id] || '';
+                html += `
+                    <textarea class="text-area" id="task_${question.id}" 
+                        placeholder="Enter your observations here..." 
+                        oninput="updateTextAnswer('${question.id}')">${value}</textarea>
+                    <div class="word-count" id="wordcount_${question.id}">
+                        Words: ${value.split(' ').filter(w => w.length > 0).length}
+                    </div>`;
+            }  else if (question.type === 'drag_drop_match') {
+                html += renderDragDropQuestion(question);}
+			   else if (question.type === 'true_false') {
+                const trueChecked = answers[question.id] === true ? 'checked' : '';
+                const falseChecked = answers[question.id] === false ? 'checked' : '';
+                
+                // Create true/false options and potentially shuffle them
+                let tfOptions = [
+                    { id: true, text: 'True' },
+                    { id: false, text: 'False' }
+                ];
+                
+                if (quizData.quiz.settings.randomizeAnswers) {
+                    // Use consistent shuffle for true/false based on question ID
+                    const questionSeed = question.id.charCodeAt(question.id.length - 1);
+                    if (questionSeed % 2 === 0) {
+                        tfOptions = [tfOptions[1], tfOptions[0]]; // Swap order
+                    }
+                }
+                
+                html += '<div class="options-container">';
+                tfOptions.forEach(option => {
+                    const checked = answers[question.id] === option.id ? 'checked' : '';
+                    html += `
+                        <div class="option ${checked ? 'selected' : ''}" onclick="selectOption('${question.id}', ${option.id}, 'radio')">
+                            <input type="radio" name="${question.id}" value="${option.id}" ${checked}>
+                            <span class="option-text">${option.text}</span>
+                        </div>`;
+                });
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+            container.dataset.currentQuestionId = question.id;
+            
+            // Draw EEG demo if it's the custom HTML question
+            if (question.id === 'q4') {
+                setTimeout(drawEEGDemo, 100);
+            }
+            if (question.type === 'drag_drop_match') {
+                setTimeout(() => {
+                    setupDragAndDrop(question.id);
+                    checkMatches(question);
+                }, 100);
+            }
+            updateNavigationButtons(index);
+        }
+ function renderDragDropQuestion(question) {
+            const dragItems = question.content.drag_items;
+            const dropZones = question.content.drop_zones;
+            const userMatches = answers[question.id] || {};
+            
+            let html = '<div class="drag-drop-container">';
+            
+            // Left column - drag items
+            html += '<div class="drag-column">';
+            html += '<div class="column-title">Drag Items</div>';
+            html += '<div class="drag-items" id="dragItems_' + question.id + '">';
+            
+            dragItems.forEach(item => {
+                // Only show items that haven't been matched yet
+                const isMatched = Object.values(userMatches).includes(item.id);
+                if (!isMatched) {
+                    html += `
+                        <div class="drag-item" draggable="true" data-item-id="${item.id}" data-question-id="${question.id}">
+                            ${item.image ? `<img src="${item.image}" alt="${item.text}">` : ''}
+                            <span class="drag-item-text">${item.text}</span>
+                        </div>`;
+                }
+            });
+            
+            html += '</div></div>';
+            
+            // Right column - drop zones
+            html += '<div class="drag-column">';
+            html += '<div class="column-title">Drop Zones</div>';
+            html += '<div class="drop-zones" id="dropZones_' + question.id + '">';
+            
+            dropZones.forEach(zone => {
+                const matchedItemId = userMatches[zone.id];
+                const matchedItem = matchedItemId ? dragItems.find(item => item.id === matchedItemId) : null;
+                
+                html += `
+                    <div class="drop-zone ${matchedItem ? 'occupied' : ''}" 
+                         data-zone-id="${zone.id}" 
+                         data-question-id="${question.id}">
+                        <span class="drop-zone-label">${zone.text}</span>
+                        ${matchedItem ? `
+                            <div class="dropped-item" onclick="returnToSource('${question.id}', '${zone.id}')">
+                                ${matchedItem.image ? `<img src="${matchedItem.image}" alt="${matchedItem.text}">` : ''}
+                                <span>${matchedItem.text}</span>
+                            </div>
+                        ` : ''}
+                    </div>`;
+            });
+            
+            html += '</div></div></div>';
+            
+            return html;
+        }
+        function updateQuestionSelections(question) {
+            if (question.type === 'multiple_choice' || question.type === 'external_html' || question.type === 'true_false') {
+                updateRadioSelection(question.id, answers[question.id]);
+            } else if (question.type === 'multiple_select') {
+                updateCheckboxSelection(question.id);
+            } else if (question.type === 'interactive_task') {
+                const textarea = document.getElementById(`task_${question.id}`);
+                const wordCountDiv = document.getElementById(`wordcount_${question.id}`);
+                if (textarea && answers[question.id]) {
+                    textarea.value = answers[question.id];
+                    const words = answers[question.id].split(' ').filter(w => w.length > 0).length;
+                    wordCountDiv.textContent = `Words: ${words}`;
+                }
+            }
+			else if (question.type === 'drag_drop_match') {
+                // Drag drop selections are handled by the updateDragDropDisplay function
+                setTimeout(() => {
+                    setupDragAndDrop(question.id);
+                    updateDragDropDisplay(question.id);
+                }, 100);
+            }
+        }
+  function setupDragAndDrop(questionId) {
+            const dragItems = document.querySelectorAll(`[data-question-id="${questionId}"].drag-item`);
+            const dropZones = document.querySelectorAll(`[data-question-id="${questionId}"].drop-zone`);
+            
+            // Add drag event listeners
+            dragItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+            
+            // Add drop zone event listeners
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
+            e.dataTransfer.setData('questionId', e.target.dataset.questionId);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (!e.target.closest('.drop-zone').classList.contains('occupied')) {
+                e.target.closest('.drop-zone').classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            e.target.closest('.drop-zone').classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            dropZone.classList.remove('drag-over');
+            
+            if (dropZone.classList.contains('occupied')) {
+                return; // Can't drop on occupied zone
+            }
+            
+            const itemId = e.dataTransfer.getData('text/plain');
+            const questionId = e.dataTransfer.getData('questionId');
+            const zoneId = dropZone.dataset.zoneId;
+            
+            // Update answers
+            if (!answers[questionId]) answers[questionId] = {};
+            answers[questionId][zoneId] = itemId;
+            
+            // Update display in place without regenerating HTML
+            updateDragDropDisplay(questionId);
+        }
+
+        function returnToSource(questionId, zoneId) {
+            if (!answers[questionId]) return;
+            
+            // Remove the match
+            delete answers[questionId][zoneId];
+            
+            // Update display in place
+            updateDragDropDisplay(questionId);
+        }
+
+        function updateDragDropDisplay(questionId) {
+            const currentQuestionData = shuffledQuestions.find(q => q.id === questionId);
+            if (!currentQuestionData) return;
+            
+            const userMatches = answers[questionId] || {};
+            const dragItems = currentQuestionData.content.drag_items;
+            const dropZones = currentQuestionData.content.drop_zones;
+            
+            // Update drag items area
+            const dragItemsContainer = document.getElementById(`dragItems_${questionId}`);
+            if (dragItemsContainer) {
+                dragItemsContainer.innerHTML = '';
+                
+                dragItems.forEach(item => {
+                    const isMatched = Object.values(userMatches).includes(item.id);
+                    if (!isMatched) {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'drag-item';
+                        itemDiv.draggable = true;
+                        itemDiv.dataset.itemId = item.id;
+                        itemDiv.dataset.questionId = questionId;
+                        itemDiv.innerHTML = `
+                            ${item.image ? `<img src="${item.image}" alt="${item.text}">` : ''}
+                            <span class="drag-item-text">${item.text}</span>
+                        `;
+                        
+                        // Add event listeners
+                        itemDiv.addEventListener('dragstart', handleDragStart);
+                        itemDiv.addEventListener('dragend', handleDragEnd);
+                        
+                        dragItemsContainer.appendChild(itemDiv);
+                    }
+                });
+            }
+            
+            // Update drop zones
+            dropZones.forEach(zone => {
+                const dropZoneElement = document.querySelector(`[data-zone-id="${zone.id}"][data-question-id="${questionId}"]`);
+                if (!dropZoneElement) return;
+                
+                const matchedItemId = userMatches[zone.id];
+                const matchedItem = matchedItemId ? dragItems.find(item => item.id === matchedItemId) : null;
+                
+                if (matchedItem) {
+                    dropZoneElement.classList.add('occupied');
+                    dropZoneElement.innerHTML = `
+                        <span class="drop-zone-label">${zone.text}</span>
+                        <div class="dropped-item" onclick="returnToSource('${questionId}', '${zone.id}')">
+                            ${matchedItem.image ? `<img src="${matchedItem.image}" alt="${matchedItem.text}">` : ''}
+                            <span>${matchedItem.text}</span>
+                        </div>
+                    `;
+                } else {
+                    dropZoneElement.classList.remove('occupied');
+                    dropZoneElement.innerHTML = `<span class="drop-zone-label">${zone.text}</span>`;
+                }
+            });
+        }
+
+        function checkMatches(question) {
+            // No progressive feedback needed
+        }
+
+
+
+        function updateNavigationButtons(index) {
+            // Update button states
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').textContent = 
+                index === shuffledQuestions.length - 1 ? 'Finish Quiz' : 'Next';
+        }
+
+        function drawEEGDemo() {
+            const canvas = document.getElementById('eegDemo');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, 400, 200);
+                ctx.strokeStyle = '#007acc';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let x = 0; x < 400; x++) {
+                    const y = 100 + 30 * Math.sin(x * 0.05) + 10 * Math.sin(x * 0.15);
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function selectOption(questionId, optionId, inputType) {
+            if (inputType === 'radio') {
+                answers[questionId] = optionId;
+                // Update radio button selection without reloading
+                updateRadioSelection(questionId, optionId);
+            } else if (inputType === 'checkbox') {
+                if (!answers[questionId]) answers[questionId] = [];
+                const index = answers[questionId].indexOf(optionId);
+                if (index > -1) {
+                    answers[questionId].splice(index, 1);
+                } else {
+                    answers[questionId].push(optionId);
+                }
+                // Update checkbox selection without reloading
+                updateCheckboxSelection(questionId);
+            }
+        }
+
+        function updateRadioSelection(questionId, selectedId) {
+            const options = document.querySelectorAll(`input[name="${questionId}"]`);
+            options.forEach(input => {
+                const optionDiv = input.closest('.option');
+                if (input.value == selectedId) {
+                    input.checked = true;
+                    optionDiv.classList.add('selected');
+                } else {
+                    input.checked = false;
+                    optionDiv.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateCheckboxSelection(questionId) {
+            const options = document.querySelectorAll(`input[name="${questionId}"]`);
+            options.forEach(input => {
+                const optionDiv = input.closest('.option');
+                const userAnswers = answers[questionId] || [];
+                if (userAnswers.includes(input.value)) {
+                    input.checked = true;
+                    optionDiv.classList.add('selected');
+                } else {
+                    input.checked = false;
+                    optionDiv.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateTextAnswer(questionId) {
+            const textarea = document.getElementById(`task_${questionId}`);
+            const wordCountDiv = document.getElementById(`wordcount_${questionId}`);
+            answers[questionId] = textarea.value;
+            
+            const words = textarea.value.split(' ').filter(w => w.length > 0).length;
+            wordCountDiv.textContent = `Words: ${words}`;
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < shuffledQuestions.length - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            } else {
+                submitQuiz();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let score = 0;
+            const maxScore = quizData.quiz.scoring.total_points;
+            let correctQuestions = 0;
+            let partialQuestions = 0;
+            const questionResults = [];
+            // Calculate score using original question data (not shuffled)
+            quizData.quiz.questions.forEach(question => {
+                const userAnswer = answers[question.id];
+                 let questionScore = 0;
+                let isCorrect = false;
+                let isPartial = false;
+                let resultData = {
+                    question: question,
+                    userAnswer: userAnswer,
+                    maxPoints: question.points,
+                    earnedPoints: 0,
+                    isCorrect: false,
+                    isPartial: false
+                };
+                if (question.type === 'multiple_choice' || question.type === 'external_html') {
+                    if (userAnswer === question.content.correct_answer) {
+						questionScore = question.points;
+                        isCorrect = true;
+                    }
+                } else if (question.type === 'multiple_select') {
+                    const correct = question.content.correct_answers.sort();
+                    const user = (userAnswer || []).sort();
+                    if (JSON.stringify(correct) === JSON.stringify(user)) {
+						questionScore = question.points;
+                        isCorrect = true;
+                    }
+                } else if (question.type === 'true_false') {
+                    if (userAnswer === question.content.correct_answer) {
+						questionScore = question.points;
+                        isCorrect = true;
+                    }
+                } else if (question.type === 'interactive_task') {
+                    // For demo purposes, give half points if answer exists
+                    if (userAnswer && userAnswer.trim().length > 50) {
+                        questionScore = question.points * 0.8;
+                        isPartial = true;
+                    }
+                }
+				else if (question.type === 'drag_drop_match') {
+                    const userMatches = userAnswer || {};
+                    const correctMatches = question.content.correct_matches;
+                    let correctCount = 0;
+                    const totalMatches = Object.keys(correctMatches).length;
+                    
+                    // Check each match
+                    for (const [zoneId, itemId] of Object.entries(userMatches)) {
+                        if (correctMatches[itemId] === zoneId) {
+                            correctCount++;
+                        }
+                    }
+                    
+                    // Award partial credit
+					questionScore = (correctCount / totalMatches) * question.points;
+					if (correctCount === totalMatches && Object.keys(userMatches).length === totalMatches) {
+                        isCorrect = true;
+                    } else if (correctCount > 0) {
+                        isPartial = true;
+                    }
+					}
+					 score += questionScore;
+                resultData.earnedPoints = questionScore;
+                resultData.isCorrect = isCorrect;
+                resultData.isPartial = isPartial;
+                
+                if (isCorrect) correctQuestions++;
+                else if (isPartial) partialQuestions++;
+                
+                questionResults.push(resultData);
+            });
+            
+            const percentage = Math.round((score / maxScore) * 100);
+            let grade = 'F';
+            const gradeScale = quizData.quiz.scoring.grade_scale;
+            
+            for (const [g, threshold] of Object.entries(gradeScale)) {
+                if (percentage >= threshold) {
+                    grade = g;
+                    break;
+                }
+            }
+            
+             const resultsHtml = generateResultsHTML(questionResults, score, maxScore, percentage, grade, correctQuestions, partialQuestions);
+            
+            document.getElementById('questionContainer').innerHTML = resultsHtml;
+            document.getElementById('controls').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+ function generateResultsHTML(questionResults, score, maxScore, percentage, grade, correctQuestions, partialQuestions) {
+            const totalQuestions = questionResults.length;
+            const incorrectQuestions = totalQuestions - correctQuestions - partialQuestions;
+            
+            let html = `
+                <div class="results-summary">
+                    <div class="summary-header">
+                        <h2>📊 Quiz Results Summary</h2>
+                        <div class="score-display">${score.toFixed(1)}/${maxScore}</div>
+                        <div class="grade-display">Grade: ${grade} (${percentage}%)</div>
+                        
+                        <div class="final-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" style="color: #28a745;">${correctQuestions}</div>
+                                <div class="stat-label">Correct</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" style="color: #ffc107;">${partialQuestions}</div>
+                                <div class="stat-label">Partial</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" style="color: #dc3545;">${incorrectQuestions}</div>
+                                <div class="stat-label">Incorrect</div>
+                            </div>
+                        </div>
+                        
+                        <p style="margin-top: 20px; font-size: 1.1em;">
+                            ${percentage >= quizData.quiz.settings.passingScore ? 
+                                '🎉 Congratulations! You passed the quiz.' : 
+                                '📚 Please review the material and try again.'}
+                        </p>
+                    </div>
+                    
+                    <h3 style="margin-bottom: 20px; color: #2c3e50;">📋 Detailed Question Review</h3>
+            `;
+            
+            questionResults.forEach((result, index) => {
+                html += generateQuestionResultHTML(result, index + 1);
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function generateQuestionResultHTML(result, questionNumber) {
+            const question = result.question;
+            const statusClass = result.isCorrect ? 'correct' : (result.isPartial ? 'partial' : 'incorrect');
+            const icon = result.isCorrect ? '✅' : (result.isPartial ? '⚠️' : '❌');
+            const scoreText = result.isCorrect ? 'Correct' : 
+                            (result.isPartial ? `Partial (${result.earnedPoints.toFixed(1)}/${result.maxPoints})` : 'Incorrect');
+            
+            let html = `
+                <div class="question-result ${statusClass}">
+                    <div class="result-header">
+                        <span class="result-icon">${icon}</span>
+                        <span class="result-title">Question ${questionNumber}: ${question.title}</span>
+                        <span class="result-score ${statusClass}">${scoreText}</span>
+                    </div>
+                    
+                    <div style="margin: 10px 0; font-style: italic; color: #6c757d;">
+                        ${question.content.question_text}
+                    </div>
+                    
+                    <div class="answer-comparison">
+            `;
+            
+            // Generate answer comparison based on question type
+            if (question.type === 'multiple_choice' || question.type === 'external_html') {
+                const userOption = question.content.options.find(opt => opt.id === result.userAnswer);
+                const correctOption = question.content.options.find(opt => opt.id === question.content.correct_answer);
+                
+                html += `
+                    <div class="answer-section your-answer">
+                        <div class="answer-label">Your Answer:</div>
+                        <div class="answer-content">${userOption ? userOption.text : 'No answer selected'}</div>
+                    </div>
+                    
+                    <div class="answer-section correct-answer">
+                        <div class="answer-label">Correct Answer:</div>
+                        <div class="answer-content">${correctOption.text}</div>
+                    </div>
+                `;
+            } else if (question.type === 'multiple_select') {
+                const userOptions = (result.userAnswer || []).map(id => 
+                    question.content.options.find(opt => opt.id === id)?.text || id
+                );
+                const correctOptions = question.content.correct_answers.map(id => 
+                    question.content.options.find(opt => opt.id === id)?.text || id
+                );
+                
+                html += `
+                    <div class="answer-section your-answer">
+                        <div class="answer-label">Your Answers:</div>
+                        <div class="answer-content">${userOptions.length ? userOptions.join(', ') : 'No answers selected'}</div>
+                    </div>
+                    
+                    <div class="answer-section correct-answer">
+                        <div class="answer-label">Correct Answers:</div>
+                        <div class="answer-content">${correctOptions.join(', ')}</div>
+                    </div>
+                `;
+            } else if (question.type === 'true_false') {
+                html += `
+                    <div class="answer-section your-answer">
+                        <div class="answer-label">Your Answer:</div>
+                        <div class="answer-content">${result.userAnswer !== undefined ? (result.userAnswer ? 'True' : 'False') : 'No answer selected'}</div>
+                    </div>
+                    
+                    <div class="answer-section correct-answer">
+                        <div class="answer-label">Correct Answer:</div>
+                        <div class="answer-content">${question.content.correct_answer ? 'True' : 'False'}</div>
+                    </div>
+                `;
+            } else if (question.type === 'interactive_task') {
+                html += `
+                    <div class="answer-section your-answer">
+                        <div class="answer-label">Your Response:</div>
+                        <div class="answer-content">${result.userAnswer || 'No response provided'}</div>
+                    </div>
+                    
+                    <div class="answer-section">
+                        <div class="answer-label">Evaluation:</div>
+                        <div class="answer-content">
+                            ${result.userAnswer && result.userAnswer.trim().length > 50 ? 
+                                'Good response with sufficient detail.' : 
+                                'Response needs more detail and explanation.'}
+                        </div>
+                    </div>
+                `;
+            } else if (question.type === 'drag_drop_match') {
+                const userMatches = result.userAnswer || {};
+                const correctMatches = question.content.correct_matches;
+                
+                html += `
+                    <div class="answer-section your-answer">
+                        <div class="answer-label">Your Matches:</div>
+                        <div class="match-display">
+                `;
+                
+                Object.entries(userMatches).forEach(([zoneId, itemId]) => {
+                    const zone = question.content.drop_zones.find(z => z.id === zoneId);
+                    const item = question.content.drag_items.find(i => i.id === itemId);
+                    const isCorrect = correctMatches[itemId] === zoneId;
+                    
+                    html += `
+                        <div class="match-item ${isCorrect ? 'correct-match' : 'incorrect-match'}">
+                            ${item?.text || itemId} → ${zone?.text || zoneId}
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                    
+                    <div class="answer-section correct-answer">
+                        <div class="answer-label">Correct Matches:</div>
+                        <div class="match-display">
+                `;
+                
+                Object.entries(correctMatches).forEach(([itemId, zoneId]) => {
+                    const zone = question.content.drop_zones.find(z => z.id === zoneId);
+                    const item = question.content.drag_items.find(i => i.id === itemId);
+                    
+                    html += `
+                        <div class="match-item correct-match">
+                            ${item?.text || itemId} → ${zone?.text || zoneId}
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            }
+            
+            html += '</div>';
+            
+            // Add explanation if available and answer is incorrect
+            if (!result.isCorrect && question.content.explanation) {
+                html += `
+                    <div class="explanation">
+                        <div class="explanation-title">💡 Explanation:</div>
+                        ${question.content.explanation}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        // Start the quiz when page loads
+        window.onload = initializeQuiz;
+    </script>
+</body>
+</html>
