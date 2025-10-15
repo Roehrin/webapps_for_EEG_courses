@@ -34,7 +34,7 @@
         padding: 15px 20px 20px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         font-family: sans-serif;
       }
-      .nav-banner-spacer { height: 160px; }
+      .nav-banner-spacer { height: auto; min-height: 100px; }
       .nav-banner-content {
         max-width: 1400px; margin: 0 auto; display: flex; align-items: center;
         justify-content: space-between; flex-wrap: wrap; gap: 10px;
@@ -275,6 +275,38 @@
     }
   }
 
+  // Update spacer height to match banner
+  function updateSpacerHeight() {
+    const banner = document.querySelector('.nav-banner');
+    const spacer = document.querySelector('.nav-banner-spacer');
+    if (banner && spacer) {
+      // Force a reflow to ensure accurate height calculation
+      banner.offsetHeight;
+      const height = banner.getBoundingClientRect().height;
+      spacer.style.height = height + 'px';
+      console.log('Banner height updated:', height + 'px');
+    }
+  }
+
+  // Set up ResizeObserver to automatically track banner size changes
+  function setupBannerObserver() {
+    const banner = document.querySelector('.nav-banner');
+    if (!banner) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        const height = entry.contentRect.height;
+        const spacer = document.querySelector('.nav-banner-spacer');
+        if (spacer) {
+          spacer.style.height = height + 'px';
+          console.log('Banner height auto-updated:', height + 'px');
+        }
+      }
+    });
+
+    resizeObserver.observe(banner);
+  }
+
   // Initialize banner
   async function init() {
     const currentPage = window.location.pathname.split('/').pop();
@@ -308,6 +340,25 @@
       }
 
       populateMenu(menuStructure, activeTabIndex);
+      
+      // Set up automatic height tracking with ResizeObserver
+      setupBannerObserver();
+      
+      // Also update on window resize and load as backup
+      window.addEventListener('resize', updateSpacerHeight);
+      window.addEventListener('load', updateSpacerHeight);
+      
+      // Wait for logo image to load before final measurement
+      const logo = document.querySelector('.nav-banner-logo');
+      if (logo) {
+        if (logo.complete) {
+          setTimeout(updateSpacerHeight, 100);
+        } else {
+          logo.addEventListener('load', () => {
+            setTimeout(updateSpacerHeight, 100);
+          });
+        }
+      }
     }
   }
 

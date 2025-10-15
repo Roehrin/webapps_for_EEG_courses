@@ -255,8 +255,22 @@ D_\text{weighted-min-norm} = (G^\top G + \lambda W^\top W)^{-1} G^\top M = W^{-1
 	</section>
 	<br>
 	<section>
+		<h2>Parametric methods</h2>
+		The minimum norm methods belong to the family of distributed source models, which are built on the assumption that the brain activity can be represented by many small sources. These models estimate the contribution of all potential sources simultaneously. In contrast, parametric methods attempt to explain the measured voltages by a limited amount of equivalent current dipoles. 
+		<br> <br>
+		The most intuitive of these methods is the dipole fitting method, which identifies the dipole (or dipoles) located that best fits the observed scalp potential topography. This means fitting six parameters per dipole, 3 for the spatial location and three for its moment (orientation and strength). This is a non-linear minimization of the cost function defined by :
+		<p style="text-align: center;">
+		\[
+		
+		|| M - G({r_j,r_{dip_i}})D ||
+	
+		\]
+		
+</p>
+	</section>
+	<section>
 		<h2>Other types of inverse solutions</h2>
-		The two solutions described in the previous section are two of the most fundamental solution, because their mathematical fundations are elegant and relatively easily described. 
+		The two solutions described in the previous section are two of the most fundamental solution, because their mathematical fundations are elegant and relatively easily described. Countless other algorithms have been developed which constrain the solution to the problem in different ways.
 	</section>
 </body>
 </html>

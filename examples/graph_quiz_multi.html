@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Weighted Matrix Graph Quiz</title>
 <link rel="stylesheet" href="quiz-universal.css">
+<script src="../src/nav-banner-smart.js"></script>
 <script src="../src/multi-quiz-system.js"></script>
 </head>
 <body>
+<div class="quiz-wrapper">
 <div class="container">
   <div class="header-row">
     <h2>Match the Weighted Matrix to its Graph</h2>
@@ -33,6 +35,7 @@
     <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
 	<button class="next-btn" id="nextBtn">Next Question →</button>
   </div>
+    </div>
 </div>
 
 <script>
@@ -545,6 +548,26 @@ window.selectOption = selectOption;
 window.resetScore = resetScore;
 setupNextButton('nextBtn');
 </script>
+ <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const banner = document.querySelector(".nav-banner");
+      if (!banner) return;
 
+      // Add class to body
+      document.body.classList.add("has-nav-banner");
+
+      // Dynamically set CSS variable for navbar height
+      function updateNavHeight() {
+        const height = banner.getBoundingClientRect().height;
+        document.body.style.setProperty("--nav-height", height + "px");
+      }
+
+      updateNavHeight();
+      window.addEventListener("resize", updateNavHeight);
+
+      const observer = new ResizeObserver(updateNavHeight);
+      observer.observe(banner);
+    });
+  </script>
 </body>
 </html>

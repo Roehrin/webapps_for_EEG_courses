@@ -21,7 +21,17 @@ body {
   align-items: center;
   padding: 20px;
 }
+body.has-nav-banner {
+  display: flex;
+  flex-direction: column;
+}
 
+body.has-nav-banner .quiz-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--nav-height, 120px)); /* navbar-safe vertical centering */
+}
 .container {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
@@ -39,12 +49,11 @@ h2 {
 }
 
 .header-row {
-  position: relative;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column; /* stack title and score vertically */
+  align-items: center;    /* center everything horizontally */
   margin-bottom: 30px;
-  min-height: 48px;
+  gap: 10px;              /* space between title and score */
 }
 
 .header-row h2 {
@@ -53,10 +62,8 @@ h2 {
 }
 
 .score-controls {
-  position: absolute;
-  right: 0;
   display: flex;
-  align-items: center;
+  justify-content: center; /* center score and reset button */
   gap: 15px;
 }
 
@@ -366,7 +373,9 @@ h3 {
   .option-card {
     height: 250px;
   }
-  
+   .header-row {
+    gap: 5px;
+  }
   .select-overlay {
     padding: 8px 16px;
     font-size: 12px;
@@ -390,6 +399,7 @@ h3 {
 </style>
 </head>
 <body>
+<div class="quiz-wrapper">
 <div class="container">
   <div class="header-row">
     <h2>What was the orientation of the dipole?</h2>
@@ -410,6 +420,7 @@ h3 {
   <div class="button-container">
     <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
     <button class="next-btn" id="nextBtn" onclick="location.reload()">Next Question →</button>
+  </div>
   </div>
 </div>
 
@@ -623,6 +634,25 @@ window.submitAnswer = submitAnswer;
 window.locationReload = () => location.reload();
 window.selectOption = selectOption;
 window.resetScore = resetScore;
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const banner = document.querySelector(".nav-banner");
+  if (!banner) return;
+
+  document.body.classList.add("has-nav-banner");
+
+  function updateNavHeight() {
+    const height = banner.getBoundingClientRect().height;
+    document.body.style.setProperty("--nav-height", height + "px");
+  }
+
+  updateNavHeight();
+  window.addEventListener("resize", updateNavHeight);
+
+  const observer = new ResizeObserver(updateNavHeight);
+  observer.observe(banner);
+});
 </script>
 
 </body>

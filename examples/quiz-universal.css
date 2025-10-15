@@ -2,7 +2,11 @@
    UNIVERSAL QUIZ STYLESHEET
    =========================== */
 
-/* --- Core Reset --- */
+/* ===========================
+   UNIVERSAL QUIZ STYLESHEET - NAVBAR SAFE + CENTERED
+   =========================== */
+
+/* Core Reset */
 * {
   margin: 0;
   padding: 0;
@@ -13,12 +17,30 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
+
+  /* Flex centering */
   display: flex;
   justify-content: center;
   align-items: center;
+
+  /* Fallback padding */
   padding: 20px;
 }
 
+/* --- Navbar safe wrapper --- */
+body.has-nav-banner {
+  /* preserve flex centering but offset content by navbar */
+  display: flex;
+  flex-direction: column;
+}
+
+body.has-nav-banner .quiz-wrapper {
+  /* vertically center, full height minus navbar */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--nav-height, 120px));
+}
 /* --- Container --- */
 .container {
   background: rgba(255, 255, 255, 0.95);
