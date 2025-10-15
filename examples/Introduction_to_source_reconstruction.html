@@ -267,10 +267,12 @@ D_\text{weighted-min-norm} = (G^\top G + \lambda W^\top W)^{-1} G^\top M = W^{-1
 		\]
 		
 </p>
+<br>
+Another approach is to focus on the sources rather than the measurements. A beamformer applies spatial filtering to estimate the activity of a source at a specific location. It computes a weighted linear combination of sensor signals that maximizes sensitivity to the target source while minimizing sensitivity to other brain regions. The weights are derived from the lead field and the covariance of the measured data, making the method a data-driven approach to source localization.
 	</section>
 	<section>
 		<h2>Other types of inverse solutions</h2>
-		The two solutions described in the previous section are two of the most fundamental solution, because their mathematical fundations are elegant and relatively easily described. Countless other algorithms have been developed which constrain the solution to the problem in different ways.
+		he solutions described in the previous section are among the most fundamental, because their mathematical foundations are elegant and relatively straightforward to describe. Countless other algorithms have been developed, each constraining the solution to the problem in different ways. These include methods that provide exact localization of the source in a noiseless situation (sLORETA, eLORETA) and methods that introduce sparsity in the source space (FOCUSS, MxNE).
 	</section>
 </body>
 </html>

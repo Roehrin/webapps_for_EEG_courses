@@ -27,7 +27,14 @@
     if (document.getElementById(styleId)) return;
 
     const styles = `
-      body { margin: 0 !important; padding: 0 !important; }
+      body { 
+        margin: 0 !important; 
+        padding: 0 !important;
+      }
+      .nav-banner-spacer { 
+        display: block;
+        width: 100%;
+      }
       .nav-banner {
         position: fixed; top: 0; left: 0; right: 0;
         background: ${CONFIG.brandColor}; color: #f1f1f1; z-index: 99999;
@@ -190,6 +197,7 @@
     const dropdown = document.getElementById('nav-dropdown');
     const menuButton = document.getElementById('nav-menu-toggle');
     const currentPage = window.location.pathname.split('/').pop();
+    const normalizedCurrentPage = normalizeMultiQuizPage(currentPage);
 
     if (!menuStructure || Object.keys(menuStructure).length === 0) {
       dropdown.innerHTML = '<div class="nav-banner-loading">No pages found in index.html</div>';
@@ -211,14 +219,20 @@
         <div class="nav-banner-section">
           <h3>${sectionName}</h3>
           <ul>
-            ${links.map(link => `
-              <li>
-                <a href="${link.url}" class="${link.url.split('/').pop() === currentPage ? 'current-page' : ''}">
-
-                  ${link.name}
-                </a>
-              </li>
-            `).join('')}
+            ${links.map(link => {
+              const linkPage = link.url.split('/').pop();
+              const normalizedLink = normalizeMultiQuizPage(linkPage);
+              const isCurrent = linkPage === currentPage || 
+                               normalizedLink === normalizedCurrentPage || 
+                               linkPage === normalizedCurrentPage;
+              return `
+                <li>
+                  <a href="${link.url}" class="${isCurrent ? 'current-page' : ''}">
+                    ${link.name}
+                  </a>
+                </li>
+              `;
+            }).join('')}
           </ul>
         </div>
       `).join('');
@@ -275,14 +289,28 @@
     }
   }
 
+  // Normalize multi-quiz page names to match the index entry
+  function normalizeMultiQuizPage(filename) {
+    // Map all three quiz variants to the base name in index.html
+    const multiQuizVariants = [
+      'topography_quiz_multi.html',
+      'graph_quiz_multi.html',
+      'source_localization_quiz_multi.html'
+    ];
+    
+    if (multiQuizVariants.includes(filename)) {
+      return 'topography_quiz_multi.html'; // Return the canonical one listed in index
+    }
+    
+    return filename;
+  }
+
   // Update spacer height to match banner
   function updateSpacerHeight() {
     const banner = document.querySelector('.nav-banner');
     const spacer = document.querySelector('.nav-banner-spacer');
     if (banner && spacer) {
-      // Force a reflow to ensure accurate height calculation
-      banner.offsetHeight;
-      const height = banner.getBoundingClientRect().height;
+      const height = banner.offsetHeight;
       spacer.style.height = height + 'px';
       console.log('Banner height updated:', height + 'px');
     }
@@ -295,16 +323,21 @@
 
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
-        const height = entry.contentRect.height;
+        const computedHeight = banner.offsetHeight;
         const spacer = document.querySelector('.nav-banner-spacer');
         if (spacer) {
-          spacer.style.height = height + 'px';
-          console.log('Banner height auto-updated:', height + 'px');
+          spacer.style.height = computedHeight + 'px';
+          console.log('Banner height auto-updated:', computedHeight + 'px');
         }
       }
     });
 
     resizeObserver.observe(banner);
+    
+    const content = banner.querySelector('.nav-banner-content');
+    if (content) {
+      resizeObserver.observe(content);
+    }
   }
 
   // Initialize banner
@@ -317,9 +350,11 @@
     if (document.body) {
       const banner = createBanner();
       document.body.insertBefore(banner, document.body.firstChild);
+      
       const spacer = document.createElement('div');
       spacer.className = 'nav-banner-spacer';
       document.body.insertBefore(spacer, banner.nextSibling);
+      
       setupMenuToggle();
 
       const menuStructure = await parseIndexMenu();
@@ -328,10 +363,21 @@
       let activeTabIndex = 0;
       if (menuStructure) {
         const tabs = Object.entries(menuStructure);
+        
+        // Normalize current page for multi-quiz variants
+        const normalizedPage = normalizeMultiQuizPage(currentPage);
+        
         for (let i = 0; i < tabs.length; i++) {
           const [tabName, sections] = tabs[i];
           for (const [section, links] of Object.entries(sections)) {
-			if (links.some(link => link.url.split('/').pop() === currentPage)) {
+            // Check if any link matches the current or normalized page
+            if (links.some(link => {
+              const linkPage = link.url.split('/').pop();
+              const normalizedLink = normalizeMultiQuizPage(linkPage);
+              return linkPage === currentPage || 
+                     normalizedLink === normalizedPage ||
+                     linkPage === normalizedPage;
+            })) {
               activeTabIndex = i;
               break;
             }
