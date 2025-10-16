@@ -87,59 +87,87 @@ function generateRandomMatrix(size) {
 }
 
 // Generate a wrong answer by permuting the matrix
-function generateWrongMatrix(correctMatrix, size) {
+function generateWrongMatrix(correctMatrix, size, existingWrongMatrices = []) {
   let wrongMatrix;
   let attempts = 0;
-  const maxAttempts = 20;
+  const maxAttempts = 50;
   
   do {
     wrongMatrix = JSON.parse(JSON.stringify(correctMatrix)); // Deep clone
-    const method = Math.floor(Math.random() * 3);
     
-    if (method === 0) {
-      // Swap two random rows
-      const row1 = Math.floor(Math.random() * size);
-      const row2 = Math.floor(Math.random() * size);
-      if (row1 !== row2) {
-        [wrongMatrix[row1], wrongMatrix[row2]] = [wrongMatrix[row2], wrongMatrix[row1]];
-      }
-    } else if (method === 1) {
-      // Swap two random columns
-      const col1 = Math.floor(Math.random() * size);
-      const col2 = Math.floor(Math.random() * size);
-      if (col1 !== col2) {
-        for (let i = 0; i < size; i++) {
-          [wrongMatrix[i][col1], wrongMatrix[i][col2]] = [wrongMatrix[i][col2], wrongMatrix[i][col1]];
+    // Choose a variation method
+    const method = Math.random();
+    
+    if (method < 0.5) {
+      // Method 1: Swap a few edges (subtle topology change)
+      const numSwaps = 1 + Math.floor(Math.random() * 2); // 1-2 swaps
+      for (let s = 0; s < numSwaps; s++) {
+        let i1, j1, i2, j2;
+        let swapAttempts = 0;
+        
+        // Find two edges to swap
+        do {
+          i1 = Math.floor(Math.random() * size);
+          j1 = Math.floor(Math.random() * size);
+          i2 = Math.floor(Math.random() * size);
+          j2 = Math.floor(Math.random() * size);
+          swapAttempts++;
+        } while (
+          (i1 === j1 || i2 === j2 || // No self-loops
+          (wrongMatrix[i1][j1] === 0 && wrongMatrix[i2][j2] === 0)) && // At least one should be non-zero
+          swapAttempts < 20
+        );
+        
+        // Swap the edge weights (keeping weights the same but changing topology)
+        [wrongMatrix[i1][j1], wrongMatrix[i2][j2]] = [wrongMatrix[i2][j2], wrongMatrix[i1][j1]];
+        
+        // For undirected, maintain symmetry
+        if (UNDIRECTED) {
+          [wrongMatrix[j1][i1], wrongMatrix[j2][i2]] = [wrongMatrix[j2][i2], wrongMatrix[j1][i1]];
         }
       }
     } else {
-      // Transpose for directed graphs only
-      if (!UNDIRECTED) {
-        const temp = [];
+      // Method 2: Node relabeling (swap rows and columns)
+      let idx1, idx2;
+      do {
+        idx1 = Math.floor(Math.random() * size);
+        idx2 = Math.floor(Math.random() * size);
+      } while (idx1 === idx2);
+      
+      if (UNDIRECTED) {
+        // Swap both row and column pair (maintains undirected property)
+        [wrongMatrix[idx1], wrongMatrix[idx2]] = [wrongMatrix[idx2], wrongMatrix[idx1]];
         for (let i = 0; i < size; i++) {
-          temp[i] = [];
-          for (let j = 0; j < size; j++) {
-            temp[i][j] = wrongMatrix[j][i];
-          }
+          [wrongMatrix[i][idx1], wrongMatrix[i][idx2]] = [wrongMatrix[i][idx2], wrongMatrix[i][idx1]];
         }
-        wrongMatrix = temp;
       } else {
-        // For undirected, swap both row and column pair
-        const idx1 = Math.floor(Math.random() * size);
-        const idx2 = Math.floor(Math.random() * size);
-        if (idx1 !== idx2) {
-          // Swap rows
+        // For directed: randomly swap rows OR columns OR transpose
+        const dirMethod = Math.floor(Math.random() * 3);
+        if (dirMethod === 0) {
           [wrongMatrix[idx1], wrongMatrix[idx2]] = [wrongMatrix[idx2], wrongMatrix[idx1]];
-          // Swap columns
+        } else if (dirMethod === 1) {
           for (let i = 0; i < size; i++) {
             [wrongMatrix[i][idx1], wrongMatrix[i][idx2]] = [wrongMatrix[i][idx2], wrongMatrix[i][idx1]];
           }
+        } else {
+          const temp = [];
+          for (let i = 0; i < size; i++) {
+            temp[i] = [];
+            for (let j = 0; j < size; j++) {
+              temp[i][j] = wrongMatrix[j][i];
+            }
+          }
+          wrongMatrix = temp;
         }
       }
     }
     
     attempts++;
-  } while (matricesEqual(wrongMatrix, correctMatrix, size) && attempts < maxAttempts);
+  } while (
+    (matricesEqual(wrongMatrix, correctMatrix, size) || 
+     existingWrongMatrices.some(m => matricesEqual(wrongMatrix, m, size))) && 
+    attempts < maxAttempts
+  );
   
   return wrongMatrix;
 }

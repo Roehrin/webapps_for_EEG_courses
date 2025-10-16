@@ -61,6 +61,42 @@ body {
   font-weight: 400;
 }
 
+.score-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+#scoreDisplay {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.reset-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.reset-btn:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
 .image-container {
   text-align: center;
   margin: 30px 0;
@@ -240,6 +276,21 @@ body {
     width: 100%;
     max-width: 200px;
   }
+  
+  .score-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  #scoreDisplay {
+    padding: 10px 18px;
+    font-size: 16px;
+  }
+  
+  .reset-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
 }
 </style>
 </head>
@@ -248,6 +299,10 @@ body {
   <div class="quiz-header">
     <h1 class="quiz-title">Source Localization Quiz</h1>
     <p class="quiz-subtitle">Which solver generated this brain activity pattern?</p>
+    <div class="score-controls">
+      <div id="scoreDisplay"></div>
+      <button class="reset-btn" onclick="resetScore()">Reset Score</button>
+    </div>
   </div>
   
   <div class="image-container">
@@ -273,6 +328,36 @@ body {
 </div>
 
 <script>
+/* === Score Management === */
+function getScore() {
+  const correct = parseInt(sessionStorage.getItem('quizCorrect') || '0');
+  const total = parseInt(sessionStorage.getItem('quizTotal') || '0');
+  return { correct, total };
+}
+
+function updateScoreDisplay() {
+  const { correct, total } = getScore();
+  document.getElementById('scoreDisplay').textContent = `Score: ${correct}/${total}`;
+}
+
+function incrementScore(isCorrect) {
+  const { correct, total } = getScore();
+  sessionStorage.setItem('quizCorrect', isCorrect ? correct + 1 : correct);
+  sessionStorage.setItem('quizTotal', total + 1);
+  updateScoreDisplay();
+}
+
+function resetScore() {
+  if (confirm('Are you sure you want to reset your score?')) {
+    sessionStorage.removeItem('quizCorrect');
+    sessionStorage.removeItem('quizTotal');
+    updateScoreDisplay();
+  }
+}
+
+// Initialize score display on page load
+updateScoreDisplay();
+
 // --- Configuration ---
 const solvers = ["MNE", "wMNE", "eLORETA"];
 const baseURL = "../examples/display_Point_Spread_Functions_on_MRI_hidden.html";
@@ -327,9 +412,11 @@ function checkAnswer(selected) {
   if (selected === correctSolver) {
     feedback.textContent = `✅ Excellent! The correct answer is ${correctSolver}`;
     feedback.className = "feedback correct";
+    incrementScore(true);
   } else {
     feedback.textContent = `❌ Not quite right. The correct answer was ${correctSolver}`;
     feedback.className = "feedback incorrect";
+    incrementScore(false);
   }
 }
 
