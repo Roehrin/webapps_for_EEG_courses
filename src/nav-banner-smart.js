@@ -295,7 +295,8 @@
     const multiQuizVariants = [
       'topography_quiz_multi.html',
       'graph_quiz_multi.html',
-      'source_localization_quiz_multi.html'
+      'source_localization_quiz_multi.html',
+	  'vector_quiz_multi.html'
     ];
     
     if (multiQuizVariants.includes(filename)) {
