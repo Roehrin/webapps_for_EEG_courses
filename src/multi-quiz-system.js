@@ -8,7 +8,8 @@ const QUIZ_CONFIG = {
   quizPages: [
     'topography_quiz_multi.html',
     'graph_quiz_multi.html',
-    'source_localization_quiz_multi.html'
+    'source_localization_quiz_multi.html',
+	'vector_quiz_multi.html'
     // Add more quiz pages as needed
   ],
   
@@ -17,7 +18,8 @@ const QUIZ_CONFIG = {
   weights: {
     'topography_quiz_multi.html': 2,
     'graph_quiz_multi.html': 2,
-    'source_localization_quiz_multi.html': 1
+    'source_localization_quiz_multi.html': 1,
+	'vector_quiz_multi.html':2
   }
 };
 
