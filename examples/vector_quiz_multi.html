@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector Addition Quiz</title>
+<link rel="stylesheet" href="quiz-universal.css">
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+<script src="../src/nav-banner-smart.js"></script>
+<script src="../src/multi-quiz-system.js"></script>
+<style>
+  .vector-display {
+    margin: 20px auto 40px auto;
+    max-width: 500px;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #target > div {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .option-card {
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .quiz-view, .answer-view {
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .quiz-view > div, .answer-view > div {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .answer-view {
+    display: none;
+  }
+  
+  .option-card.answered .quiz-view {
+    display: none;
+  }
+  
+  .option-card.answered .answer-view {
+    display: flex;
+  }
+</style>
+</head>
+<body>
+<div class="quiz-wrapper">
+<div class="container">
+  <div class="header-row">
+    <h2>What is the Average Resultant Vector? </h2>
+    <div class="score-controls">
+      <div id="scoreDisplay"></div>
+      <button class="reset-btn" onclick="resetScore()">Reset Score</button>
+    </div>
+  </div>
+  
+  <div id="target" class="vector-display"></div>
+  
+  <h3 style="clear: both; margin-top: 20px;">Select the correct average resultant vector:</h3>
+  
+  <div class="options" id="choices"></div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <div class="button-container">
+    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
+    <button class="next-btn" id="nextBtn">Next Question →</button>
+  </div>
+</div>
+</div>
+
+<script>
+// Generate random phase values for 4 vectors
+function generateRandomPhases() {
+  let phases;
+  let resultant;
+  
+  // Keep generating until we get a resultant magnitude > 0.1
+  do {
+    phases = [];
+    for (let i = 0; i < 4; i++) {
+      phases.push(Math.random() * 2 * Math.PI);
+    }
+    resultant = calculateResultant(phases);
+  } while (resultant.magnitude < 0.1);
+  
+  return phases;
+}
+
+// Calculate resultant vector from phases
+function calculateResultant(phases) {
+  const mag = phases.map(() => 1); // All magnitudes are 1
+  const reMag = mag.map((val, i) => val * Math.cos(phases[i]));
+  const imMag = mag.map((val, i) => val * Math.sin(phases[i]));
+  
+  const sumRe = reMag.reduce((acc, val) => acc + val, 0);
+  const sumIm = imMag.reduce((acc, val) => acc + val, 0);
+  
+  const avgRe = sumRe / 4;
+  const avgIm = sumIm / 4;
+  
+  const avgMag = Math.sqrt(avgRe ** 2 + avgIm ** 2);
+  const avgTheta = Math.atan2(avgIm, avgRe);
+  
+  return { magnitude: avgMag, angle: avgTheta };
+}
+
+// Generate wrong resultant vector
+function generateWrongResultant(correctResultant, existingWrong = []) {
+  let wrongResultant;
+  let attempts = 0;
+  const maxAttempts = 100;
+  
+  const minAngleDiff = 15 * Math.PI / 180; // 15 degrees
+  const minMagDiff = 0.15;
+  
+  do {
+    // Randomly vary either angle, magnitude, or both
+    const method = Math.random();
+    
+    if (method < 0.33) {
+      // Change angle significantly
+      const angleDelta = (minAngleDiff + Math.random() * (Math.PI - minAngleDiff)) * (Math.random() < 0.5 ? 1 : -1);
+      wrongResultant = {
+        angle: correctResultant.angle + angleDelta,
+        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + (Math.random() - 0.5) * 0.3))
+      };
+    } else if (method < 0.66) {
+      // Change magnitude significantly
+      const magDelta = (minMagDiff + Math.random() * (1 - correctResultant.magnitude - minMagDiff)) * (Math.random() < 0.5 ? 1 : -1);
+      wrongResultant = {
+        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + magDelta)),
+        angle: correctResultant.angle + (Math.random() - 0.5) * minAngleDiff
+      };
+    } else {
+      // Change both
+      const angleDelta = (minAngleDiff + Math.random() * Math.PI) * (Math.random() < 0.5 ? 1 : -1);
+      const magDelta = (minMagDiff + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1);
+      wrongResultant = {
+        angle: correctResultant.angle + angleDelta,
+        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + magDelta))
+      };
+    }
+    
+    // Normalize angle to [-π, π]
+    while (wrongResultant.angle > Math.PI) wrongResultant.angle -= 2 * Math.PI;
+    while (wrongResultant.angle < -Math.PI) wrongResultant.angle += 2 * Math.PI;
+    
+    attempts++;
+    
+    // Check if different enough from correct and existing wrong answers
+    const angleDiff = Math.abs(wrongResultant.angle - correctResultant.angle);
+    const magDiff = Math.abs(wrongResultant.magnitude - correctResultant.magnitude);
+    const isDifferentFromCorrect = angleDiff > minAngleDiff || magDiff > minMagDiff;
+    
+    const isDifferentFromExisting = existingWrong.every(existing => {
+      const aD = Math.abs(wrongResultant.angle - existing.angle);
+      const mD = Math.abs(wrongResultant.magnitude - existing.magnitude);
+      return aD > minAngleDiff || mD > minMagDiff;
+    });
+    
+    if (isDifferentFromCorrect && isDifferentFromExisting) {
+      break;
+    }
+    
+  } while (attempts < maxAttempts);
+  
+  return wrongResultant;
+}
+
+// Create plot data for individual vectors (question display)
+function createQuestionPlot(phases) {
+  const mag = phases.map(() => 1);
+  
+  const trace = {
+    type: "scatterpolar",
+    name: '$e^{i\\theta[j]}$',
+    r: mag,
+    theta: phases,
+    mode: "markers",
+    marker: {
+      color: ['black', 'orange', 'purple', 'green'],
+      symbol: "square",
+      size: 15,
+    },
+    thetaunit: "radians",
+  };
+  
+  const layout = {
+    polar: {
+      angularaxis: { thetaunit: "radians" },
+      radialaxis: { range: [0, 1.1] }
+    },
+    showlegend: false,
+    font: { size: 16 },
+    margin: { t: 40, b: 40, l: 40, r: 40 },
+    title: '4 Complex Vectors'
+  };
+  
+  return { data: [trace], layout: layout };
+}
+
+// Create plot data for resultant vector (answer options)
+function createResultantPlot(resultant) {
+  const trace = {
+    type: "scatterpolar",
+    name: "$\\frac{1}{N}\\sum e^{i\\theta[j]}$",
+    r: [0, resultant.magnitude],
+    theta: [0, resultant.angle],
+    marker: {
+      color: ['', 'brown'],
+      symbol: "square",
+      size: [0, 15],
+    },
+    line: {
+      color: 'brown',
+      width: 5
+    },
+    thetaunit: "radians",
+  };
+  
+  const layout = {
+    polar: {
+      angularaxis: { thetaunit: "radians" },
+      radialaxis: { range: [0, 1.1] }
+    },
+    showlegend: false,
+    font: { size: 14 },
+    margin: { t: 30, b: 30, l: 30, r: 30 },
+  };
+  
+  return { data: [trace], layout: layout };
+}
+
+// Create detailed plot showing step-by-step addition
+function createDetailedPlot(phases, resultant) {
+  const mag = phases.map(() => 1);
+  const reMag = mag.map((val, i) => val * Math.cos(phases[i]));
+  const imMag = mag.map((val, i) => val * Math.sin(phases[i]));
+  
+  const cumRe = reMag.reduce((acc, value, i) => {
+    acc[i] = (i === 0 ? value : acc[i - 1] + value);
+    return acc;
+  }, []);
+  
+  const cumIm = imMag.reduce((acc, value, i) => {
+    acc[i] = (i === 0 ? value : acc[i - 1] + value);
+    return acc;
+  }, []);
+  
+  const cumMag = cumRe.map((val, i) => Math.sqrt(val ** 2 + cumIm[i] ** 2));
+  const cumTh = cumRe.map((val, i) => Math.atan2(cumIm[i], val));
+  
+  const traces = [
+    {
+      type: "scatterpolar",
+      name: '$e^{i\\theta[j]}$',
+      r: mag,
+      theta: phases,
+      mode: "markers",
+      marker: {
+        color: ['black', 'orange', 'purple', 'green'],
+        symbol: "square",
+        size: 15,
+      },
+      thetaunit: "radians",
+    },
+    {
+      type: "scatterpolar",
+      name: "$\\sum e^{i\\theta[j]}$",
+      r: [0, ...cumMag],
+      theta: [0, ...cumTh],
+      marker: {
+        color: ['', 'black', 'orange', 'purple', 'green'],
+        symbol: "square",
+        size: [0, 15, 15, 15, 15],
+      },
+      line: {
+        color: 'black',
+        width: 5
+      },
+      thetaunit: "radians",
+    },
+    {
+      type: "scatterpolar",
+      name: "$\\frac{1}{N}\\sum e^{i\\theta[j]}$",
+      r: [0, resultant.magnitude],
+      theta: [0, resultant.angle],
+      marker: {
+        color: ['', 'brown'],
+        symbol: "square",
+        size: [0, 15],
+      },
+      line: {
+        color: 'brown',
+        width: 5
+      },
+      thetaunit: "radians",
+    }
+  ];
+  
+  const layout = {
+    polar: {
+      angularaxis: { thetaunit: "radians" },
+      radialaxis: { range: [0, Math.max(1.1, Math.max(...cumMag) * 1.1)] }
+    },
+    showlegend: true,
+    font: { size: 14 },
+    margin: { t: 30, b: 30, l: 30, r: 30 },
+  };
+  
+  return { data: traces, layout: layout };
+}
+
+// Generate question
+const correctPhases = generateRandomPhases();
+const correctResultant = calculateResultant(correctPhases);
+
+// Display question
+const questionPlot = createQuestionPlot(correctPhases);
+Plotly.newPlot('target', questionPlot.data, questionPlot.layout, {responsive: true});
+
+// Generate options
+const wrongResultant1 = generateWrongResultant(correctResultant);
+const wrongResultant2 = generateWrongResultant(correctResultant, [wrongResultant1]);
+
+const options = [
+  { resultant: correctResultant, isCorrect: true },
+  { resultant: wrongResultant1, isCorrect: false },
+  { resultant: wrongResultant2, isCorrect: false }
+];
+
+const shuffledOptions = options.sort(() => Math.random() - 0.5);
+
+let selectedOption = null;
+let answered = false;
+
+// Build choice cards
+const choicesDiv = document.getElementById("choices");
+shuffledOptions.forEach((option, idx) => {
+  const card = document.createElement("div");
+  card.className = "option-card";
+  card.dataset.index = idx;
+  
+  // Quiz view (simple resultant)
+  const quizView = document.createElement("div");
+  quizView.className = "quiz-view";
+  quizView.id = `quiz-${idx}`;
+  
+  // Answer view (detailed breakdown)
+  const answerView = document.createElement("div");
+  answerView.className = "answer-view";
+  answerView.id = `answer-${idx}`;
+  
+  const selectBtn = document.createElement("div");
+  selectBtn.className = "select-overlay";
+  selectBtn.textContent = "Select This";
+  selectBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    selectOption(idx, card);
+  });
+  
+  card.appendChild(quizView);
+  card.appendChild(answerView);
+  card.appendChild(selectBtn);
+  choicesDiv.appendChild(card);
+});
+
+// Render all plots after DOM is ready (fixes sizing issues)
+setTimeout(() => {
+  shuffledOptions.forEach((option, idx) => {
+    const resultantPlot = createResultantPlot(option.resultant);
+    Plotly.newPlot(`quiz-${idx}`, resultantPlot.data, resultantPlot.layout, {responsive: true, displayModeBar: false});
+  });
+}, 0);
+
+function selectOption(idx, card) {
+  if (answered) return;
+  document.querySelectorAll(".option-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  selectedOption = idx;
+  document.getElementById("submitBtn").disabled = false;
+}
+
+function submitAnswer() {
+  if (selectedOption === null || answered) return;
+  answered = true;
+  
+  const feedback = document.getElementById("feedback");
+  const allCards = document.querySelectorAll(".option-card");
+  const selectedCard = document.querySelector(`.option-card[data-index="${selectedOption}"]`);
+  const isCorrect = shuffledOptions[selectedOption].isCorrect;
+  
+  // Disable select overlays
+  allCards.forEach(card => {
+    const overlay = card.querySelector(".select-overlay");
+    overlay.style.pointerEvents = "none";
+    overlay.style.opacity = "0.5";
+  });
+  
+  document.getElementById("submitBtn").disabled = true;
+  
+  // Highlight correct/incorrect answers
+  if (isCorrect) {
+    selectedCard.classList.add("correct");
+    feedback.textContent = "✅ Correct!";
+    feedback.style.color = "#4caf50";
+  } else {
+    selectedCard.classList.add("incorrect");
+    allCards.forEach((card, idx) => {
+      if (shuffledOptions[idx].isCorrect) {
+        card.classList.add("correct");
+      }
+    });
+    feedback.textContent = "❌ Wrong! The correct answer is highlighted in green.";
+    feedback.style.color = "#f44336";
+  }
+  
+  // Update score
+  incrementScore(isCorrect);
+  document.getElementById("nextBtn").style.display = "inline-block";
+}
+
+window.submitAnswer = submitAnswer;
+window.locationReload = () => location.reload();
+window.selectOption = selectOption;
+window.resetScore = resetScore;
+setupNextButton('nextBtn');
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const banner = document.querySelector(".nav-banner");
+  if (!banner) return;
+  
+  document.body.classList.add("has-nav-banner");
+  
+  function updateNavHeight() {
+    const height = banner.getBoundingClientRect().height;
+    document.body.style.setProperty("--nav-height", height + "px");
+  }
+  
+  updateNavHeight();
+  window.addEventListener("resize", updateNavHeight);
+  
+  const observer = new ResizeObserver(updateNavHeight);
+  observer.observe(banner);
+});
+</script>
+</body>
+</html>
