@@ -29,6 +29,6 @@ Collections of interactive web applications for the visualisation, teaching and 
 3. go to `http://localhost:8080`
 
 ## Project funding
-This project was funded by the Swiss National Science Foundation and la commission d'informatique of the UNIGE
+This project was funded by the Swiss National Science Foundation (209120, 209470) and la commission d'informatique of the UNIGE
 
 ![atlas](./images/SNF_logo_standard_web_color_neg_e.svg "SNSF logo")  
