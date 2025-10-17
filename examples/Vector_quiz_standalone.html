@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector Addition Quiz</title>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+<style>
+/* ===========================
+   UNIVERSAL QUIZ STYLESHEET
+   =========================== */
+
+/* Core Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* --- Container --- */
+.container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 1400px;
+  width: 100%;
+}
+
+/* --- Headings --- */
+h2 {
+  text-align: center;
+  color: #333;
+  font-size: 32px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+  text-align: center;
+  color: #555;
+  font-size: 24px;
+  margin-bottom: 25px;
+}
+
+/* --- Header and Score Controls --- */
+.header-row {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  min-height: 48px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header-row h2 {
+  margin: 0;
+  flex: 1 1 100%;
+  text-align: center;
+}
+
+.score-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+}
+
+#scoreDisplay {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.reset-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.reset-btn:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Vector Display --- */
+.vector-display {
+  margin: 20px auto 40px auto;
+  max-width: 500px;
+  width: 100%;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#target > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* --- Options Section --- */
+.options {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+/* --- Option Cards --- */
+.option-card {
+  flex: 1;
+  min-width: 300px;
+  max-width: 420px;
+  min-height: 350px;
+  border: 3px solid #ddd;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.option-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.option-card.selected {
+  border-color: #667eea;
+  border-width: 4px;
+  transform: scale(1.02);
+}
+
+.option-card.correct {
+  border-color: #4caf50;
+  border-width: 4px;
+  animation: correctPulse 0.5s ease;
+}
+
+.option-card.incorrect {
+  border-color: #f44336;
+  border-width: 4px;
+  animation: incorrectShake 0.5s ease;
+}
+
+.option-card.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* --- Plot Views --- */
+.quiz-view, .answer-view {
+  width: 100%;
+  height: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.quiz-view > div, .answer-view > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.answer-view {
+  display: none;
+}
+
+.option-card.answered .quiz-view {
+  display: none;
+}
+
+.option-card.answered .answer-view {
+  display: flex;
+}
+
+/* --- Select Overlay --- */
+.select-overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(102, 126, 234, 0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.option-card:hover .select-overlay {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.option-card.selected .select-overlay {
+  opacity: 1;
+  background: rgba(102, 126, 234, 1);
+}
+
+.select-overlay:hover {
+  background: rgba(102, 126, 234, 1);
+  transform: translateX(-50%) translateY(-3px);
+}
+
+/* --- Feedback Text --- */
+.feedback {
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+  min-height: 40px;
+  margin-bottom: 20px;
+}
+
+/* --- Buttons (Submit, Next) --- */
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.submit-btn, .next-btn {
+  padding: 15px 40px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.submit-btn:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.next-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: none;
+}
+
+.next-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Animations --- */
+@keyframes correctPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes incorrectShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1200px) {
+  .container { padding: 30px 20px; }
+  .option-card { min-height: 380px; }
+}
+
+@media (max-width: 768px) {
+  body { padding: 10px; }
+  .container { padding: 20px 15px; border-radius: 15px; }
+  h2 { font-size: 24px; }
+  h3 { font-size: 20px; margin-bottom: 20px; }
+  .vector-display { height: 350px; }
+  .options { gap: 15px; }
+  .option-card { min-height: 350px; }
+  .quiz-view, .answer-view { height: 350px; }
+  .button-container { flex-direction: column; gap: 15px; }
+  .submit-btn, .next-btn { width: 100%; padding: 12px 30px; font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 15px 10px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+  .vector-display { height: 300px; }
+  .option-card { min-height: 320px; }
+  .quiz-view, .answer-view { height: 320px; }
+  .feedback { font-size: 20px; }
+  #scoreDisplay { padding: 10px 18px; font-size: 16px; }
+  .reset-btn { padding: 10px 16px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+<div class="quiz-wrapper">
+<div class="container">
+  <div class="header-row">
+    <h2>What is the Average Resultant Vector? </h2>
+    <div class="score-controls">
+      <div id="scoreDisplay"></div>
+      <button class="reset-btn" onclick="resetScore()">Reset Score</button>
+    </div>
+  </div>
+  
+  <div id="target" class="vector-display"></div>
+  
+  <h3 style="clear: both; margin-top: 20px;">Select the correct average resultant vector:</h3>
+  
+  <div class="options" id="choices"></div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <div class="button-container">
+    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+</div>
+</div>
+
+<script>
+// Score management
+let score = { correct: 0, total: 0 };
+
+function loadScore() {
+  const saved = { correct: 0, total: 0 };
+  score = saved;
+  updateScoreDisplay();
+}
+
+function saveScore() {
+  // Score persists in memory during session
+}
+
+function updateScoreDisplay() {
+  const display = document.getElementById('scoreDisplay');
+  const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
+  display.textContent = `Score: ${score.correct}/${score.total} (${percentage}%)`;
+}
+
+function incrementScore(isCorrect) {
+  score.total++;
+  if (isCorrect) score.correct++;
+  saveScore();
+  updateScoreDisplay();
+}
+
+function resetScore() {
+  if (confirm('Are you sure you want to reset your score?')) {
+    score = { correct: 0, total: 0 };
+    saveScore();
+    updateScoreDisplay();
+  }
+}
+
+// Generate random phase values for 4 vectors
+function generateRandomPhases() {
+  let phases;
+  let resultant;
+  
+  // Keep generating until we get a resultant magnitude > 0.1
+  do {
+    phases = [];
+    for (let i = 0; i < 4; i++) {
+      phases.push(Math.random() * 2 * Math.PI);
+    }
+    resultant = calculateResultant(phases);
+  } while (resultant.magnitude < 0.1);
+  
+  return phases;
+}
+
+// Calculate resultant vector from phases
+function calculateResultant(phases) {
+  const mag = phases.map(() => 1); // All magnitudes are 1
+  const reMag = mag.map((val, i) => val * Math.cos(phases[i]));
+  const imMag = mag.map((val, i) => val * Math.sin(phases[i]));
+  
+  const sumRe = reMag.reduce((acc, val) => acc + val, 0);
+  const sumIm = imMag.reduce((acc, val) => acc + val, 0);
+  
+  const avgRe = sumRe / 4;
+  const avgIm = sumIm / 4;
+  
+  const avgMag = Math.sqrt(avgRe ** 2 + avgIm ** 2);
+  const avgTheta = Math.atan2(avgIm, avgRe);
+  
+  return { magnitude: avgMag, angle: avgTheta };
+}
+
+// Generate wrong resultant vector
+function generateWrongResultant(correctResultant, existingWrong = []) {
+  let wrongResultant;
+  let attempts = 0;
+  const maxAttempts = 100;
+  
+  const minAngleDiff = 15 * Math.PI / 180; // 15 degrees
+  const minMagDiff = 0.15;
+  
+  do {
+    // Randomly vary either angle, magnitude, or both
+    const method = Math.random();
+    
+    if (method < 0.33) {
+      // Change angle significantly
+      const angleDelta = (minAngleDiff + Math.random() * (Math.PI - minAngleDiff)) * (Math.random() < 0.5 ? 1 : -1);
+      wrongResultant = {
+        angle: correctResultant.angle + angleDelta,
+        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + (Math.random() - 0.5) * 0.3))
+      };
+    } else if (method < 0.66) {
+      // Change magnitude significantly
+      const magDelta = (minMagDiff + Math.random() * (1 - correctResultant.magnitude - minMagDiff)) * (Math.random() < 0.5 ? 1 : -1);
+      wrongResultant = {
+        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + magDelta)),
+        angle: correctResultant.angle + (Math.random() - 0.5) * minAngleDiff
+      };
+    } else {
+      // Change both
+      const angleDelta = (minAngleDiff + Math.random() * Math.PI) * (Math.random() < 0.5 ? 1 : -1);
+      const magDelta = (minMagDiff + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1);
+      wrongResultant = {
+        angle: correctResultant.angle + angleDelta,
+        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + magDelta))
+      };
+    }
+    
+    // Normalize angle to [-π, π]
+    while (wrongResultant.angle > Math.PI) wrongResultant.angle -= 2 * Math.PI;
+    while (wrongResultant.angle < -Math.PI) wrongResultant.angle += 2 * Math.PI;
+    
+    attempts++;
+    
+    // Check if different enough from correct and existing wrong answers
+    const angleDiff = Math.abs(wrongResultant.angle - correctResultant.angle);
+    const magDiff = Math.abs(wrongResultant.magnitude - correctResultant.magnitude);
+    const isDifferentFromCorrect = angleDiff > minAngleDiff || magDiff > minMagDiff;
+    
+    const isDifferentFromExisting = existingWrong.every(existing => {
+      const aD = Math.abs(wrongResultant.angle - existing.angle);
+      const mD = Math.abs(wrongResultant.magnitude - existing.magnitude);
+      return aD > minAngleDiff || mD > minMagDiff;
+    });
+    
+    if (isDifferentFromCorrect && isDifferentFromExisting) {
+      break;
+    }
+    
+  } while (attempts < maxAttempts);
+  
+  return wrongResultant;
+}
+
+// Create plot data for individual vectors (question display)
+function createQuestionPlot(phases) {
+  const mag = phases.map(() => 1);
+  
+  const trace = {
+    type: "scatterpolar",
+    name: '$e^{i\\theta[j]}$',
+    r: mag,
+    theta: phases,
+    mode: "markers",
+    marker: {
+      color: ['black', 'orange', 'purple', 'green'],
+      symbol: "square",
+      size: 15,
+    },
+    thetaunit: "radians",
+  };
+  
+  const layout = {
+    polar: {
+      angularaxis: { thetaunit: "radians" },
+      radialaxis: { range: [0, 1.1] }
+    },
+    showlegend: false,
+    font: { size: 16 },
+    margin: { t: 40, b: 40, l: 40, r: 40 },
+    title: '4 Complex Vectors'
+  };
+  
+  return { data: [trace], layout: layout };
+}
+
+// Create plot data for resultant vector (answer options)
+function createResultantPlot(resultant) {
+  const trace = {
+    type: "scatterpolar",
+    name: "$\\frac{1}{N}\\sum e^{i\\theta[j]}$",
+    r: [0, resultant.magnitude],
+    theta: [0, resultant.angle],
+    marker: {
+      color: ['', 'brown'],
+      symbol: "square",
+      size: [0, 15],
+    },
+    line: {
+      color: 'brown',
+      width: 5
+    },
+    thetaunit: "radians",
+  };
+  
+  const layout = {
+    polar: {
+      angularaxis: { thetaunit: "radians" },
+      radialaxis: { range: [0, 1.1] }
+    },
+    showlegend: false,
+    font: { size: 14 },
+    margin: { t: 30, b: 30, l: 30, r: 30 },
+  };
+  
+  return { data: [trace], layout: layout };
+}
+
+// Quiz state
+let currentQuestion = null;
+let selectedOption = null;
+let answered = false;
+
+function generateQuestion() {
+  const correctPhases = generateRandomPhases();
+  const correctResultant = calculateResultant(correctPhases);
+  
+  const wrongResultant1 = generateWrongResultant(correctResultant);
+  const wrongResultant2 = generateWrongResultant(correctResultant, [wrongResultant1]);
+  
+  const options = [
+    { resultant: correctResultant, isCorrect: true },
+    { resultant: wrongResultant1, isCorrect: false },
+    { resultant: wrongResultant2, isCorrect: false }
+  ];
+  
+  const shuffledOptions = options.sort(() => Math.random() - 0.5);
+  
+  return {
+    phases: correctPhases,
+    resultant: correctResultant,
+    options: shuffledOptions
+  };
+}
+
+function renderQuestion() {
+  currentQuestion = generateQuestion();
+  selectedOption = null;
+  answered = false;
+  
+  // Clear feedback
+  document.getElementById('feedback').textContent = '';
+  
+  // Display question plot
+  const questionPlot = createQuestionPlot(currentQuestion.phases);
+  Plotly.newPlot('target', questionPlot.data, questionPlot.layout, {responsive: true});
+  
+  // Build choice cards
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = '';
+  
+  currentQuestion.options.forEach((option, idx) => {
+    const card = document.createElement("div");
+    card.className = "option-card";
+    card.dataset.index = idx;
+    
+    // Quiz view (simple resultant)
+    const quizView = document.createElement("div");
+    quizView.className = "quiz-view";
+    quizView.id = `quiz-${idx}`;
+    
+    // Answer view (detailed breakdown)
+    const answerView = document.createElement("div");
+    answerView.className = "answer-view";
+    answerView.id = `answer-${idx}`;
+    
+    const selectBtn = document.createElement("div");
+    selectBtn.className = "select-overlay";
+    selectBtn.textContent = "Select This";
+    selectBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectOption(idx, card);
+    });
+    
+    card.appendChild(quizView);
+    card.appendChild(answerView);
+    card.appendChild(selectBtn);
+    choicesDiv.appendChild(card);
+  });
+  
+  // Render plots after DOM is ready
+  setTimeout(() => {
+    currentQuestion.options.forEach((option, idx) => {
+      const resultantPlot = createResultantPlot(option.resultant);
+      Plotly.newPlot(`quiz-${idx}`, resultantPlot.data, resultantPlot.layout, {responsive: true, displayModeBar: false});
+    });
+  }, 0);
+  
+  // Reset buttons
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectOption(idx, card) {
+  if (answered) return;
+  document.querySelectorAll(".option-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  selectedOption = idx;
+  document.getElementById("submitBtn").disabled = false;
+}
+
+function submitAnswer() {
+  if (selectedOption === null || answered) return;
+  answered = true;
+  
+  const feedback = document.getElementById("feedback");
+  const allCards = document.querySelectorAll(".option-card");
+  const selectedCard = document.querySelector(`.option-card[data-index="${selectedOption}"]`);
+  const isCorrect = currentQuestion.options[selectedOption].isCorrect;
+  
+  // Disable select overlays
+  allCards.forEach(card => {
+    const overlay = card.querySelector(".select-overlay");
+    overlay.style.pointerEvents = "none";
+    overlay.style.opacity = "0.5";
+  });
+  
+  document.getElementById("submitBtn").disabled = true;
+  
+  // Highlight correct/incorrect answers
+  if (isCorrect) {
+    selectedCard.classList.add("correct");
+    feedback.textContent = "✅ Correct!";
+    feedback.style.color = "#4caf50";
+  } else {
+    selectedCard.classList.add("incorrect");
+    allCards.forEach((card, idx) => {
+      if (currentQuestion.options[idx].isCorrect) {
+        card.classList.add("correct");
+      }
+    });
+    feedback.textContent = "❌ Wrong! The correct answer is highlighted in green.";
+    feedback.style.color = "#f44336";
+  }
+  
+  // Update score
+  incrementScore(isCorrect);
+  document.getElementById("nextBtn").style.display = "inline-block";
+}
+
+function nextQuestion() {
+  renderQuestion();
+}
+
+// Initialize
+loadScore();
+renderQuestion();
+</script>
+</body>
+</html>
