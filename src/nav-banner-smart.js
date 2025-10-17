@@ -18,7 +18,7 @@
     brandColor: '#96004B',
     logoUrl: 'https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg',
     githubUrl: 'https://github.com/Roehrin/webapps_for_EEG_courses/tree/site',
-    copyright: '© 2025 Dr Nicolas Roehri'
+   // copyright: '© 2025 Dr Nicolas Roehri'
   };
 
   // Create and inject styles
@@ -63,7 +63,6 @@
       .nav-banner-title { font-size: 16px; margin: 0; color: rgba(255,255,255,0.9); }
       .nav-banner-right { display: flex; align-items: center; gap: 15px; }
       .nav-banner-logo { height: 40px; filter: brightness(0) invert(1); opacity: 0.9; }
-      .nav-banner-copyright { font-size: 14px; color: rgba(255,255,255,0.9); margin: 0; }
       .nav-banner-dropdown {
         position: absolute; top: 100%; left: 0; right: 0; background: #fff;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -182,7 +181,6 @@
         </div>
         <div class="nav-banner-right">
           <img src="${CONFIG.logoUrl}" alt="University of Geneva" class="nav-banner-logo">
-          <p class="nav-banner-copyright">${CONFIG.copyright}</p>
         </div>
       </div>
       <div class="nav-banner-dropdown" id="nav-dropdown">
