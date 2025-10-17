@@ -218,16 +218,19 @@ h3 {
   border: none;
 }
 
-.option-card:hover {
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+.option-card:hover .select-overlay {
+  opacity: 1;
+  pointer-events: all;
 }
 
-.option-card.selected {
-  border-color: #667eea;
-  border-width: 4px;
-  transform: scale(1.02);
+.option-card.selected .select-overlay {
+  opacity: 1;
+  background: rgba(102, 126, 234, 1);
 }
-
+.option-card:hover .select-overlaygraph {
+  opacity: 1;
+  pointer-events: all;
+}
 .option-card.correct {
   border-color: #4caf50;
   border-width: 4px;
@@ -274,7 +277,9 @@ h3 {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  z-index: 20; /* make sure it’s above iframe */
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .select-overlay:hover {
@@ -294,8 +299,10 @@ h3 {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 10;
+  z-index: 20;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .select-overlaygraph:hover {
