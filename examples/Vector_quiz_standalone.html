@@ -405,14 +405,14 @@ function generateRandomPhases() {
   let phases;
   let resultant;
   
-  // Keep generating until we get a resultant magnitude > 0.1
+  // Keep generating until we get a resultant magnitude >= 0.2
   do {
     phases = [];
     for (let i = 0; i < 4; i++) {
       phases.push(Math.random() * 2 * Math.PI);
     }
     resultant = calculateResultant(phases);
-  } while (resultant.magnitude < 0.1);
+  } while (resultant.magnitude < 0.2);
   
   return phases;
 }
@@ -443,6 +443,7 @@ function generateWrongResultant(correctResultant, existingWrong = []) {
   
   const minAngleDiff = 15 * Math.PI / 180; // 15 degrees
   const minMagDiff = 0.15;
+  const minMagnitude = 0.1; // Minimum magnitude threshold
   
   do {
     // Randomly vary either angle, magnitude, or both
@@ -453,13 +454,13 @@ function generateWrongResultant(correctResultant, existingWrong = []) {
       const angleDelta = (minAngleDiff + Math.random() * (Math.PI - minAngleDiff)) * (Math.random() < 0.5 ? 1 : -1);
       wrongResultant = {
         angle: correctResultant.angle + angleDelta,
-        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + (Math.random() - 0.5) * 0.3))
+        magnitude: Math.max(minMagnitude, Math.min(1, correctResultant.magnitude + (Math.random() - 0.5) * 0.3))
       };
     } else if (method < 0.66) {
       // Change magnitude significantly
       const magDelta = (minMagDiff + Math.random() * (1 - correctResultant.magnitude - minMagDiff)) * (Math.random() < 0.5 ? 1 : -1);
       wrongResultant = {
-        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + magDelta)),
+        magnitude: Math.max(minMagnitude, Math.min(1, correctResultant.magnitude + magDelta)),
         angle: correctResultant.angle + (Math.random() - 0.5) * minAngleDiff
       };
     } else {
@@ -468,7 +469,7 @@ function generateWrongResultant(correctResultant, existingWrong = []) {
       const magDelta = (minMagDiff + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1);
       wrongResultant = {
         angle: correctResultant.angle + angleDelta,
-        magnitude: Math.max(0, Math.min(1, correctResultant.magnitude + magDelta))
+        magnitude: Math.max(minMagnitude, Math.min(1, correctResultant.magnitude + magDelta))
       };
     }
     
