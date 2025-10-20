@@ -34,9 +34,9 @@ This project was funded by the Swiss National Science Foundation (209120, 209470
 
 ## Contributors
 
-Thanks to everyone who has contributed to this project:
 
 - Dr. Nicolas Roehri
 - Steven Beumer MSc
+- Dr. Isotta Rigoni
 - Dr. Stanislas Lagarde
 
