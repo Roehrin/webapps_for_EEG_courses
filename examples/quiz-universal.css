@@ -217,7 +217,12 @@ h3 {
   height: 100%;
   border: none;
 }
-
+.option-card.selected {
+  border-color: #667eea; /* blue border */
+  border-width: 4px;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6); /* subtle blue glow */
+  transition: all 0.3s ease;
+}
 .option-card:hover .select-overlay {
   opacity: 1;
   pointer-events: all;
