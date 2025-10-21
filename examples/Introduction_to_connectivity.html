@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to functional connectivity</title>
+
+	<script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+	<script src="../src/nav-banner-smart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.banner {
+		  position: sticky;
+		  top: 0;
+		  background:#96004B;
+		  color: #f1f1f1;
+		  z-index: 1;
+		  text-align: right;
+		  padding: 10px
+		}
+		.divfooter {
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		}
+		.text {
+		  text-align: right;
+		}
+		.div {
+		  margin: 20px;
+		}
+		section {
+			margin: 30px;
+		}
+		h1 {
+			margin: 10px;
+		}
+    </style>
+</head>
+<body>
+	<h1>Introduction to functional connectivity</h1>
+	<section>
+	<h2>Definition of Functional Connectivity</h2>
+	Functional connectivity refers to the statistical relationship between signals recorded from different brain regions, reflecting their dynamic interactions over time. It can be assessed using various families of measures, including phase-based connectivity (e.g., Phase Locking Value, which quantifies phase synchronization), amplitude-based connectivity (e.g., Amplitude Envelope Correlation, which examines power co-modulations), and coherence, which captures both phase and amplitude relationships.<br><br>
+	Regardless of the chosen method, extracting meaningful connectivity information requires computing the amplitude and phase of signals, typically using the Fourier transform \(\left(\mathcal{F}(.)\right)\) or the Hilbert transform \(\left(\mathcal{H}(.)\right)\).<br><br>
+	Since these transformations yield complex-valued representations of the signals, it is often useful to apply Euler’s formula, which expresses a complex number in terms of its magnitude and phase, making it easier to manipulate and interpret in functional connectivity analyses.
+	$$ z = a + ib = Re^{i\theta}$$ with \(\Re(z) = a = R\cos(\theta)\) the real part, \( \Im(z) = b= R\sin(\theta)\) the imaginary part, \(\left|z\right| = R = \sqrt{a^2 + b^2}\) the absolute value or magnitude, \(\arg(z) = \theta = \arctan\left(\frac{b}{a}\right)\) the phase angle, with \(\theta \in \left[0, 2\pi\right]\) or \(\theta \in \left[-\pi, \pi\right]\) (the second definition will be used).
+
+	</section>
+	<section>
+	To illustrate the principle of the Fourier transform or Hilbert transform, we will define a simple signal.<br><br>
+	Let us assume a noisy oscillating signal \(S\) of amplitude \(A(t)\), frequency \(f_S\), and phase shift \(\theta\) and \(\epsilon(t)\) the noise, drawn from a centered Normal distribution of standard deviation \(\sigma\). This signal is written as:
+	$$S(t) = A(t)\cos(2\pi f_St + \theta) + \epsilon(t),$$ $$\epsilon \sim \mathcal{N}(0,\sigma^{2}).$$<br><br>
+	\(A\) takes the following form:
+	$$A(t) = \frac{1}{2}(m\cos(2\pi f_{A}t + \theta_{A}) + 1)$$ 
+	\(f_{A}\) the frequency of the cosine amplitude modulation, \(\theta_{A}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(\theta_{A} = \pi\textrm{ rad}\) and \(m = \frac{4}{5}\).<br> 	\(f_S\), \(\theta\) and \(f_{A}\) can be tuned. Note that when \(f_{A} = 0\), \(A(t) = c\), with \(c\) being a constant, dependent on \(m\) and \(\theta_A\). In the example below, \(c\) is set to 1, when \(f_{A} = 0\).
+
+	</section>
+	<section>
+	<h2>Frequency domain (<em>spectral method</em>)</h2>
+	<ol>
+        <li><strong>Segment the Signal</strong> – Divide the continuous signal into <em>trials</em> (typically aligned to an event of interest or stimulus) or <em>epochs</em> (several time window of a fixed duration).</li>
+        <li><strong>Compute the Fourier Transform</strong> – Apply the <em>Fourier Transform</em> to each trial/epoch to obtain the complex frequency representation of the signal. This provides the <em>amplitude and phase</em> information for each frequency component.</li>
+        <li><strong>Compute the Metric of Interest</strong> – across the epochs/trials. This yields	 a connectivity metric for each frequency bin.</li>
+        <li><strong>Average Across Frequency Bands (Optional)</strong> – If interested in specific frequency bands (e.g., theta, alpha, beta), average the metric across the selected frequencies.</li>
+    </ol>
+	The Fourier transform provides the frequency content of a signal, as a complex number as:
+	$$\mathcal{F}_S(f)=\tilde{S}(f) = A'(f)e^{i\theta'(f)}$$
+	<br>
+	The Fourier transform gives us the amplitude \(A'(f)\) and the phase shift \(\theta'(f)\) for each frequency bin. Usually, one represents the power density across frequency bins (i.e. \(A'(f)/\Delta T\), with \(\Delta T\) the duration of the signal) referred to as the <strong>power spectral density</strong> (<strong>PSD</strong>) in \(V^2/Hz\).<br><br>
+
+	In the example below, \(f_{A} = 0\) and \(A(t) = A =1\) in case 1. This means that \(A^2 = A'^2(f_S)/\Delta T = 1\) and \(\theta=\theta'(f_S)\) in absence  of noise (\(\sigma = 0\)). <br>In case 2,  \(\theta_{A} = \pi\textrm{ rad}\) and \(m = \frac{4}{5}\). The modulation frequency, \(f_{A} \), can be varied from 0 to 3 Hz <br>
+	There are <em>key values</em> to keep in mind: 
+	<ul>
+		<li>\(\theta=0 \implies S(0)\) <strong>starts at</strong> its peak;</li>
+		<li>\(\theta=\frac{\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> in its up-to-down phase;</li>
+		<li>\(\theta=\pi\implies S(0)\) <strong>starts at</strong> its peak;</li>
+		<li>\(\theta=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> zero in its down-to-up phase.</li>
+	</ul>
+
+	 The plot below let you modify \(f_S\), \(\theta\) and \(\sigma\) in case 1 and additionaly  \(f_{A} \) in case 2, and see their effect on the Fourier transform. You could start by modifying \(\theta\) to verify the above list.
+	</section>
+    <div id="plot_DFT" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter_DFT">
+		<span style="padding: 5px">
+			<label for="frequency_DFT">\(f_S\) :</label>
+			<input type="range" id="frequency_DFT" class="slider" min="1" max="25" value="10">
+			<span id="freqValue_DFT">10 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="phase_DFT">\(\theta\) :</label>
+			<input type="range" id="phase_DFT" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue_DFT">0 rad</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="noiseLevel_DFT">\(\sigma\) :</label>
+			<input type="range" id="noiseLevel_DFT" class="slider" min="0" max="1" value="0" step="0.01">
+			<span id="noiseValue_DFT">0.00</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="envFreq_DFT">\(f_{A}\) :</label>
+			<input type="range" id="envFreq_DFT" class="slider" min="0" max="3" value="0" step=".2">
+			<span id="envFreqValue_DFT">0.00 Hz</span>
+		</span>
+		<span style="padding: 5px">
+		Cases: 
+		<input type="radio" id="case1Btn" name="caseID" checked>
+		<label for="case1Lbl">case 1</label>
+		<input type="radio" id="case2Btn" name="caseID">
+		<label for="case2Lbl"> case 2</label>
+
+    </div>
+	
+	<section>
+	<h2>Time domain</h2>
+	<ol>
+        <li><strong>Bandpass Filter the Signal</strong> – Apply a <em>bandpass filter</em> to isolate the frequency range of interest (e.g., theta, alpha, beta). The Hilbert transform is meaningful only within a defined frequency band.</li>
+        <li><strong>Compute the Analytic Signal</strong> – Apply the <em>Hilbert Transform</em> to obtain the analytic signal, which consists of:
+            <ul>
+                <li><strong>Real part</strong>: The original band-limited signal.</li>
+                <li><strong>Imaginary part</strong>: The Hilbert transform of the real part, forming a complex representation.</li>
+            </ul>
+        </li>
+        <li><strong>Extract Amplitude and Phase</strong> – Compute:
+            <ul>
+                <li><strong>Instantaneous Amplitude (Envelope)</strong>: The magnitude of the analytic signal.</li>
+                <li><strong>Instantaneous Phase</strong>: The phase angle, obtained using the arctangent function.</li>
+            </ul>
+        </li>
+        <li><strong>Compute the Metric of Interest</strong> across the temporal dimension.</li>
+    </ol>
+	The analytic signal representation gives us the (instantaneous) amplitude of the envelope \(A(t)\) and the instantaneous phase \(\phi(t)\).
+	$$\widehat{S}(t)= S(t)+i\mathcal{H}(S(t)) = A(t)e^{i(2\pi f_St + \theta)}$$
+	The instantaneous phase is defined as:
+	$$\phi(t)= 2\pi f_St + \theta,$$
+	$$\textrm{so }\widehat{S}(t)= A(t)e^{i\phi(t)}.$$
+	There are <em>key values</em> to keep in mind: 
+	<ul>
+		<li>\(\phi(t)=0 \implies S(t)\) <strong>is at</strong> its peak;</li>
+		<li>\(\phi(t)=\frac{\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its up-to-down phase;</li>
+		<li>\(\phi(t)=\pi\implies S(t)\) <strong>is at</strong> its peak;</li>
+		<li>\(\phi(t)=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(t)\) <strong>is crossing</strong> zero in its down-to-up phase.</li>
+	</ul>
+	 The plot below let you modify \(f_S\), \(\theta\), \(\sigma\), \(f_A\) and the time instant \(t\) to evaluate their effect on the envelope \(A(t)\) and instantaneous phase \(\phi(t)\). You could start by modifying spanning the different time instant \(t\) to verify that the above list is true regarless of the values of \(f_S\), \(\theta\) and \(f_A\).
+	</section>
+    <div id="plot_Hil" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter_Hil">
+		<span style="padding: 5px">
+			<label for="frequency_Hil">\(f_S\) :</label>
+			<input type="range" id="frequency_Hil" class="slider" min="1" max="25" value="10">
+			<span id="freqValue_Hil">10 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="phase_Hil">\(\theta\) :</label>
+			<input type="range" id="phase_Hil" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue_Hil">0 rad</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="noiseLevel_Hil">\(\sigma\) :</label>
+			<input type="range" id="noiseLevel_Hil" class="slider" min="0" max="1" value="0" step="0.01">
+			<span id="noiseValue_Hil">0.00</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="envFreq_Hil">\(f_{A}\) :</label>
+			<input type="range" id="envFreq_Hil" class="slider" min="0" max="3" value="0" step=".2">
+			<span id="envFreqValue_Hil">0.00 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="time_Hil">time :</label>
+			<input type="range" id="time_Hil" style="width:25%", class="slider" min="0" max="255" value="64" step="1">
+			<span id="timeValue_Hil">0.25 s</span>
+		</span>
+    </div>
+	<section>
+		<h2>Time-frequency domain</h2>
+		Time-frequency analysis decomposes a signal into its frequency components at different time points. This is commonly achieved using either the <strong>Short-Time Fourier Transform (STFT)</strong> or <strong>Analytic Continuous Wavelet Transform (CWT)</strong>.<br>
+		For the <strong>STFT</strong>, the signal is divided into short overlapping time windows (epochs) to capture local frequency changes. The Fourier Transform is computed within each window, providing a spectrogram with frequency resolution dependent on window size. The connectivity metric is then computed the same way as explained above in the frequency domain section.<br>
+		<strong>CWT</strong> adapts the frequency resolution dynamically, offering better time resolution for high frequencies and better frequency resolution for low frequencies. Using analytic wavelets (e.g., complex Morlet or Morse wavelets) allows for the extraction of the analytic signal at each frequency bin, making it conceptually similar to the Hilbert Transform applied after bandpass filtering.
+		The connectivity metric is then computed the same way as explained above in the time domain section.
+	</section>
+    <section>
+		<h2>Average of complex numbers</h2>
+		When summing complex numbers, you can visualize each number as a vector in the complex plane.<br>
+		In the cartesian coordinate system \((x,y)\) you have: 
+		$$x = \Re(z) = a = R\cos(\theta),\quad y = \Im(z) = b = R\sin(\theta)$$
+		In the polar coordinate system \((R,\theta)\), where \(R)\) is the length of the vector and \(\theta)\) the angle/phase of the vector, you have: 
+		$$R = \left|z\right|, \quad \theta = \arg(z)$$
+		For the purpose of this course, we will mainly use the polar form.
+		Given two complex numbers in polar form:
+		$$z_1= R_1e^{i\theta_1},\quad z_2= R_2e^{i\theta_2}.$$
+		You can visualise their sum as placing the tip of \(z_1\) at the origin, then placing \(z_2\) starting at the tip of \(z_1\). The resultant vector goes from the origin to the new tip. When the sum has more element you continue adding each element to the tip of the last resultant vector. If you want to compute the average you simply need to divide the resultant vector by the number of element. 
+		<ul>
+			<li>If the vectors are aligned (same phase), they add constructively, making the magnitude larger.</li>
+			<li>If they are in opposite directions \(\theta_1 - \theta_2 = \pi\), they add destructively, reducing the magnitude.</li>
+			<li>If they have different angles, the sum results in a new angle and magnitude.</li>
+		</ul>
+		Below, 3 cases are illustrated:
+		<ol>
+			<li>the vectors have a length of 1 <strong>with similar angles</strong>, so the average resultant vector points in <strong>the same direction with a length close to 1</strong>,</li>
+			<li>the vectors have a length of 1 <strong>but with different angles</strong>, so the average resultant vector is <strong>small and points in  another direction</strong>,</li>
+			<li>the vectors have a length of 1 <strong>with random orientations</strong>. You can click the <em>'Randomize' button</em> to generate new samples.</li>
+		</ol>
+	</section>
+	<section>
+		<h3>Vectors with consistent phase</h3>
+	</section>
+	<div id="consistentPh"></div>
+	<section>
+		<h3>Vectors with inconsistent phase</h3>
+	</section>
+	<div id="inconsistentPh"></div>
+	<section>
+		<h3>Vectors with random phase</h3>
+	</section>
+	<div id="randPh"></div>
+	<div class="divfooter" id="myDivFooter_DFT">
+		<button onclick="javascript:randomize();" style="margin: 10px">Randomise!</button>
+	</div>
+	<script type="module" async>
+		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computeCoherence, computecImCoh, computeImCoh} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
+			
+		const sampleRate = 256;
+
+		const checkboxes = document.querySelectorAll('input[type=checkbox]');
+		const radiobuttons = document.querySelectorAll('input[type=radio]');
+
+		var freq1_DFT = parseFloat(document.getElementById("frequency_DFT").value);
+		var phase1_DFT = 2*Math.PI/360*parseFloat(document.getElementById("phase_DFT").value);
+		var noiseLvl_DFT = parseFloat(document.getElementById("noiseLevel_DFT").value);
+		var freq1_Hil = parseFloat(document.getElementById("frequency_Hil").value);
+		var phase1_Hil = 2*Math.PI/360*parseFloat(document.getElementById("phase_Hil").value);
+		var noiseLvl_Hil = parseFloat(document.getElementById("noiseLevel_Hil").value);
+		var timeIdx_Hil = parseFloat(document.getElementById("time_Hil").value);
+		var envFreq = parseFloat(envFreq_Hil.value);
+
+		var envFreqDFT = parseFloat(document.getElementById("envFreq_DFT").value);
+        const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
+		const N = time.length;
+		const envPhase = Math.PI;
+		const metricColours = ['orange', 'green', 'purple'];
+		
+		var w1_DFT = .65;
+		var w2_DFT = .25;
+		const wgap = .05;
+		// normalise the ws to ensure the sum equals 1
+		let wnorm = w1_DFT + w2_DFT + 2*wgap;
+		w1_DFT = w1_DFT/wnorm; w2_DFT = w2_DFT/wnorm; const wgap_DFT = wgap/wnorm;
+		
+		var w1_Hil = .65;
+		var w2_Hil = .25;
+		// normalise the ws to ensure the sum equals 1
+		wnorm = w1_Hil + w2_Hil + 2*wgap;
+		w1_Hil = w1_Hil/wnorm; w2_Hil = w2_Hil/wnorm; const wgap_Hil = wgap/wnorm;
+		
+		// for DFT
+		// Generate noise
+		var noise1_DFT = generateGaussianNoise(noiseLvl_DFT, time.length); // Noise for first channel
+		
+		// Generate sine waves
+
+
+		var sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreqDFT); // First sine wave
+		
+		var dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+		
+		// for Hilbert transform
+		// Generate noise
+		var noise1_Hil = generateGaussianNoise(noiseLvl_Hil, time.length); // Noise for first channel
+		
+		// Generate sine waves
+		var sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase); // First sine wave
+		
+		var zWave1 = analyticSignal(sineWave1_Hil);
+		
+		frequency_DFT.oninput = function () {
+			freq1_DFT = parseFloat(document.getElementById("frequency_DFT").value);
+			document.getElementById("freqValue_DFT").textContent = freq1_DFT + " Hz";
+
+			envFreq = parseFloat(envFreq_DFT.value);
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		
+		phase_DFT.oninput = function () {
+			phase1_DFT = 2*Math.PI/360*parseFloat(document.getElementById("phase_DFT").value);
+			document.getElementById("phaseValue_DFT").textContent = phase1_DFT.toFixed(2) + " rad";
+
+			envFreq = parseFloat(envFreq_DFT.value);
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		
+		noiseLevel_DFT.oninput = function () {
+			noiseLvl_DFT = parseFloat(document.getElementById("noiseLevel_DFT").value);
+			document.getElementById("noiseValue_DFT").textContent = noiseLvl_DFT.toFixed(2);
+			envFreq = parseFloat(envFreq_DFT.value);
+			noise1_DFT = generateGaussianNoise(noiseLvl_DFT, time.length);
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		envFreq_DFT.oninput = function () {
+			envFreq = parseFloat(envFreq_DFT.value);
+			envFreqValue_DFT.textContent = envFreq.toFixed(2) + " Hz";
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		
+		// for Hil
+		frequency_Hil.oninput = function () {
+			freq1_Hil = parseFloat(document.getElementById("frequency_Hil").value);
+			document.getElementById("freqValue_Hil").textContent = freq1_Hil + " Hz";
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		phase_Hil.oninput = function () {
+			phase1_Hil = 2*Math.PI/360*parseFloat(document.getElementById("phase_Hil").value);
+			document.getElementById("phaseValue_Hil").textContent = phase1_Hil.toFixed(2) + " rad";
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		envFreq_Hil.oninput = function () {
+			envFreq = parseFloat(envFreq_Hil.value);
+			envFreqValue_Hil.textContent = envFreq.toFixed(2) + " Hz";
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		noiseLevel_Hil.oninput = function () {
+			noiseLvl_Hil = parseFloat(document.getElementById("noiseLevel_Hil").value);
+			document.getElementById("noiseValue_Hil").textContent = noiseLvl_Hil.toFixed(2);
+			
+			noise1_Hil = generateGaussianNoise(noiseLvl_Hil, time.length);
+			sineWave1_Hil = generateSineWave(time, freq1_Hil, phase1_Hil, noise1_Hil, envFreq, envPhase);
+			zWave1 = analyticSignal(sineWave1_Hil);
+			updatePlots_Hil()
+		}
+		
+		time_Hil.oninput = function () {
+			timeIdx_Hil = parseFloat(time_Hil.value);
+			timeValue_Hil.textContent = (timeIdx_Hil/sampleRate).toFixed(2) + ' s';
+			updatePlots_Hil()
+		}
+
+        function updatePlots_DFT() {        
+            
+			// Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1_DFT,
+                mode: 'lines',
+				type: 'scatter',
+                name: '$S(t)$',
+                line: { color: 'black' }
+            };
+
+            // Create traces for frequency domain signals
+            const freqTrace1 = {
+                x: dftResult1_DFT.frequencies,
+                y: dftResult1_DFT.psd,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'lines',
+				type: 'scatter',
+                name: "$A'^2(f)/\\Delta T$",
+                line: { color: 'brown' },
+				showlegend: true,
+            };
+			
+			// Create traces for phase domain signals
+            const phaseTrace1 = {
+                x: dftResult1_DFT.frequencies,
+                y: dftResult1_DFT.phase,
+				xaxis: 'x3',
+				yaxis: 'y3',
+                mode: 'lines',
+				type: 'scatter',
+                name: "$\\theta'(f)$",
+                line: { color: 'purple' },
+				showlegend: true,
+            };
+
+			const freqInd = dftResult1_DFT.frequencies.indexOf(freq1_DFT);
+
+			const annot = [
+				{
+				  x: dftResult1_DFT.frequencies[freqInd],
+				  y: Math.min(dftResult1_DFT.psd[freqInd], 1.2),
+				  xref: 'x2',
+				  yref: 'y2',
+				  text: `freq. = ${dftResult1_DFT.frequencies[freqInd].toFixed(2)} Hz, psd = ${dftResult1_DFT.psd[freqInd].toFixed(2)}`,
+				  showarrow: true,
+				  arrowhead: 7,
+				  ax: 40,
+				  ay: -40,
+				  xanchor: 'left',
+				  bgcolor: 'rgba(255,255,255,.8)',
+				  arrowcolor: 'brown'
+				},
+				{
+				  x: dftResult1_DFT.frequencies[freqInd],
+				  y: dftResult1_DFT.phase[freqInd],
+				  xref: 'x3',
+				  yref: 'y3',
+				  text: `freq. = ${dftResult1_DFT.frequencies[freqInd].toFixed(2)} Hz, phase = ${dftResult1_DFT.phase[freqInd].toFixed(2)} rad`,
+				  showarrow: true,
+				  arrowhead: 7,
+				  ax: 40,
+				  ay: 40,
+				  xanchor: 'left',
+				  bgcolor: 'rgba(255,255,255,.8)',
+				  arrowcolor: 'brown'
+				}
+			];
+
+			// Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+                xaxis: { title: 'Time (s)', domain: [0, w1_DFT], anchor: 'y1'},
+                yaxis: { title: 'Amplitude (V)', anchor: 'x1', range: [-2, 2]},
+				xaxis2: { domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y2', range: [0, 30]},
+                yaxis2: { title: 'PSD (V^2/Hz)', domain: [.55, 1], anchor: 'x2', range: [0, 1.3]},
+				xaxis3: { title: 'Frequency (Hz)', domain: [w1_DFT+wgap_DFT, w1_DFT+w2_DFT], anchor: 'y3', range: [0, 30]},
+                yaxis3: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x3', range: [-Math.PI, Math.PI],tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
+							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']},
+				shapes: [{type: 'line', line: { color: 'blue',dash: 'dashdot'}, x0: freq1_DFT, y0: 0, x1: freq1_DFT, y1: 1, xref: 'x2', yref: 'y2'}, {type: 'line', line: { color: 'blue',dash: 'dashdot'}, x0: freq1_DFT, y0:-Math.PI, x1: freq1_DFT, y1: Math.PI, xref: 'x3', yref: 'y3'}],
+				annotations: annot,
+                showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }},
+				title: '$\\text{Fourier representation of }S(t) = A(t)\\cos(2\\pi f_St + \\theta) + \\epsilon(t)$'
+            };
+
+            // Combine all traces into a single data array
+            const combinedData = [
+                timeTrace1,
+                freqTrace1,
+				phaseTrace1
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot_DFT', combinedData, layout, {responsive: true});
+        }
+		
+		function updatePlots_Hil() {        
+            
+			const instPhase1 = zWave1.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			const hilWave = zWave1.map(([real, imag]) => imag);
+			const envelope = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			// Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1_Hil,
+                mode: 'lines',
+				type: 'scatter',
+                name: '$S(t)$',
+                line: { color: 'black' }
+            };
+			
+			const timeHilTrace1 = {
+                x: time,
+                y: hilWave,
+                mode: 'lines',
+				type: 'scatter',
+                name: '$\\mathcal{H}(S(t))$',
+                line: { color: 'blue', dash: 'dashdot'}
+            };
+			
+			const timeEnvTrace1 = {
+                x: time,
+                y: envelope,
+                mode: 'lines',
+				type: 'scatter',
+                name: '$A(t)$',
+                line: { color: 'brown' }
+            };
+			
+			const timeMrkTrace1 = {
+                x: [timeIdx_Hil/sampleRate, timeIdx_Hil/sampleRate, timeIdx_Hil/sampleRate],
+                y: [sineWave1_Hil[timeIdx_Hil], hilWave[timeIdx_Hil], envelope[timeIdx_Hil]],
+                mode: 'markers',
+				type: 'scatter',
+                name: 'markers',
+                marker: { color: ['black', 'blue', 'brown'], size: 15, symbol: "x"},
+				showlegend: false
+            };
+
+            // Create traces for instantaneous phase signals
+            const instPhTrace1 = {
+                x: time,
+                y: instPhase1,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				type: 'scatter',
+                name: '$\\phi(t)$',
+                line: { color: 'black' },
+				showlegend: true,
+            };
+			
+			const timePhMrkTrace1 = {
+                x: [timeIdx_Hil/sampleRate],
+                y: [instPhase1[timeIdx_Hil]],
+                mode: 'markers',
+				type: 'scatter',
+                name: 'markersPh',
+				xaxis: 'x2',
+				yaxis: 'y2',
+                marker: { color: 'black', size: 15, symbol: "x"},
+				showlegend: false
+            };
+			
+			// Create scatter plot trace
+            const scatterTrace = [{
+				type: "scatterpolar",
+				r: envelope,
+				theta: instPhase1,
+				mode: "markers",
+				marker: {
+					color: 'black',//"#2255ff",
+					size: 10,
+					opacity: 0.1
+				},
+				thetaunit: "radians",
+				cliponaxis: true,
+				subplot: "polar",
+				name: '$\\phi(t)$',
+			},
+			{
+				type: "scatterpolar",
+				name: "projection",
+				r: [Math.abs(sineWave1_Hil[timeIdx_Hil]), envelope[timeIdx_Hil], Math.abs(hilWave[timeIdx_Hil])],
+				theta: [Math.PI/2*(1 - Math.sign(sineWave1_Hil[timeIdx_Hil])), instPhase1[timeIdx_Hil], Math.sign(hilWave[timeIdx_Hil])*Math.PI/2],
+				line: {
+					color: "rgba(0,0,0,.5)",
+					width: 3,
+					dash: 'dashdot'
+					},
+				thetaunit: "radians",
+				subplot: "polar",
+				showlegend: false,
+			},
+			{
+				type: "scatterpolar",
+				name: "$\\Re(\\widehat{S}(t))$",
+				r: [0, Math.abs(sineWave1_Hil[timeIdx_Hil])],
+				theta: [0, Math.PI/2*(1 - Math.sign(sineWave1_Hil[timeIdx_Hil]))],
+				marker: {
+					color: "black",
+					symbol: "square",
+					size: [0, 15],
+				},
+				line: {
+					color: "black",
+					width: 3},
+				thetaunit: "radians",
+				subplot: "polar",
+			},
+			{
+				type: "scatterpolar",
+				name: "$\\Im(\\widehat{S}(t))$",
+				r: [0, Math.abs(hilWave[timeIdx_Hil])],
+				theta: [0, Math.sign(hilWave[timeIdx_Hil])*Math.PI/2],
+				marker: {
+					color: "blue",
+					symbol: "square",
+					size: [0, 15],
+				},
+				line: {
+					color: "blue",
+					width: 3},
+				thetaunit: "radians",
+				subplot: "polar",
+			},
+			{
+				type: "scatterpolar",
+				name: "$\\widehat{S}(t)$",
+				r: [0, envelope[timeIdx_Hil]],
+				theta: [0, instPhase1[timeIdx_Hil]],
+				marker: {
+					color: "brown",
+					symbol: "square",
+					size: [0, 15],
+				},
+				line: {
+					color: "brown",
+					width: 5},
+				thetaunit: "radians",
+				subplot: "polar",
+			}
+			];
+
+
+			const shapesHilTime = [
+				{type: 'line+markers', line: { color: 'blue',dash: 'dashdot', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: hilWave[timeIdx_Hil], xref: 'x1', yref: 'y1'}, 
+				{type: 'line', line: { color: 'black', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: sineWave1_Hil[timeIdx_Hil], xref: 'x1', yref: 'y1'},
+				{type: 'line', line: { color: 'brown', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: envelope[timeIdx_Hil], xref: 'x1', yref: 'y1'},
+				{type: 'line', line: { color: 'black', width:3}, x0: timeIdx_Hil/sampleRate, y0: 0, x1: timeIdx_Hil/sampleRate, y1: instPhase1[timeIdx_Hil], xref: 'x2', yref: 'y2'},
+			];
+			// Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+				// time domain
+                xaxis: { domain: [0, w1_Hil], range: [0, 1], anchor: 'y1', matches: 'x2'},
+                yaxis: { title: 'Amplitude (V)', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
+				xaxis2: { title: 'Time (s)', domain: [0, w1_Hil], anchor: 'y2'},
+                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
+							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
+							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']
+						},				
+				// polar scatter
+				polar: {domain: {x: [w1_Hil+wgap_Hil, w1_Hil+w2_Hil], y: [0, 1]}, angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+				shapes: shapesHilTime,
+				showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }},
+				title: '$\\text{Polar representation of }\\widehat{S}(t)= A(t)e^{i\\phi(t)} + \\widehat{\\epsilon}(t)$'
+            };
+
+            // Combine all traces into a single data array
+            const combinedData = [
+                timeTrace1,
+				timeHilTrace1,
+				timeEnvTrace1,
+				timeMrkTrace1,
+                instPhTrace1,
+				timePhMrkTrace1,
+				...scatterTrace
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot_Hil', combinedData, layout, {responsive: true});
+        }
+		radiobuttons.forEach(checkbox => {
+            checkbox.addEventListener('click', noiseLevel_DFT.oninput);
+        });
+        // Initial plot
+        updatePlots_DFT();
+		updatePlots_Hil();
+		
+
+    </script>
+	<script>
+	function makeData(theta = []){
+    if (theta.length === 0) theta = [Math.random(), Math.random(), Math.random(), Math.random()];
+    theta = theta.map( (val,i) => 2*Math.PI*val);
+    var mag = [Math.random(), Math.random(), Math.random(), Math.random()];
+    //mag = mag.map( (val,i) => 3*val+1);
+     mag = mag.map( (val,i) => 1);
+    const reMag = mag.map((val,i) => val*Math.cos(theta[i]))
+    const imMag = mag.map((val,i) => val*Math.sin(theta[i]))
+    
+    const cumRe = reMag.reduce((acc, value, i) => {
+            acc[i] = (i === 0 ? value : acc[i - 1] + value);
+            return acc;
+        }, []);;
+    const cumIm = imMag.reduce((acc, value, i) => {
+            acc[i] = (i === 0 ? value : acc[i - 1] + value);
+            return acc;
+        }, []);
+    const cumMag = cumRe.map((val,i) => Math.sqrt(val ** 2 + cumIm[i] ** 2));
+    const cumTh = cumRe.map((val,i) => Math.atan2(cumIm[i], val));
+    // Create scatter plot trace
+
+    const scatterTrace = [{
+        
+        type: "scatterpolar",
+		name: '$e^{i\\theta[j]}$',
+        r: mag,
+        theta: theta,
+        mode: "markers",
+        marker: {
+            color: ['black', 'orange', 'purple', 'green'],//"#2255ff",
+            symbol: "square",
+            size: 15,
+        },
+        cliponaxis: true,
+		thetaunit: "radians",
+		subplot: "polar2",
+       
+    },{
+        type: "scatterpolar",
+        name: "$\\sum e^{i\\theta[j]}$",
+        r: [0, ...cumMag],
+        theta: [0, ...cumTh],
+        marker: {
+            color: ['', 'black', 'orange', 'purple', 'green'],
+            symbol: "square",
+            size: [0, 15, 15, 15, 15],
+        },
+        line: {
+            color: 'black',
+            width: 5},
+        thetaunit: "radians",
+        subplot: "polar3",
+    },{
+        type: "scatterpolar",
+        name: "$\\frac{1}{N}\\sum e^{i\\theta[j]}$",
+        r: [0, 1/4*cumMag[3]],
+        theta: [0, cumTh[3]],
+        marker: {
+            color: ['', 'brown'],
+            symbol: "square",
+            size: [0, 15],
+        },
+        line: {
+            color: 'brown',
+            width: 5},
+        thetaunit: "radians",
+        subplot: "polar4",
+    }];
+    return scatterTrace
+}
+
+var randPhPLot = makeData();
+
+var constPhPLot = makeData([1.01*Math.PI/3, 1.005*Math.PI/3, 0.985*Math.PI/3, Math.PI/3]);
+var inconstPhPLot = makeData([Math.PI/3, 5*Math.PI/3, Math.PI/2, -Math.PI/2]);
+
+var annot = [{
+    text: "4 complex numbers",
+      font: {
+      size: 18,
+    },
+    showarrow: false,
+    xanchor: 'center',
+    x: 1/6, //position in x domain
+    y: -.2, //position in y domain
+    xref: 'paper',
+    yref: 'paper',
+    },
+    {
+      text: "",
+      font: {
+      size: 18,
+    },
+    showarrow: false,
+    xanchor: 'center',
+    x: 3/6, //position in x domain
+    y: -.2,  // position in y domain
+    xref: 'paper',
+    yref: 'paper',
+    },
+    {
+      text: "",
+      font: {
+      size: 18,
+    },
+    showarrow: false,
+    xanchor: 'center',
+    x: 5/6, //position in x domain
+    y: -.2,  // position in y domain
+    xref: 'paper',
+    yref: 'paper',
+    }
+];
+
+
+var layout = {
+	polar2: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+	polar3: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, randPhPLot[0].r.length*1]}},
+	polar4: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+    annotations: annot,
+    showlegend: true,
+    font: { size: 16 },
+    legend: {x: 0, xanchor: 'left', y: 1.3, orientation: "h", font: { size: 16 }}
+};
+
+annot[1].text = `sum as vectors (length: ${constPhPLot[1].r[4].toFixed(2)})`;
+annot[2].text = `average resultant vector (length: ${constPhPLot[2].r[1].toFixed(2)})`;
+layout.annotations = annot;
+Plotly.newPlot('consistentPh', constPhPLot, layout, {showSendToCloud:false});
+
+annot[1].text = `sum as vectors (length: ${inconstPhPLot[1].r[4].toFixed(2)})`;
+annot[2].text = `average resultant vector (length: ${inconstPhPLot[2].r[1].toFixed(2)})`;
+layout.annotations = annot;
+Plotly.newPlot('inconsistentPh', inconstPhPLot, layout, {showSendToCloud:false});
+
+annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
+annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+layout.annotations = annot;
+Plotly.newPlot('randPh', randPhPLot, layout, {showSendToCloud:false});
+
+function randomize() {
+    randPhPLot = makeData()
+    annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
+    annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+    layout.annotations = annot;
+    Plotly.animate('randPh', {
+        data: randPhPLot,
+        layout: layout
+      }, {})
+}
+	</script>
+</body>
+</html>

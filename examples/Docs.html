@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iEEG Connectivity Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: #2c3e50;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .nav li {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 10px;
+            text-align: center;
+            border-right: 1px solid #34495e;
+            transition: background 0.3s;
+        }
+        
+        .nav a:hover {
+            background: #34495e;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .section h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+        }
+        
+        .frequency-bands {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .band-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .band-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .band-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .frequency-range {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .connectivity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .connectivity-item {
+            background: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .connectivity-item h4 {
+            color: #e74c3c;
+            margin-bottom: 8px;
+        }
+        
+        .formula {
+            background: #f1f3f4;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .note::before {
+            content: "💡 ";
+            font-size: 1.2em;
+        }
+        
+        .example {
+            background: #d1ecf1;
+            border: 1px solid #b8daff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .example::before {
+            content: "🔬 Example: ";
+            font-weight: bold;
+            color: #0c5460;
+        }
+          .steps {
+    counter-reset: step;
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .steps li {
+    position: relative;
+    padding-left: 2.5rem;
+    margin: .5rem 0;
+  }
+
+  .steps li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: .2rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--ring);
+    box-shadow: var(--shadow);
+    background: #f8fafc; /* slate-50 */
+    font-weight: 600;
+  }
+ .howto-card {
+    --bg: #ffffff;
+    --fg: #0f172a;            /* slate-900 */
+    --muted: #475569;         /* slate-600 */
+    --ring: #e2e8f0;          /* slate-200 */
+    --shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+
+    max-width: 56rem;
+    margin: 1.5rem auto;
+    padding: 1.25rem 1.25rem 1.5rem;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--ring);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    line-height: 1.6;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  }
+
+  .howto-card .lead {
+    color: var(--muted);
+    margin-top: .25rem;
+  }
+
+  .howto-card h2 {
+    font-size: clamp(1.25rem, 1.1rem + 1vw, 1.75rem);
+    margin: 0 0 .25rem;
+  }
+ .sliders {
+    display: grid;
+    gap: .25rem;
+    margin: .25rem 0 0;
+  }
+
+  .sliders .row {
+    display: grid;
+    grid-template-columns: 12ch 1fr;
+    gap: 1rem;
+    padding: .5rem .75rem;
+    border: 1px dashed var(--ring);
+    border-radius: .75rem;
+    background: #fcfdff;
+  }
+
+  .sliders dt {
+    font-weight: 700;
+  }
+
+  .sliders dd {
+    margin: 0;
+    color: var(--muted);
+  }
+  .howto-card h3 {
+    font-size: 1rem;
+    margin: 1rem 0 .5rem;
+    letter-spacing: .2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .nav ul {
+                flex-direction: column;
+            }
+            
+            .nav a {
+                border-right: none;
+                border-bottom: 1px solid #34495e;
+            }
+            
+            .frequency-bands,
+            .connectivity-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>iEEG Connectivity Documentation</h1>
+            <p>Complete guide to frequency bands, connectivity measures, and analysis parameters</p>
+        </div>
+        
+        <nav class="nav">
+            <ul>
+                <li><a href="#frequency-bands">Frequency Bands</a></li>
+                <li><a href="#connectivity">Connectivity</a></li>
+                <li><a href="#nodal-measures">Nodal Measures</a></li>
+                <li><a href="#ictal_connectivity">Ictal Connectivity</a></li>
+                <li><a href="#interictal_connectivity">Interical Connectivity</a></li>
+            </ul>
+        </nav>
+        
+        <div class="content">
+            <section id="frequency-bands" class="section">
+                <h2>Frequency Bands</h2>
+                <p>Brain oscillations are categorized into distinct frequency bands, each associated with different cognitive and physiological processes.</p>
+                
+                <div class="frequency-bands">
+                    <div class="band-card">
+                        <div class="band-name">Delta (δ)</div>
+                        <div class="frequency-range">0.5-4 Hz</div>
+                        <p>The slowest brain waves, predominantly observed during deep sleep (stages 3 and 4 of NREM sleep). Delta waves are associated with:</p>
+                        <ul>
+                            <li>Deep, restorative sleep</li>
+                            <li>Unconscious bodily functions</li>
+                            <li>Memory consolidation</li>
+                            <li>Growth hormone release</li>
+                        </ul>
+                        <div class="note">
+                            High delta activity during wakefulness may indicate brain injury or learning disabilities.
+                        </div>
+                    </div>
+                    
+                    <div class="band-card">
+                        <div class="band-name">Theta (θ)</div>
+                        <div class="frequency-range">4-8 Hz</div>
+                        <p>Associated with drowsiness, light sleep, and deep meditative states. Theta waves are linked to:</p>
+                        <ul>
+                            <li>REM sleep and dreaming</li>
+                            <li>Memory formation and retrieval</li>
+                            <li>Creative thinking and insight</li>
+                            <li>Emotional processing</li>
+                            <li>Hippocampal activity</li>
+                        </ul>
+                        <div class="example">
+                            Theta oscillations in the hippocampus are crucial for spatial navigation and episodic memory encoding.
+                        </div>
+                    </div>
+                    
+                    <div class="band-card">
+                        <div class="band-name">Alpha (α)</div>
+                        <div class="frequency-range">8-12 Hz</div>
+                        <p>The most well-known brain rhythm, first discovered by Hans Berger. Alpha waves indicate:</p>
+                        <ul>
+                            <li>Relaxed, wakeful state</li>
+                            <li>Eyes-closed resting condition</li>
+                            <li>Inhibition of task-irrelevant areas</li>
+                            <li>Attention and consciousness</li>
+                            <li>Sensory gating</li>
+                        </ul>
+                        <div class="note">
+                            Alpha power typically decreases with eyes open and during cognitive tasks, a phenomenon called "alpha blocking."
+                        </div>
+                    </div>
+                    
+                    <div class="band-card">
+                        <div class="band-name">Beta (β)</div>
+                        <div class="frequency-range">12-30 Hz</div>
+                        <p>Fast brain waves associated with active, alert mental states. Beta activity indicates:</p>
+                        <ul>
+                            <li>Active concentration and focus</li>
+                            <li>Problem-solving and decision making</li>
+                            <li>Motor control and movement</li>
+                            <li>Anxiety and stress (when excessive)</li>
+                        </ul>
+                        <div class="example">
+                            Beta desynchronization occurs in motor cortex during movement preparation and execution.
+                        </div>
+                    </div>
+                    
+                    <div class="band-card">
+                        <div class="band-name">Gamma (γ)</div>
+                        <div class="frequency-range">30-100+ Hz</div>
+                        <p>The fastest brain waves, associated with higher-level cognitive functions:</p>
+                        <ul>
+                            <li>Conscious awareness and perception</li>
+                            <li>Information binding across brain regions</li>
+                            <li>Attention and working memory</li>
+                            <li>Neural synchronization</li>
+                        </ul>
+                        <div class="note">
+                            Gamma oscillations are often considered a signature of conscious processing and neural communication.
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="connectivity" class="section">
+                <h2>Connectivity Measures</h2>
+                <p>Different methods to quantify functional connectivity between brain regions:</p>
+                
+                <h3>Phase-Based Measures</h3>
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>Phase Locking Value (PLV)</h4>
+                        <p>Measures the consistency of phase relationships between two signals across time or trials.</p>
+                        <div class="formula">
+PLV = |1/N ∑ e^(i(φ₁(t) - φ₂(t)))|
+                        </div>
+                        <p>Range: 0 (no coupling) to 1 (perfect coupling)</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Corrected Imaginary PLV (ciPLV)</h4>
+                        <p>Removes zero-lag interactions to eliminate volume conduction artifacts, focusing on true neural connectivity.</p>
+                    </div>
+                </div>
+                
+                <h3>Amplitude-Based Measures</h3>
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>Coherence</h4>
+                        <p>Measures the linear relationship between two signals in the frequency domain, combining both phase and amplitude information.</p>
+                        <div class="formula">
+Coh = |S₁₂(f)|² / (S₁₁(f) × S₂₂(f))
+                        </div>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Envelope Correlation</h4>
+                        <p>Correlation between the amplitude envelopes of band-limited signals, indicating synchronized fluctuations in power.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Orthogonalized Envelope Correlation (OAEC)</h4>
+                        <p>Removes zero-lag correlations from envelope correlation to reduce spurious connectivity from volume conduction.</p>
+                    </div>
+                </div>
+                
+                <h3>Event-Based Measures</h3>
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>Spike Co-occurrence</h4>
+                        <p>Measures how often epileptic spikes occur simultaneously between electrode pairs within a time window.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Gamma/Ripple Co-occurrence</h4>
+                        <p>Quantifies the temporal relationship between high-frequency oscillations (gamma bursts, ripples) across electrode sites.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="nodal-measures" class="section">
+                <h2>Nodal Measures</h2>
+                <p>Metrics that characterize individual nodes (electrodes) in the brain network:</p>
+                
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>Strength</h4>
+                        <p>Sum of all connection weights for a given node. Indicates the total connectivity of a brain region.</p>
+                        <div class="formula">
+S_i = ∑ w_ij
+                        </div>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Clustering Coefficient</h4>
+                        <p>Measures the tendency of neighboring nodes to be connected to each other, indicating local network cohesion.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Eigenvector Centrality</h4>
+                        <p>Measures a node's influence based on the connectivity of its neighbors. Nodes connected to highly connected nodes have higher centrality.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Epileptogenicity Index</h4>
+                        <p>Quantifies the propensity of a brain region to generate epileptic activity, based on spectral analysis during seizure onset.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Event Rates</h4>
+                        <p><strong>Spike Rate:</strong> Frequency of interictal epileptic discharges<br>
+                        <strong>Gamma Burst Rate:</strong> Frequency of high-frequency oscillations<br>
+                        <strong>Ripple Rate:</strong> Frequency of ripple events (80-250 Hz)</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="ictal_connectivity" class="section">
+ <h2>Navigate the connectivity changes during an epileptic seizure</h2>
+  <p>
+    Use the traces, MRI, and sliders together to explore channel activity and network connectivity.
+  </p>
+
+  <h3>Interactions</h3>
+  <ol>
+    <li><strong>Hover</strong> on the traces to see the name of the iEEG channel.</li>
+    <li><strong>Click once</strong> on a channel to show it on the MRI.</li>
+    <li><strong>Click again on the same channel</strong> to show only its neighbourhood.</li>
+    <li><strong>Click a third time</strong> to reset the view.</li>
+  </ol>
+
+  <h3>Electrodes</h3>
+  <ul>
+    <li><strong>SEEG electrodes</strong> are displayed in yellow on the MRI.</li>
+    <li><strong>Bipolar electrodes</strong> are shown according to the maximum of the current time window; their colours match the map.</li>
+  </ul>
+
+  <h3>Sliders</h3>
+  <dl>
+    <dt><b>Edge size</b></dt>
+    <dd>Controls the thickness of edges in the MRI graph.</dd>
+
+    <dt><b>Node size</b></dt>
+    <dd>Controls the size of electrodes in the MRI graph.</dd>
+
+    <dt><b>Percentage of edges</b></dt>
+    <dd>Displays only a given percentage of edges on the MRI.</dd>
+
+    <dt><b>Network time point</b></dt>
+    <dd>Changes the time window (dotted rectangle on the traces) corresponding to the network displayed on the MRI.</dd>
+  </dl>
+            </section>
+            
+            <section id="interictal_connectivity" class="section">
+                <h2>Documentation for interictal connectivity</h2>
+                
+    
+                
+                <div class="example">
+                    <strong>What's on the screen:</strong> Theta-band PLV between hippocampus and cortical regions often increases during successful memory encoding.
+                </div>
+                
+                  <h3>Navigate the functional connectivity </h3>
+				  <p class="lead">
+					Use the matrix and MRI view together. The interactions below explain how to explore regions (nodes) and adjust the visualization.
+				  </p>
+
+				  <h3>Interactions</h3>
+				  <ol class="steps">
+					<li><strong>Hover</strong> over the matrix to highlight the corresponding region (node) on the <em>y</em>-axis.</li>
+					<li><strong>Click once</strong> on a region to show it on the MRI.</li>
+					<li><strong>Click again on the same region</strong> to show only that region’s neighbourhood.</li>
+					<li><strong>Click a third time</strong> to reset the view.</li>
+				  </ol>
+				   <!--
+                <ol>
+                    <li><strong>Add new sections:</strong> Copy the section structure and modify the content</li>
+                    <li><strong>Add frequency band:</strong> Copy a band-card div and update the information</li>
+                    <li><strong>Add connectivity measure:</strong> Copy a connectivity-item div and add your method</li>
+                    <li><strong>Update navigation:</strong> Add new links to the nav menu for easy access</li>
+                    <li><strong>Use styling classes:</strong> Use .note, .example, .formula for consistent formatting</li>
+                </ol>
+                -->
+                <div class="note">
+                    This documentation is designed to be easily extensible. Simply copy the existing patterns and modify the content to add new information.
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Highlight current section in navigation
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.style.backgroundColor = '';
+                if (link.getAttribute('href') === '#' + current) {
+                    link.style.backgroundColor = '#34495e';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear vs nonlinear</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.banner {
+		  position: sticky;
+		  top: 0;
+		  background:#96004B;
+		  color: #f1f1f1;
+		  z-index: 1;
+		  text-align: right;
+		  padding: 10px
+		}
+		.divfooter {
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		}
+		.text {
+		  text-align: right;
+		}
+		.div {
+		  margin: 20px;
+		}
+		section {
+			margin: 30px;
+		}
+		h1 {
+			margin: 10px;
+		}
+    </style>
+</head>
+<body>
+	<div class="banner">
+			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
+			<br>&copy; 2025 Dr Nicolas Roehri
+	</div>
+	<h1>Linear vs Non-linear</h1>
+	<p>
+	<section>
+	<h2>Introduction</h2>	
+	</section>
+	<section>
+	<h2>Example: Mutual information</h2>
+	$$I(S_1,S_2)= H(S_1)+H(S_2)-H(S_1,S_2)$$
+	$$NMI(S_1,S_2)= \frac{2I(S_1,S_2)}{H(S_1)+H(S_2)}\in [0, 1]$$
+	$$\text{with entropy defined as:  } H(S) = - \sum_{i=1}^{N}p(s_i)log(p(s_i))\in [0, 1]$$
+	</section>
+    <div id="plot" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter">
+		<span style="padding: 5px">
+			<label for="frequency">\(f_2\) :</label>
+			<input type="range" id="frequency" class="slider" min="1" max="25" value="10">
+			<span id="freqValue">10 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="phase">\(\theta_2\) :</label>
+			<input type="range" id="phase" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue">0 rad</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="noiseLevel">\(\sigma\) :</label>
+			<input type="range" id="noiseLevel" class="slider" min="0" max="1" value="0.1" step="0.01">
+			<span id="noiseValue">0.1</span>
+		</span>
+		<span style="padding: 5px">
+			Show: 
+			<input type="radio" id="showPLV" name="metricID" checked>
+			<label for="showPLVLbl">PLV</label>
+			<input type="radio" id="showCorr" name="metricID">
+			<label for="showCorrLbl">Corr</label>
+			<input type="radio" id="showEnvCorr" name="metricID">
+			<label for="showEnvCorrLbl">Env. Corr</label>
+		</span>
+		<span style="padding: 5px">
+			Cases: 
+			<input type="radio" id="case1Btn" name="caseID" checked>
+			<label for="case1Lbl">case 1</label>
+			<input type="radio" id="case2Btn" name="caseID">
+			<label for="case2Lbl"> case 2</label>
+		</span>
+    </div>
+	<section>
+    <script type="module" async>
+		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computePLV, pearsonCorrelation, computeEnvCorr} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
+        
+		const checkboxes = document.querySelectorAll('input[type=checkbox]');
+		const radiobuttons = document.querySelectorAll('input[type=radio]');
+		
+        const sampleRate = 256;
+		const freq1 = 10;
+		const phase1 = 0;
+		var freq2 = parseFloat(document.getElementById("frequency").value);
+		var phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+		var noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+        const time = Array.from({ length: 2*sampleRate }, (_, i) => i / sampleRate);
+		const envFreq = 2;
+		const metricColours = ['orange', 'green', 'purple'];
+		
+		var w1 = .65;
+		var w2 = .25;
+		var w3 = .05;
+		var wgap = .05;
+		// normalise the ws to ensure the sum equals 1
+		let wnorm = w1 + w2 + w3 + 2*wgap;
+		w1 = w1/wnorm; w2 = w2/wnorm; wgap = wgap/wnorm;
+		
+        
+		// Generate noise
+		var noise1 = generateGaussianNoise(noiseLvl, time.length); // Noise for first channel
+		var noise2 = generateGaussianNoise(noiseLvl, time.length); // Second sine wave
+		
+		// Generate sine waves
+		var sineWave1 = generateSineWave(time, freq1, phase1, noise1); // First sine wave
+		var sineWave2 = generateSineWave(time, freq2, phase2, noise2); // Second sine wave
+		
+		// compute analytic signal
+		var zWave1 = analyticSignal(sineWave1); // First sine wave
+		var zWave2 = analyticSignal(sineWave2); // Second sine wave
+		
+		var instPhase1 = zWave1.map(([real, imag]) => Math.atan2(imag, real)); // Math.atan2(imag, real))
+		var instPhase2 = zWave2.map(([real, imag]) => Math.atan2(imag, real));
+		
+		frequency.oninput = function () {
+			freq2 = parseFloat(document.getElementById("frequency").value);
+			document.getElementById("freqValue").textContent = freq2 + " Hz";
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2, case2Btn.checked*envFreq);
+			zWave2 = analyticSignal(sineWave2);
+			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			updatePlots()
+		}
+		
+		phase.oninput = function () {
+			phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+			document.getElementById("phaseValue").textContent = phase2.toFixed(2) + " rad";
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2, case2Btn.checked*envFreq);
+			zWave2 = analyticSignal(sineWave2);
+			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			updatePlots()
+		}
+		
+		noiseLevel.oninput = function () {
+			noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+			document.getElementById("noiseValue").textContent = noiseLvl.toFixed(2);
+			
+			noise1 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave1 = generateSineWave(time, freq1, phase1, noise1, case2Btn.checked*envFreq);
+			zWave1 = analyticSignal(sineWave1);
+			instPhase1 = zWave1.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			
+			noise2 = generateGaussianNoise(noiseLvl, time.length);
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2, case2Btn.checked*envFreq);
+			zWave2 = analyticSignal(sineWave2);
+			instPhase2 = zWave2.map((cmplx, i) => Math.atan2(cmplx[1], cmplx[0]));
+			updatePlots()
+		}
+		
+		function entropy(probabilities) {
+            return -probabilities.reduce((sum, p) => (p > 0 ? sum + p * Math.log2(p) : sum), 0);
+        }
+
+        function computeNMI(binCounts) {
+		
+            let total = binCounts.flat().reduce((sum, count) => sum + count, 0);
+
+            // Compute joint probabilities
+            let Pxy = binCounts.map(row => row.map(v => v / total));
+
+            // Compute marginal probabilities
+            let Px = Pxy.map(row => row.reduce((a, b) => a + b, 0)); // Sum rows
+            let Py = Pxy[0].map((_, i) => Pxy.reduce((sum, row) => sum + row[i], 0)); // Sum cols
+
+            // Compute entropies
+            let Hx = entropy(Px);
+            let Hy = entropy(Py);
+            let Hxy = entropy(Pxy.flat());
+			
+			// Compute mutual information
+			let Ixy = Hx + Hy - Hxy;
+
+            // Compute Normalized Mutual Information
+            return (2 * Ixy) / (Hx + Hy);
+			//return Ixy / Math.sqrt(Hx + Hy);
+        }
+
+        function updatePlots() {        
+            
+			const PLV = computePLV(instPhase1, instPhase2);
+			const corr = pearsonCorrelation(sineWave1, sineWave2); //  correlation, slope, intercept
+			const envCorr = computeEnvCorr(zWave1, zWave2); //  correlation, slope, intercept
+			
+			// to compute the angle diff we have to pass again to the complex values to stay within [-pi, pi]
+			const angleDiff = instPhase1.map((ph1, i) => Math.atan2(Math.sin(ph1-instPhase2[i]),Math.cos(ph1-instPhase2[i]))); 
+            // Create traces for time domain signals
+            const timeTrace1 = {
+                x: time,
+                y: sineWave1,
+                mode: 'lines',
+				type: 'scatter',
+                name: '$S_1(t)$',
+                line: { color: 'black' }
+            };
+
+            const timeTrace2 = {
+                x: time,
+                y: sineWave2,
+                mode: 'lines',
+                name: '$S_2(t)$',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'}
+            };
+			
+			// Create traces for instantaneous phase signals
+            const instPhTrace1 = {
+                x: time,
+                y: instPhase1,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				type: 'scatter',
+                name: '$\\phi_1(t)$',
+                line: { color: 'black' },
+				showlegend: true,
+            };
+
+            const instPhTrace2 = {
+                x: time,
+                y: instPhase2,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+                name: '$\\phi_2(t)$',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'},
+				showlegend: true,
+            };
+			
+			const instPhDiffTrace = {
+                x: time,
+                y: angleDiff,
+                mode: 'lines',
+				xaxis: 'x2',
+				yaxis: 'y2',
+                name: '$\\Delta\\phi_{1,2}(t)$',
+				type: 'scatter',
+                line: { color: 'brown',dash: 'solid'},
+				showlegend: true,
+            };
+
+
+            // Create scatter plot trace
+            const scatterTrace = {
+				type: "scatterpolar",
+				r: new Array(angleDiff.length).fill(1),
+				theta: angleDiff,
+				mode: "markers",
+				marker: {
+					color: 'brown',//"#2255ff",
+					size: 10,
+					line: {
+					  color: "white"
+					},
+					opacity: 0.1
+				},
+				thetaunit: "radians",
+				cliponaxis: true,
+				subplot: "polar",
+				name: '$\\Delta\\phi_{1,2}(t)$',
+			};
+			
+			
+			
+				
+			var barValues = [];
+			var barText = [];
+			let xData = [];
+			let yData = [];
+			let xrange = [];
+			let yrange = [];
+			
+			if (showPLV.checked) {
+				barText.push('PLV');
+				barValues.push(PLV.magnitude);
+				xData = instPhase1;
+				yData = instPhase2;
+				xrange = { start: -Math.PI, end: Math.PI, size: Math.PI/10 };
+				yrange = { start: -Math.PI, end: Math.PI, size: Math.PI/10 };
+			}else if (showCorr.checked) {
+				barText.push('Corr')
+				barValues.push(corr.correlation);
+				xData = sineWave1;
+				yData = sineWave2;
+				xrange = { start: Math.min(...sineWave1), end: Math.max(...sineWave1), size: .1};
+				yrange = { start: Math.min(...sineWave2), end: Math.max(...sineWave2), size: .1};
+			} else {
+				barText.push('EnvCorr')
+				barValues.push(envCorr.correlation);
+				xData = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));;
+				yData = zWave2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));;
+				xrange = { start: 0, end: Math.max(...xData), size: .05};
+				yrange = { start: 0, end: Math.max(...yData), size: .05};
+			}
+			barText.push('NMI')
+			
+			var barColors = metricColours.slice(0,2);
+			
+			// Create bar plot for correlation
+			const bivarHisto = {
+				x: xData,
+				y: yData,
+				type: 'histogram2d',
+				colorscale: 'Viridis',
+				histnorm: 'probability density',
+				colorbar: {
+					orientation:'h'
+					},
+				autobinx: false,
+				autobiny: false,
+				xaxis: 'x3',
+				yaxis: 'y3',
+				xbins: xrange,
+				ybins: yrange
+			};
+			
+			
+			// Create bar plot for correlation
+			var barPlot = {
+				x: barText,
+				y: barValues,
+				type: 'bar',
+				xaxis: 'x4',
+				yaxis: 'y4',
+				name: 'Bar Plot',
+				marker:{
+					color: barColors
+				},
+				showlegend: false
+			};
+			
+            // Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+				// time domain
+                xaxis: { domain: [0, w1], anchor: 'y1', matches: 'x2'},
+                yaxis: { title: 'Amplitude (V)', domain: [.55, 1], anchor: 'x1', range: [-1.5, 1.5]},
+				xaxis2: { title: 'Time (s)', domain: [0, w1], anchor: 'y2'},
+                yaxis2: { title: 'Phase (rad)', domain: [0, .45], anchor: 'x2', range: [-Math.PI, Math.PI], 
+							tickmode: "array", tickvals: [-Math.PI, -1/2*Math.PI, 0, 1/2*Math.PI, Math.PI],
+							ticktext: ['-π', '-<sup>1</sup>⁄<sub>2</sub>π','0','<sup>1</sup>⁄<sub>2</sub>π','π']
+						},
+				xaxis3: { domain: [w1+wgap, w1+w2], title: 'X values', anchor: 'y3' },
+				yaxis3: {  domain: [0, 1], title: 'Y values', anchor: 'x3',},						
+				// bar plot
+				xaxis4: { domain: [w1+w2+wgap, 1], anchor: 'y4'},
+                yaxis4: { title: 'Magnitude', domain: [0, 1], side: 'right', anchor: 'x4', range: [-1, 1]},
+				
+				
+				showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
+            };
+
+            // Combine all traces into a single data array
+            var combinedData = [
+                timeTrace1,
+                timeTrace2,
+                instPhTrace1,
+                instPhTrace2,
+				instPhDiffTrace,
+				bivarHisto,
+				barPlot
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot', combinedData, layout, {responsive: true});
+			let binCounts = plot.calcdata[5][0].z;
+
+            // Compute NMI
+            let nmiValue = computeNMI(binCounts);
+			barPlot.y[1] = nmiValue;
+			Plotly.redraw('plot');
+        }
+
+        // Initial plot
+        updatePlots();
+		
+		checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('click', updatePlots);
+        });
+		
+		radiobuttons.forEach(checkbox => {
+            checkbox.addEventListener('click', noiseLevel.oninput);
+        });
+				
+    </script>
+</body>
+</html>

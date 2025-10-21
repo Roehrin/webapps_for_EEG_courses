@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amplitude-based connectivity</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="../src/nav-banner-smart.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.banner {
+		  position: sticky;
+		  top: 0;
+		  background:#96004B;
+		  color: #f1f1f1;
+		  z-index: 1;
+		  text-align: right;
+		  padding: 10px
+		}
+		.divfooter {
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		}
+		.text {
+		  text-align: right;
+		}
+		.div {
+		  margin: 20px;
+		}
+		section {
+			margin: 30px;
+		}
+		h1 {
+			margin: 10px;
+		}
+    </style>
+</head>
+<body>
+	<h1>Amplitude-based connectivity.</h1>
+	<section>
+	<h2>Introduction</h2>
+	<h3>Definition</h3>
+	Amplitude-based connectivity refers to the statistical dependence between the amplitude or envelopes of two signals. Instead of focusing on phase relationships, this measure assesses how the fluctuations in signal power are correlated over time. It is commonly used in neuroscience and signal processing to analyse oscillatory interactions between brain regions, usually using EEG, MEG or LFP signals.
+	<h3>Key concept</h3>
+	Two signals are considered to be coupled in amplitude if their amplitude or envelope fluctuations show a consistent correlation over time. This means that when the amplitude of one signal increases or decreases, the amplitude of the other signal tends to follow a similar pattern. This suggests a functional interaction between the underlying sources that generate these signals.
+	</section>
+	<section>
+	<h2>Example: Pearson Correlation (Corr)</h2>
+	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
+
+	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma_i^{2}).$$
+	\(f_1\), \(\theta_1\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}\), \(t\) is the time. <br>
+	\(f_2\), \(\theta_2\) and \(\sigma_1 = \sigma_2 = \sigma\) are user defined.
+
+	</section>
+	<section>
+	The Pearson correlation coefficient is a statistical measure that evaluates the strength and direction of a linear relationship between two signals, with values ranging from -1 (perfect negative correlation) to +1 (perfect positive correlation). A value of 0 indicates no correlation between the variables.
+	$$Corr(S_1,S_2) = \frac{\frac{1}{N-1}\sum_{t=1}^{N} (S_1(t) - \bar{S_1}) (S_2(t) - \bar{S_2})}{\sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (S_1(t) - \bar{S_1})^2} \sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (S_2(t) - \bar{S_2})^2}}$$
+	$$Corr(S_1,S_2) = \frac{Cov(S_1,S_2)}{\sigma_{S_1}\sigma_{S_2}}$$
+	\(\bar{S_i}\) is the mean of \(S_i\), \(\sigma_{S_i}\) is the standard deviation of \(S_i\), \(Cov(S_1,S_2)\) is the covariance between \(S_1\) and \(S_2\), \(N\) is the total number of time points.
+	<br>
+	The Pearson Correlation is a symmetric measure: \(Corr(S_1,S_2) = Corr(S_2,S_1)\).
+	<br>
+	<h3>Case 1: constant amplitude</h3>
+	As a first example, let us define \(A_1=A_2=A=1\).
+	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{Corr}\).<br>
+
+	First, you could test that when \(\sigma = 0\), \(Corr(S_1,S_2) = 1\) only when \(\theta_2 = \theta_1\) and \(f_2 = f_1\).<br><br> This means that sinusoidal waves, with different frequencies cannot be correlated. For signals of the same frequency, correlation is sensitive to the phase shift because a phase shift introduces a time lag, which affects the correlation. If the phase shift is (90°), the correlation is zero. If it's phase difference is \(\Delta\theta = \theta_2-\theta_1 = \frac{\pi}{2}\) the correlation is zero.  If \(\Delta\theta = \pi\) the correlation is -1 (perfect anti-correlation).
+
+	Again in our case without noise, 
+	$$ Corr(S_1,S_2) = \cos(\Delta\theta).$$
+	</section>
+    <div id="plot" style="width:100%;height:600px;"></div>
+	<div class="divfooter" id="myDivFooter">
+		<span style="padding: 5px">
+			<label for="frequency">\(f_2\) :</label>
+			<input type="range" id="frequency" class="slider" min="1" max="25" value="10">
+			<span id="freqValue">10 Hz</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="phase">\(\theta_2\) :</label>
+			<input type="range" id="phase" class="slider" min="-175" max="180" value="0" step="5">
+			<span id="phaseValue">0 rad</span>
+		</span>
+		<span style="padding: 5px">
+			<label for="noiseLevel">\(\sigma\) :</label>
+			<input type="range" id="noiseLevel" class="slider" min="0" max="1" value="0.1" step="0.01">
+			<span id="noiseValue">0.10</span>
+		</span>
+		<span style="padding: 5px">
+		Show: 
+		<input type="checkbox" id="showCorr" checked /><label for="showCorr">Corr</label>
+		<input type="checkbox" id="showEnvCorr"/><label for="showEnvCorr">env. Corr</label>
+		<input type="checkbox" id="showOEnvCorr"/><label for="showOEnvCorr">ortho. env. Corr</label>
+		</span>
+		<span style="padding: 5px">
+		Cases: 
+		<input type="radio" id="case1Btn" name="caseID" checked>
+		<label for="case1Lbl">case 1</label>
+		<input type="radio" id="case2Btn" name="caseID">
+		<label for="case2Lbl"> case 2</label>
+		</span>
+    </div>
+	<section>
+	<h3>Case 2: amplitude modulated signal</h3>
+	Let us now investigate the Pearson correlation when the amplitude is not constant, but varies over time.
+	$$A_i(t) = \frac{1}{2}(m\cos(2\pi f_{A_i}t + \theta_{A_i}) + 1)$$ 
+	\(f_{A_i}\) the frequency of the cosine amplitude modulation, \(\theta_{A_i}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(f_{A_i} = 2\textrm{ Hz}\), \(\theta_{A1} = 0\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
+	<br>
+	Something strange happens when \(f_{2} = 8\textrm{ Hz}\) or \(f_{2} = 12\textrm{ Hz}\). For these frequencies, \(\text{Corr} \neq 0\) even if \(f_{1} \neq f_{2}\). Do you know why?<br>
+	<button onclick="answerDisp()">Answer</button><div id="answerDiv" style="padding: 5px; display: none">Using trigonometric identities, we write \(S_i\) as a sum of three cosine waves:
+	$$S_i(t) = \frac{1}{2}(m\cos(2\pi f_{A_i}t + \theta_{A_i}) + 1)\cos(2\pi f_it + \theta_i)$$
+	$$S_i(t) = \frac{1}{2}\cos(2\pi f_it + \theta_i) + \frac{1}{2}m\cos(2\pi f_{A_i}t + \theta_{A_i})\cos(2\pi f_it + \theta_i)$$
+	$$S_i(t) = \frac{1}{2}\cos(2\pi f_it + \theta_i) + \frac{1}{4}m\cos(2\pi (f_i - f_{A_i})t + \theta_i - \theta_{A_i}) + \frac{1}{4}m\cos(2\pi (f_i + f_{A_i})t + \theta_i + \theta_{A_i})$$ 
+	the carrier wave (\(S_i\) from case 1) which is unchanged in frequency (\(f_i\)), and two sidebands with frequencies slightly above and below the carrier frequency \(f_i\), i.e. \(f_{sb} = f_i \pm f_{A_i} = 10 \pm 2\textrm{ Hz}\).
+	</section>
+	<section>
+	<h2>Example: Envelope Correlation (envCorr)</h2>
+	The Envelope Correlation (envCorr) is based on the Pearson correlation. Instead of estimating the correlation between the amplitude of two signals \(Corr(S_1, S_2)\), envCorr estimates the correlation between the amplitude of the envelope of two signals \(Corr(A_1, A_2)\).<br> 
+	The envelope of the signal is given by the absolute value of the analytic signal \(\widehat{S_1}\) computed with the Hilbert transform (\(\mathcal{H}(.)\)). Thanks to <a href="https://en.wikipedia.org/wiki/Euler's_formula" target="_blank" rel="noopener noreferrer">Euler's formula</a>, we obtain:
+	$$\widehat{S_1}(t)= S_1(t)+i\mathcal{H}(S_1(t)) = A(t)e^{i(2\pi f_1t + \theta_1)} + \widehat{\epsilon_1}(t),$$
+	$$\widehat{S_2}(t)= A(t)e^{i(2\pi f_2t + \theta_2)} + \widehat{\epsilon_2}(t).$$
+	as \(\widehat{\epsilon_i}\) is also a complex, we can write again thanks to Euler's formula:
+	$$\widehat{S_i}(t)= \tilde{A_i}(t)e^{i\tilde{\phi_i}(t)}$$
+	where \(\tilde{A_i}\) and \(\tilde{\phi_i}\) are the (noisy) estimation of \(A_i\) and \(\phi_i\). In other word, when the noise becomes null, \(\lim_{\sigma\to0} \tilde{A_i} = A_i\) and \(\lim_{\sigma\to0} \tilde{\phi_i} = \phi_i\).
+	For simplicity of the notation we will only use \(A_i\)  and \(\phi_i\).
+	<br>
+	The envelope correlation is thus:
+	$$envCorr(S_1,S_2) = Corr(A_1,A_2)$$
+	$$envCorr(S_1,S_2) = \frac{\frac{1}{N-1}\sum_{t=1}^{N} (A_1(t) - \bar{A_1}) (A_2(t) - \bar{A_2})}{\sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (A_1(t) - \bar{A_1})^2} \sqrt{\frac{1}{N-1}\sum_{t=1}^{N} (A_2(t) - \bar{A_2})^2}}$$
+	$$envCorr(S_1,S_2) = \frac{Cov(A_1,A_2)}{\sigma_{A_1}\sigma_{A_2}}$$
+	\(\bar{A_i}\) is the mean of the envelope of \(S_i\) (i.e., \(A_i\)), \(\sigma_{A_i}\) is the standard deviation of \(A_i\), \(Cov(A_1,A_2)\) is the covariance between \(A_1\) and \(A_2\), \(N\) is the total number of time points.<br>
+	The envelope Correlation is a symmetric measure: \(envCorr(S_1,S_2) = envCorr(S_2,S_1)\).
+	</section>
+	<section>
+	<h2>Version of the Envelope Correlation Coefficient robust to spatial leakage.</h2>
+	The orthogonalised envelope correlation (oCC) is a method designed to reduce the effects of spatial leakage when measuring amplitude-based connectivity. Spatial leakage, common in EEG and MEG analyses, can cause spurious correlations due to volume conduction (sensor level) or ill-posed problem of the inverse solution (source level). The oCC addresses this issue by orthogonalising one signal with respect to the other before computing the envelope correlation.
+	Given two signals, their amplitude envelopes can be extracted using the Hilbert transform. To mitigate leakage effects, one signal is regressed out from the other before computing the envelope correlation.<br>
+	Regressing out means to remove the (linear) contribution of one signal from another signal to mitigate leakage (0-lag) (<a href="https://doi.org/10.1073/pnas.1112685108" target="_blank" rel="noopener noreferrer">Brookes et al., 2011</a>, <a href="https://doi.org/10.1038/nn.3101" target="_blank" rel="noopener noreferrer">Hipp et al., 2012</a>).
+	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\langle S_1, S_2 \rangle}{\langle S_1, S_1 \rangle} S_1(t)$$
+	$$S_2^{\perp S_1}(t) = S_2(t) - \frac{\sum_{t=1}^{N} S_1(t) S_2(t)}{\sum_{t=1}^{N} S_1(t)^2} S_1(t)$$
+	\(S_2^{\perp S_1}\) is the orthogonalised version of \(S_2\) with respect to \(S_1\).
+	using the Hilbert transform one can estimate the envelope of \(S_2^{\perp S_1}\): \(A_{S_1^{\perp S_2}}\).<br>
+	Because the orthogonalisation of \(S_2^{\perp S_1}\) and \(S_1^{\perp S_2}\) yields  different correlation (\(Corr(A_1,A_{S_2^{\perp S_1}}) \ne Corr(A_2,A_{S_1^{\perp S_2}})\)), The oCC is defined as the average of the two:
+	$$oCC(S_1,S_2) = \frac{1}{2}\left(envCorr(S_1,S_2^{\perp S_1}) + Corr(S_2,S_1^{\perp S_2})\right)$$
+	$$oCC(S_1,S_2) = \frac{1}{2}\left(Corr(A_1,A_{S_2^{\perp S_1}}) + Corr(A_2,A_{S_1^{\perp S_2}})\right)$$
+	This average makes the oCC symmetric: \(oCC(S_1,S_2) = oCC(S_2,S_1)\).
+	</section>
+	<script>
+	function answerDisp() {
+		  var x = document.getElementById("answerDiv");
+		  if (x.style.display === "none") {
+			x.style.display = "block";
+		  } else {
+			x.style.display = "none";
+		  }
+		}
+	</script>
+    <script type="module" async>
+		import {computeDFT, inverseDFT, generateGaussianNoise, generateSineWave, analyticSignal, pearsonCorrelation, computeEnvCorr, OrthoEnvCorr} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
+        
+        const checkboxes = document.querySelectorAll('input[type=checkbox]');
+		const radiobuttons = document.querySelectorAll('input[type=radio]');
+		
+        const sampleRate = 256;
+		const freq1 = 10;
+		const phase1 = 0;
+		var freq2 = parseFloat(document.getElementById("frequency").value);
+		var phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+		var noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+        const time = Array.from({ length: 2*sampleRate }, (_, i) => i / sampleRate);
+		const N = time.length;
+		const envFreq = 2;
+		const metricColours = ['orange', 'green', 'purple'];
+		
+		var w1 = .65;
+		var w2 = .25;
+		var w3 = .05;
+		var wgap = .05;
+		// normalise the ws to ensure the sum equals 1
+		let wnorm = w1 + w2 + w3 + 2*wgap;
+		w1 = w1/wnorm; w2 = w2/wnorm; wgap = wgap/wnorm;
+		
+        
+		// Generate noise
+		var noise1 = generateGaussianNoise(noiseLvl, time.length); // Noise for first channel
+		var noise2 = generateGaussianNoise(noiseLvl, time.length); // Second sine wave
+		
+		// Generate sine waves
+		var sineWave1 = generateSineWave(time, freq1, phase1, noise1); // First sine wave
+		var sineWave2 = generateSineWave(time, freq2, phase2, noise2); // Second sine wave
+		
+		// compute analytic signal
+		var zWave1 = analyticSignal(sineWave1); // First sine wave
+		var zWave2 = analyticSignal(sineWave2); // Second sine wave
+		
+		frequency.oninput = function () {
+			freq2 = parseFloat(document.getElementById("frequency").value);
+			document.getElementById("freqValue").textContent = freq2 + " Hz";
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2, case2Btn.checked*envFreq);
+			zWave2 = analyticSignal(sineWave2);
+			updatePlots()
+		}
+		
+		phase.oninput = function () {
+			phase2 = 2*Math.PI/360*parseFloat(document.getElementById("phase").value);
+			document.getElementById("phaseValue").textContent = phase2.toFixed(2) + " rad";
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2, case2Btn.checked*envFreq);
+			zWave2 = analyticSignal(sineWave2);
+			updatePlots()
+		}
+		
+		noiseLevel.oninput = function () {
+			noiseLvl = parseFloat(document.getElementById("noiseLevel").value);
+			document.getElementById("noiseValue").textContent = noiseLvl.toFixed(2);
+			
+			noise1 = (noiseLvl === 0 ) ? new Array(N).fill(0) : generateGaussianNoise(noiseLvl, time.length);
+			sineWave1 = generateSineWave(time, freq1, phase1, noise1, case2Btn.checked*envFreq);
+			zWave1 = analyticSignal(sineWave1);
+			
+			noise2 = (noiseLvl === 0 ) ? new Array(N).fill(0) : generateGaussianNoise(noiseLvl, time.length);
+			sineWave2 = generateSineWave(time, freq2, phase2, noise2, case2Btn.checked*envFreq);
+			zWave2 = analyticSignal(sineWave2);
+			updatePlots()
+		}
+		
+        function updatePlots() {  
+		
+            const corr = pearsonCorrelation(sineWave1, sineWave2); //  correlation, slope, intercept
+			const envCorr = computeEnvCorr(zWave1, zWave2); //  correlation, slope, intercept
+			const oEnvCorr12 = OrthoEnvCorr(sineWave1, sineWave2)
+			const oEnvCorr21 = OrthoEnvCorr(sineWave2, sineWave1)
+			// compute envelop
+			const envp1 = zWave1.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			const envp2 = zWave2.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			const envp2_1 = oEnvCorr12.zY_ortho.map(([real, imag]) => Math.sqrt(real ** 2 + imag ** 2));
+			
+			// Generate regression line points
+			let xMin = 1.05*Math.min(...sineWave1);
+			let xMax = 1.05*Math.max(...sineWave1);
+			let regLineX = [xMin, xMax];
+			let regLineY = [corr.slope * xMin + corr.intercept, corr.slope * xMax + corr.intercept];
+			
+			xMin = 1.05*Math.min(...envp1);
+			xMax = 1.05*Math.max(...envp2);
+			let regEnvLineX = [xMin, xMax];
+			let regEnvLineY = [envCorr.slope * xMin + envCorr.intercept, envCorr.slope * xMax + envCorr.intercept];
+			
+			xMin = 1.05*Math.min(...envp1);
+			xMax = 1.05*Math.max(...envp2);
+			let regOEnvLineX = [xMin, xMax];
+			let regOEnvLineY = [oEnvCorr12.slope * xMin + oEnvCorr12.intercept, oEnvCorr12.slope * xMax + oEnvCorr12.intercept];
+			
+            // Create traces for time domain signals
+            const timeTrace = [{
+                x: time,
+                y: sineWave1,
+                mode: 'lines',
+				type: 'scatter',
+                name: '$S_1(t)$',
+                line: { color: 'black' }
+            },{
+                x: time,
+                y: sineWave2,
+                mode: 'lines',
+                name: '$S_2(t)$',
+				type: 'scatter',
+                line: { color: 'blue',dash: 'dashdot'}
+            },{
+                x: time,
+                y: oEnvCorr12.s2_ortho,
+                mode: 'lines',
+                name: '$S_2^{\\perp S_1}(t)$',
+				type: 'scatter',
+                line: { color: 'brown',dash: 'solid', width: 4},
+				visible: (showOEnvCorr.checked) ? true : 'legendonly',
+            }];
+			
+			const timeEnv = [{
+                x: time,
+                y: envp1,
+                mode: 'lines',
+                name: '$A_1(t)$',
+				type: 'scatter',
+                line: { color: 'black', dash: 'dashdot', width: 2},
+				visible: (showEnvCorr.checked) ? true : 'legendonly',
+            },{
+                x: time,
+                y: envp2,
+                mode: 'lines',
+                name: '$A_2(t)$',
+				type: 'scatter',
+                line: { color: 'blue', dash: 'dash', width: 2},
+				visible: (showEnvCorr.checked) ? true : 'legendonly',
+            },{
+                x: time,
+                y: envp2_1,
+                mode: 'lines',
+                name: '$A_{S_2^{\\perp S_1}}(t)$',
+				type: 'scatter',
+                line: { color: 'brown', dash: 'dash', width: 4},
+				visible: (showOEnvCorr.checked) ? true : 'legendonly',
+            }];
+
+            // Create scatter plot trace
+            const scatterTrace = [{
+                x: sineWave1,
+                y: sineWave2,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'markers',
+                name: '$S_1 vs. S_2$',
+				type: 'scatter',
+				opacity: 0.5,
+                marker: { color: metricColours[0] },
+				showlegend: true,
+				visible: showCorr.checked,
+            },{
+                x: envp1,
+                y: envp2,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'markers',
+                name: '$A_1 vs. A_2$',
+				type: 'scatter',
+				opacity: 0.5,
+                marker: { color: metricColours[1] },
+				visible: showEnvCorr.checked,
+            },{
+                x: envp1,
+                y: envp2_1,
+				xaxis: 'x2',
+				yaxis: 'y2',
+                mode: 'markers',
+                name: '$A_1 vs. A_{S_2^{\\perp S_1}}$',
+				type: 'scatter',
+				opacity: 0.5,
+                marker: { color: metricColours[2] },
+				visible: showOEnvCorr.checked,
+            }
+			];
+			
+			// Add regression line to scatter plot
+			let regressionTrace = [{
+				x: regLineX,
+				y: regLineY,
+				mode: 'lines',
+				type: 'scatter',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				name: `corr = ${corr.correlation.toFixed(2)}`,
+				line: { color: metricColours[0], width: 5, dash: 'solid' },
+				visible: showCorr.checked
+			},{
+				x: regEnvLineX,
+				y: regEnvLineY,
+				mode: 'lines',
+				type: 'scatter',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				name: `envCorr = ${envCorr.correlation.toFixed(2)}`,
+				line: { color: metricColours[1], width: 5, dash: 'solid' },
+				visible: showEnvCorr.checked,
+			},{
+				x: regOEnvLineX,
+				y: regOEnvLineY,
+				mode: 'lines',
+				type: 'scatter',
+				xaxis: 'x2',
+				yaxis: 'y2',
+				name: `oCC = ${oEnvCorr12.correlation.toFixed(2)}`,
+				line: { color: metricColours[2], width: 5, dash: 'solid'},
+				visible: showOEnvCorr.checked,
+			}];
+			
+			
+			// Define metric data
+			const metricsData = [
+				corr.correlation,
+				envCorr.correlation,
+				.5*(oEnvCorr12.correlation+oEnvCorr21.correlation)
+			];
+			
+			var barValues = [];
+			var barText = [];
+			var barColors = [];
+			
+			checkboxes.forEach(checkbox => {
+				if (checkbox.checked) {
+					barText.push(checkbox.id.substr(4)); // Store corresponding values
+					let ind = ['Corr', 'EnvCorr', 'OEnvCorr'].indexOf(checkbox.id.substr(4));
+					barColors.push(metricColours[ind])
+					barValues.push(metricsData[ind]);  // Store metric name
+				}
+			});
+			
+			// Create bar plot for correlation
+			const barPlot = {
+				x: barText,
+				y: barValues,
+				type: 'bar',
+				xaxis: 'x3',
+				yaxis: 'y3',
+				name: 'Bar Plot',
+				marker:{
+					color: barColors
+				},
+				showlegend: false
+			};
+			
+            // Define subplots layout
+            const layout = {
+                //grid: { rows: subplotRows, columns: subplotCols, pattern: 'independent' },
+                xaxis: { title: 'Time (s)', domain: [0, w1], anchor: 'y1'},
+                yaxis: { title: 'Amplitude (V)', anchor: 'x1', range: [-2, 2]},
+				
+				xaxis2: { title: 'Amplitude 1 (V)', side: 'bottom', domain: [w1+wgap, w1+w2], anchor: 'y2', range: [-2, 2]},
+                yaxis2: { title: 'Amplitude 2 (V)', domain: [0, 1], anchor: 'x2', range: [-2, 2]},
+				
+				xaxis3: { domain: [w1+w2+wgap, 1], anchor: 'y3'},
+                yaxis3: { title: 'correlation', side: 'right', domain: [0, 1], anchor: 'x3', range: [-1.2, 1.2]},
+				showlegend: true,
+				font: { size: 16 },
+				legend: {x: 0, xanchor: 'left', y: 1.1, orientation: "h", font: { size: 16 }}
+            };
+
+            // Combine all traces into a single data array
+            const combinedData = [
+                ...timeTrace,
+				...timeEnv,
+                ...scatterTrace,
+				...regressionTrace,
+				barPlot
+            ];
+
+            // Update the plot
+            Plotly.newPlot('plot', combinedData, layout, {responsive: true});
+        }
+
+        // Initial plot
+        updatePlots();
+		
+		checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('click', updatePlots);
+        });
+		
+		radiobuttons.forEach(checkbox => {
+            checkbox.addEventListener('click', noiseLevel.oninput);
+        });
+				
+    </script>
+</body>
+</html>

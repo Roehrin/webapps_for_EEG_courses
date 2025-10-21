@@ -1,0 +1,7 @@
+Brain Vision Data Exchange Marker File Version 1.0
+[Common Infos]
+DataFile=seizure1.eeg
+
+[Marker Infos]
+Mk1=Comment,EI,5160,7104,0
+Mk2=Comment,crise,8458,1,0

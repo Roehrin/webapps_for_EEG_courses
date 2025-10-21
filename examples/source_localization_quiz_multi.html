@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Source Localization Quiz</title>
+<link rel="stylesheet" href="quiz-universal.css">
+<script src="../src/nav-banner-smart.js"></script>
+<script src="../src/multi-quiz-system.js"></script>
+</head>
+<body>
+<div class="quiz-wrapper">
+<div class="container">
+  <div class="header-row">
+    <h2>Which solver generated this pattern?</h2>
+    <div class="score-controls">
+      <div id="scoreDisplay"></div>
+      <button class="reset-btn" onclick="resetScore()">Reset Score</button>
+    </div>
+  </div>
+  
+  <div id="target"></div>
+  
+  <h3>Select the correct solver:</h3>
+  
+  <div class="options" id="choices"></div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <div class="button-container">
+    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
+ 	<button class="next-btn" id="nextBtn">Next Question →</button>
+  </div>
+  </div>
+</div>
+
+<script>
+
+
+
+/* ==========================================
+   QUIZ LOGIC
+   ========================================== */
+
+const solvers = ["MNE", "wMNE", "eLORETA"];
+const baseURL = "../examples/display_Point_Spread_Functions_on_MRI_hidden.html";
+let correctSolver;
+let selectedSolver = null;
+let answered = false;
+
+function initializeQuiz() {
+  // Pick random correct solver
+  correctSolver = solvers[Math.floor(Math.random() * solvers.length)];
+  let srcnmbr = Math.floor(Math.random() * 116);
+  
+  document.getElementById("target").innerHTML =
+    `<iframe src="${baseURL}?method=${correctSolver}&srcnmbr=${srcnmbr}"></iframe>`;
+  
+  // Clear previous state
+  const feedback = document.getElementById("feedback");
+  feedback.textContent = "";
+  feedback.style.color = "";
+  selectedSolver = null;
+  answered = false;
+  
+  // Build choice buttons
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+  
+  // Shuffle solvers for random button order
+  const shuffledSolvers = [...solvers].sort(() => Math.random() - 0.5);
+  
+  shuffledSolvers.forEach(solver => {
+    const btn = document.createElement("button");
+    btn.textContent = solver;
+    btn.className = "choice-btn";
+    btn.dataset.solver = solver;
+    btn.addEventListener("click", () => selectSolver(solver, btn));
+    choicesDiv.appendChild(btn);
+  });
+  
+  // Reset buttons
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function selectSolver(solver, btn) {
+  if (answered) return;
+  
+  // Remove previous selection
+  document.querySelectorAll(".choice-btn").forEach(b => b.classList.remove("selected"));
+  
+  // Mark new selection
+  btn.classList.add("selected");
+  selectedSolver = solver;
+  
+  // Enable submit button
+  document.getElementById("submitBtn").disabled = false;
+}
+
+function submitAnswer() {
+  if (selectedSolver === null || answered) return;
+  answered = true;
+  
+  const feedback = document.getElementById("feedback");
+  const buttons = document.querySelectorAll(".choice-btn");
+  
+  // Disable all buttons
+  buttons.forEach(btn => {
+    btn.classList.add("disabled");
+  });
+  
+  // Disable submit button
+  document.getElementById("submitBtn").disabled = true;
+  
+  if (selectedSolver === correctSolver) {
+    // Find and mark correct button
+    buttons.forEach(btn => {
+      if (btn.dataset.solver === correctSolver) {
+        btn.classList.add("correct");
+      }
+    });
+    feedback.textContent = "✅ Correct!";
+    feedback.style.color = "#4caf50";
+    incrementScore(true);
+  } else {
+    // Mark incorrect and correct buttons
+    buttons.forEach(btn => {
+      if (btn.dataset.solver === selectedSolver) {
+        btn.classList.add("incorrect");
+      }
+      if (btn.dataset.solver === correctSolver) {
+        btn.classList.add("correct");
+      }
+    });
+    feedback.textContent = `❌ Wrong! The correct answer was ${correctSolver}.`;
+    feedback.style.color = "#f44336";
+    incrementScore(false);
+  }
+  
+  // Show next button
+  document.getElementById("nextBtn").style.display = "inline-block";
+}
+
+// Initialize quiz on page load
+initializeQuiz();
+
+
+
+// Expose functions globally
+window.submitAnswer = submitAnswer;
+window.resetScore = resetScore;
+// Setup multi-quiz navigation
+setupNextButton('nextBtn');
+</script>
+ <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const banner = document.querySelector(".nav-banner");
+      if (!banner) return;
+
+      // Add class to body
+      document.body.classList.add("has-nav-banner");
+
+      // Dynamically set CSS variable for navbar height
+      function updateNavHeight() {
+        const height = banner.getBoundingClientRect().height;
+        document.body.style.setProperty("--nav-height", height + "px");
+      }
+
+      updateNavHeight();
+      window.addEventListener("resize", updateNavHeight);
+
+      const observer = new ResizeObserver(updateNavHeight);
+      observer.observe(banner);
+    });
+  </script>
+</body>
+</html>

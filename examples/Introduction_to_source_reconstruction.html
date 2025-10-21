@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to source reconstruction</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        .slider {
+            margin: 10px 0;
+        }
+		.banner {
+		  position: sticky;
+		  top: 0;
+		  background:#96004B;
+		  color: #f1f1f1;
+		  z-index: 1;
+		  text-align: right;
+		  padding: 10px
+		}
+		.divfooter {
+		  top: 0;
+		  background: #555;
+		  color: #f1f1f1;
+		}
+		.text {
+		  text-align: right;
+		}
+		.div {
+		  margin: 20px;
+		}
+		section {
+			margin: 30px;
+		}
+		h1 {
+			margin: 10px;
+		}
+		.center {
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+			width: 20%;
+			}
+.image-container {
+  display: flex;
+  justify-content: center;
+  gap: 120px;
+  flex-wrap: wrap;
+}
+
+figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 600px;       /* match your desired image width */
+  margin: 0;
+  box-sizing: border-box;
+}
+
+figure img {
+  width: 100%;         /* fills figure width */
+  height: auto;
+  border-radius: 10px;
+  display: block;
+}
+
+figcaption {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 0.95em;
+  color: #555;
+  font-style: italic;
+  width: 100%;
+  box-sizing: border-box;
+}
+.single-image-container {
+  display: flex;
+  justify-content: center;  /* centers the figure horizontally */
+  margin: 20px 0;           /* optional spacing */
+}
+/* Responsive adjustments */
+@media (max-width: 1300px) {
+  .image-container { gap: 40px; }
+}
+
+@media (max-width: 700px) {
+  figure {
+    width: 100%;
+    max-width: 600px;
+    padding: 0 16px;
+  }
+}
+    </style>
+	<script src="../src/nav-banner-smart.js"></script>
+</head>
+<body>
+	
+	<h1>Introduction to source reconstruction</h1>
+	<section>
+	<h2>Problem outline </h2>
+	One of the holy grails of EEG analysis would be to infer where in the brain the signals are generated that constitute the EEG. It is well established that the EEG does not reflect the activity of single neurons, but rather the combined electrical activity of spatially extended patches of simultaneously active cortical tissue with a minimal area in the order of several square centimeters. To go from these patches of simultaneous active cortex to EEG signals, we will use the terminology and mathematical notation described in (<a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>) <br><br>
+	
+	<h2>Assumptions </h2>
+In this module, we will make a few key assumptions to develop elegant mathematical models for the forward and inverse problems in EEG. These assumptions are:
+
+	<ul> 
+		<li>There is no time delay between synchronized neuronal activity and the resulting EEG; any change in the neuronal signal is reflected instantaneously in the EEG.</li> 
+		<li>Neuronal sources can be represented as mathematical dipoles, which will be explained in detail below.</li> 
+		<li>The head consists of homogeneous tissue layers, typically with isotropic electrical conductivity.</li> 
+	</ul>
+	<h2>Forward problem </h2>
+	To transform the electrical signals recorded on the EEG into the source space (i.e., to estimate where in the brain they originated), we first need to understand how brain activity generates signals measurable at the scalp. 
+	This is known as the forward problem in EEG. The first step is to define how neural sources are represented. The best current approximation models each source as an electric dipole — a pair of equal and opposite charges separated by a very small distance. Because of this structure, a dipole has both a magnitude (strength) and a direction, and can therefore be represented as a vector.
+<br> <br>
+	This dipole model is based on the properties of pyramidal neurons, which are long, oriented cells in the cerebral cortex. When many of these neurons are active and aligned, their combined electrical fields produce measurable EEG signals. Thus, the dipole serves as a simplified but biologically grounded model of how neuronal populations contribute to scalp potentials.
+	
+	<br> <br>
+	In the diagram below, adapted from (<a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>), a simplification of the forward problem is shown.
+
+<div class="single-image-container">	
+<figure id="fig-head-model" aria-describedby="fig-caption" style="width:550px;">
+  <img
+    src="../src/New_test_source_2dir.svg"
+    alt="Schematic three-layer head model (scalp, skull, brain) with a single dipole at position r_dip_i and one measurement electrode at r. Dipole orientation decomposed into x and z axes."
+    title="Three-layer head model with a single dipole"
+  />
+  <figcaption id="fig-caption">
+    Diagram adapted from <a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>.
+    A three-layer approximation of the head (scalp, skull, brain) is shown with a single dipole located at position
+    \( \mathbf{r}_{\text{dip}_i} \) from the origin. In this two-dimensional plane, any dipole orientation at that location can be decomposed into two orthogonal axes,
+    \( \mathbf{e}_{\text{x}} \) and \( \mathbf{e}_{\text{z}} \). For simplicity, one measurement electrode \( \mathbf{m}_{\text{r}} \) is drawn at radius \( \mathbf{r} \).
+  </figcaption>
+</figure>
+</div>
+	<br><br>
+	The source space can be represented in one of two main ways. In a volumetric model, dipoles oriented along the x, y, and z axes are placed at discrete points throughout the whole brain volume. Alternatively, sources can be restricted to the cortical surface, where dipoles are oriented perpendicular (normal) to the cortex. This approach reduces the number of parameters to estimate and reflects the organization of cortical pyramidal neurons.
+	<br> <br>
+By solving the Poisson equation—using the tissues’ electrical conductivities, geometry, source locations, and EEG electrode positions as inputs—we can estimate how each dipole influences each electrode. Two examples of dipoles and their influence on the EEG electrodes are given below <br><br>
+
+ <div class="image-container">
+    <figure>
+       <img src="../src/dipole_topo1.png" alt="Normal dipole">
+      <figcaption>The electric field and influence on EEG electrodes for a normal oriented dipole</figcaption>
+    </figure>
+    <figure>
+	  <img src="../src/dipole_topo2.png" alt="Tangential dipole">
+      <figcaption>The electric field and influence on EEG electrodes for a tangential oriented dipole</figcaption>
+    </figure>
+  </div>
+  <br><br>
+According to the principle of superposition, the EEG signal measured at electrode \( m \) at time \( t \) can be expressed as a linear combination of dipole contributions, each weighted by a gain factor \( g \).
+All gain factors can be collected into an \( M \times N \) matrix, where \( M \) is the number of electrodes and \( N \) is the number of sources. Typically, \( M \ll N \), making the system underdetermined; in practice, 
+\( M  \) ranges from roughly 20 to 256 electrodes, whereas \( N \) is on the order of several thousand potential sources.
+
+
+$$
+\mathbf{M} = 
+\begin{bmatrix}
+    m(\mathbf{r}_1) \\
+    \vdots \\
+    m(\mathbf{r}_N)
+\end{bmatrix}
+=
+\begin{bmatrix}
+    g(\mathbf{r}_1, \mathbf{r}_{\text{dip}_1}) & \cdots & g(\mathbf{r}_1, \mathbf{r}_{\text{dip}_p}) \\
+    \vdots & \ddots & \vdots \\
+    g(\mathbf{r}_N, \mathbf{r}_{\text{dip}_1}) & \cdots & g(\mathbf{r}_N, \mathbf{r}_{\text{dip}_p})
+\end{bmatrix}
+\begin{bmatrix}
+    d_1 \mathbf{e}_1 \\
+    \vdots \\
+    d_p \mathbf{e}_p
+\end{bmatrix}
+$$
+	<br><br>
+	
+Or in compact notation, with added gaussian noise from the amplifying system \( n \sim \mathcal{N}(0,\sigma^{2}) \)
+	
+		$$M = GD+n$$ 
+		
+		<h2>The minimum norm inverse solution</h2>
+		
+	Since the forward problem is non-square due to the vast amount of sources compared to the limited amount of measuring electrods, the matrix \( G \) cannot be simply inverted and applied to the EEG signal \( M \) to find the sources \( D \) . Consequently, there is an infinite amount of solutions to this problem. Choosing an inverse method is thus choosing a solution with certain properties. 
+	
+	The most simple solution is choosing a solution where the sources have minimal power with regards to a certain norm.  This family of estimates is usually referred to as the Minimum norm estimates (MNE)
+		To find the <b>minimum norm solution</b> with regularization, we solve the following minimization problem:
+</p>
+
+<p style="text-align: center;">
+\[
+\min_D \| M - G D \|_2^2 + \lambda \| D \|_2^2
+\]
+</p>
+
+<p>
+Here, \( \lambda > 0 \) is a regularization parameter that balances the fitting of the residual and the norm of the sources.
+</p>
+
+<p>
+Taking the derivative with respect to \( D \) and set it to zero:
+</p>
+
+<p style="text-align: center;">
+\[
+-2 G^\top (M - G D) + 2 \lambda D = 0
+\]
+</p>
+
+<p>
+Rearranging:
+</p>
+
+<p style="text-align: center;">
+\[
+G^\top G D + \lambda D = G^\top M
+\quad \Rightarrow \quad
+(G^\top G + \lambda I) D = G^\top M
+\]
+</p>
+
+<p>
+Solve for \( D \):
+</p>
+
+<p style="text-align: center;">
+\[
+\boxed{
+D_\text{min-norm} = (G^\top G + \lambda I)^{-1} G^\top M = G^\top (G G^\top + \lambda I)^{-1}M
+}
+\]
+</p>
+
+<p>
+These are called the regularized minimum norm solutions, where the second form is obtained by applying the Woodbury matrix identity. Since \(G \) is an \( M \times N \) matrix, the first form requires the inversion of an \( N \times N \) matrix and the second form only a \( M \times M \) matrix, obviously, for computational purposes, the second form is preferred.  Inherently, this solution is biased towards shallower sources, since sources closer to the measurement electrodes require less amplitude to give a similar signal with respect to deeper sources.
+One way to solve this is by changing the minimization problem to include a weighting matrix \( W \) which is diagonal with entries equal to the norms of the lead fields. Since sources with smaller lead field norms are typically deeper, this weighting effectively compensates for depth bias.
+<p style="text-align: center;">
+\[
+\min_D \| M - G D \|_2^2 + \lambda \| WD \|_2^2
+\]
+</p>
+This leads to the solution for the weighted minimum norm where again, the Woodbury matrix identity has been used to find the computationally more efficient form. 
+<p style="text-align: center;">
+\[
+\boxed{
+D_\text{weighted-min-norm} = (G^\top G + \lambda W^\top W)^{-1} G^\top M = W^{-1}G^\top (G (W^\top W)^{-1}G^\top + \lambda I)^{-1}M
+}
+\]
+</p>
+</p>
+	</section>
+	<br>
+	<section>
+		<h2>Parametric methods</h2>
+		The minimum norm methods belong to the family of distributed source models, which are built on the assumption that the brain activity can be represented by many small sources. These models estimate the contribution of all potential sources simultaneously. In contrast, parametric methods attempt to explain the measured voltages by a limited amount of equivalent current dipoles. 
+		<br> <br>
+		The most intuitive of these methods is the dipole fitting method, which identifies the dipole (or dipoles) located that best fits the observed scalp potential topography. This means fitting six parameters per dipole, 3 for the spatial location and three for its moment (orientation and strength). This is a non-linear minimization of the cost function defined by :
+		<p style="text-align: center;">
+		\[
+		
+		|| M - G({r_j,r_{dip_i}})D ||
+	
+		\]
+		
+</p>
+<br>
+Another approach is to focus on the sources rather than the measurements. A beamformer applies spatial filtering to estimate the activity of a source at a specific location. It computes a weighted linear combination of sensor signals that maximizes sensitivity to the target source while minimizing sensitivity to other brain regions. The weights are derived from the lead field and the covariance of the measured data, making the method a data-driven approach to source localization.
+	</section>
+	<section>
+		<h2>Other types of inverse solutions</h2>
+		he solutions described in the previous section are among the most fundamental, because their mathematical foundations are elegant and relatively straightforward to describe. Countless other algorithms have been developed, each constraining the solution to the problem in different ways. These include methods that provide exact localization of the source in a noiseless situation (sLORETA, eLORETA) and methods that introduce sparsity in the source space (FOCUSS, MxNE).
+	</section>
+</body>
+</html>
