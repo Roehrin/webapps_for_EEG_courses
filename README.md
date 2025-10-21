@@ -9,6 +9,7 @@ Collections of interactive web applications for the visualisation, teaching and 
 ## Some examples
 
 ### [Leadfield Visualisation](https://roehrin.github.io/webapps_for_EEG_courses/examples/EEG_mesh_with_topo.html)
+
 ![topo](./images/fig_topo.png "EEG Voltage Map")  
 
 ### [ESI Spatial Leakage](https://roehrin.github.io/webapps_for_EEG_courses/examples/display_Point_Spread_Functions_on_MRI.html)
@@ -29,7 +30,7 @@ Collections of interactive web applications for the visualisation, teaching and 
 3. go to `http://localhost:8080`
 
 ## Project funding
-This project was funded by the Swiss National Science Foundation (209120, 209470) and la commission d'informatique of the UNIGE
+This project was funded by the Swiss National Science Foundation (209120, 209470) and la commission d'informatique of the UNIGE  
 <img src="./images/SNF_logo_standard_office_color_pos_e_w_BKG.png" width="250" alt="SNSF logo">
 <img src="./images/coinf_w_BKG.png" width="250" alt="COINF UNIGE logo">
 
@@ -40,4 +41,3 @@ This project was funded by the Swiss National Science Foundation (209120, 209470
 - Steven Beumer MSc
 - Dr. Isotta Rigoni
 - Dr. Stanislas Lagarde
-
