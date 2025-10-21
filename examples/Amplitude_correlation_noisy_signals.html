@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amplitude-based connectivity</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="../src/nav-banner-smart.js"></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
     <style>
         body {
@@ -43,10 +44,6 @@
     </style>
 </head>
 <body>
-	<div class="banner">
-			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
-			<br>&copy; 2025 Dr Nicolas Roehri
-	</div>
 	<h1>Amplitude-based connectivity.</h1>
 	<section>
 	<h2>Introduction</h2>
@@ -58,9 +55,11 @@
 	<section>
 	<h2>Example: Pearson Correlation (Corr)</h2>
 	Let us assume two noisy oscillating signals \(S_1\) and \(S_2\) of amplitudes \(A_1\) and \(A_2\), frequencies \(f_1\) and \(f_2\), and phase shifts \(\theta_1\) and \(\theta_2\), respectively. These signals are can be written as:
-	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma^{2}).$$
+
+	$$S_1(t) = A_1(t)\cos(2\pi f_1t + \theta_1) + \epsilon_1(t), and$$ $$S_2(t) = A_2(t)\cos(2\pi f_2t + \theta_2) + \epsilon_2(t)$$ $$\epsilon_i \sim \mathcal{N}(0,\sigma_i^{2}).$$
 	\(f_1\), \(\theta_1\) are fixed, \(f_1 = 10\textrm{ Hz}, \theta_1=0\textrm{ rad}\), \(t\) is the time. <br>
-	\(f_2\), \(\theta_2\) and \(\sigma\) are user defined.
+	\(f_2\), \(\theta_2\) and \(\sigma_1 = \sigma_2 = \sigma\) are user defined.
+
 	</section>
 	<section>
 	The Pearson correlation coefficient is a statistical measure that evaluates the strength and direction of a linear relationship between two signals, with values ranging from -1 (perfect negative correlation) to +1 (perfect positive correlation). A value of 0 indicates no correlation between the variables.
@@ -73,7 +72,9 @@
 	<h3>Case 1: constant amplitude</h3>
 	As a first example, let us define \(A_1=A_2=A=1\).
 	The plot below let you modify \(f_2\), \(\theta_2\) and \(\sigma\) and see their effect on the \(\text{Corr}\).<br>
-	First, you could test that when \(\sigma = 0\), \(Corr(S_1,S_2) = 1\) only when \(\theta_2 = \theta_1\) and \(f_2 = f_1\).<br><br> This means that sinusoidal from different frequency bands cannot be correlated. For signals of the same frequency, correlation is sensitive to the phase shift because a phase shift introduces a time lag, which affects the correlation. If the phase shift is (90°), the correlation is zero. If it's phase difference is \(\Delta\theta = \theta_2-\theta_1 = \frac{\pi}{2}\) the correlation is zero.  If \(\Delta\theta = \pi\) the correlation is -1 (perfect anti-correlation).
+
+	First, you could test that when \(\sigma = 0\), \(Corr(S_1,S_2) = 1\) only when \(\theta_2 = \theta_1\) and \(f_2 = f_1\).<br><br> This means that sinusoidal waves, with different frequencies cannot be correlated. For signals of the same frequency, correlation is sensitive to the phase shift because a phase shift introduces a time lag, which affects the correlation. If the phase shift is (90°), the correlation is zero. If it's phase difference is \(\Delta\theta = \theta_2-\theta_1 = \frac{\pi}{2}\) the correlation is zero.  If \(\Delta\theta = \pi\) the correlation is -1 (perfect anti-correlation).
+
 	Again in our case without noise, 
 	$$ Corr(S_1,S_2) = \cos(\Delta\theta).$$
 	</section>

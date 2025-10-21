@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Topography Quiz</title>
+<script src="../src/nav-banner-smart.js"></script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+body.has-nav-banner {
+  display: flex;
+  flex-direction: column;
+}
+
+body.has-nav-banner .quiz-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--nav-height, 120px)); /* navbar-safe vertical centering */
+}
+.container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 1400px;
+  width: 100%;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  font-size: 32px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-row {
+  display: flex;
+  flex-direction: column; /* stack title and score vertically */
+  align-items: center;    /* center everything horizontally */
+  margin-bottom: 30px;
+  gap: 10px;              /* space between title and score */
+}
+
+.header-row h2 {
+  margin: 0;
+  text-align: center;
+}
+
+.score-controls {
+  display: flex;
+  justify-content: center; /* center score and reset button */
+  gap: 15px;
+}
+
+#scoreDisplay {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.reset-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.reset-btn:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+#target {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  width: 100%;
+  min-height: 550px;
+}
+
+#target iframe {
+  width: 750px;
+  height: 550px;
+  border: 3px solid #667eea;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+h3 {
+  text-align: center;
+  color: #555;
+  font-size: 24px;
+  margin-bottom: 25px;
+}
+
+.options {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  min-height: 320px;
+}
+
+.option-card {
+  flex: 1;
+  min-width: 320px;
+  max-width: 420px;
+  height: 320px;
+  border: 3px solid #ddd;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  background: #f5f5f5;
+}
+
+.option-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.option-card.selected {
+  border-color: #667eea;
+  border-width: 4px;
+  transform: scale(1.02);
+}
+
+.option-card.correct {
+  border-color: #4caf50;
+  border-width: 4px;
+  animation: correctPulse 0.5s ease;
+}
+
+.option-card.incorrect {
+  border-color: #f44336;
+  border-width: 4px;
+  animation: incorrectShake 0.5s ease;
+}
+
+.option-card.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.option-card iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.option-card iframe.loaded {
+  opacity: 1;
+}
+
+.select-overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(102, 126, 234, 0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.select-overlay:hover {
+  background: rgba(102, 126, 234, 1);
+  transform: translateX(-50%) translateY(-3px);
+}
+
+.feedback {
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+  min-height: 40px;
+  margin-bottom: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.submit-btn, .next-btn {
+  padding: 15px 40px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.submit-btn:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.next-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: none;
+}
+
+.next-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.next-btn:active {
+  transform: translateY(-1px);
+}
+
+@keyframes correctPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes incorrectShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+@media (max-width: 1200px) {
+  .container {
+    padding: 30px 20px;
+  }
+  
+  h2 {
+    font-size: 28px;
+  }
+  
+  #target iframe {
+    width: 100%;
+    max-width: 700px;
+    height: 500px;
+  }
+  
+  .option-card {
+    min-width: 280px;
+    max-width: 350px;
+    height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+  
+  .container {
+    padding: 20px 15px;
+    border-radius: 15px;
+  }
+  
+  .header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-row h2 {
+    text-align: center;
+  }
+  
+  .score-controls {
+    justify-content: center;
+  }
+  
+  h2 {
+    font-size: 24px;
+  }
+  
+  h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  #target iframe {
+    width: 100%;
+    max-width: 100%;
+    height: 400px;
+  }
+  
+  .options {
+    gap: 15px;
+    margin-bottom: 60px;
+  }
+  
+  .option-card {
+    min-width: 100%;
+    max-width: 100%;
+    height: 300px;
+  }
+  
+  .button-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .submit-btn, .next-btn {
+    width: 100%;
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px 10px;
+  }
+  
+  h2 {
+    font-size: 20px;
+  }
+  
+  h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  #target iframe {
+    height: 350px;
+  }
+  
+  .option-card {
+    height: 250px;
+  }
+   .header-row {
+    gap: 5px;
+  }
+  .select-overlay {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .feedback {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  #scoreDisplay {
+    padding: 10px 18px;
+    font-size: 16px;
+  }
+  
+  .reset-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="quiz-wrapper">
+<div class="container">
+  <div class="header-row">
+    <h2>What was the orientation of the dipole?</h2>
+    <div class="score-controls">
+      <div id="scoreDisplay"></div>
+      <button class="reset-btn" onclick="resetScore()">Reset Score</button>
+    </div>
+  </div>
+  
+  <div id="target"></div>
+  
+  <h3>Select the correct topography:</h3>
+  
+  <div class="options" id="choices"></div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <div class="button-container">
+    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
+    <button class="next-btn" id="nextBtn" onclick="location.reload()">Next Question →</button>
+  </div>
+  </div>
+</div>
+
+<script>
+/* === Score Management === */
+function getScore() {
+  const correct = parseInt(sessionStorage.getItem('quizCorrect') || '0');
+  const total = parseInt(sessionStorage.getItem('quizTotal') || '0');
+  return { correct, total };
+}
+
+function updateScoreDisplay() {
+  const { correct, total } = getScore();
+  document.getElementById('scoreDisplay').textContent = `Score: ${correct}/${total}`;
+}
+
+function incrementScore(isCorrect) {
+  const { correct, total } = getScore();
+  sessionStorage.setItem('quizCorrect', isCorrect ? correct + 1 : correct);
+  sessionStorage.setItem('quizTotal', total + 1);
+  updateScoreDisplay();
+}
+
+function resetScore() {
+  if (confirm('Are you sure you want to reset your score?')) {
+    sessionStorage.removeItem('quizCorrect');
+    sessionStorage.removeItem('quizTotal');
+    updateScoreDisplay();
+  }
+}
+
+// Initialize score display on page load
+updateScoreDisplay();
+
+/* === Config === */
+const baseURL = "../examples/EEG_mesh_with_topo_hidden_AI_reduced.html";
+const dipoleURL = "../examples/EEG_mesh_with_topo_dipole.html";
+const answerURL = "../examples/EEG_mesh_with_topo_answer_AI_reduced.html";
+
+/* === Generate question params === */
+const srcnmbr = Math.floor(Math.random() * 1156);
+const azimuth = Math.floor(Math.random() * 100);
+const elevation = Math.floor(Math.random() * 100);
+
+/* === Render main question iframe (high priority) === */
+const targetDiv = document.getElementById("target");
+const mainIframe = document.createElement("iframe");
+mainIframe.src = `${baseURL}?srcnmbr=${srcnmbr}&azimuth=${azimuth}&elevation=${elevation}`;
+mainIframe.loading = "eager";
+mainIframe.style.border = "3px solid #667eea";
+mainIframe.style.borderRadius = "15px";
+mainIframe.style.boxShadow = "0 10px 30px rgba(0,0,0,0.2)";
+targetDiv.appendChild(mainIframe);
+
+/* === Build options (one correct + two distractors) === */
+const options = [
+  { srcnmbr, azimuth, elevation, isCorrect: true },
+  { srcnmbr: Math.floor(Math.random() * 1156), azimuth, elevation, isCorrect: false },
+  { srcnmbr: Math.floor(Math.random() * 1156), azimuth: Math.floor(Math.random() * 100), elevation: Math.floor(Math.random() * 100), isCorrect: false }
+];
+const shuffledOptions = options.sort(() => Math.random() - 0.5);
+
+const choicesDiv = document.getElementById("choices");
+let selectedOption = null;
+let answered = false;
+
+/* helper to set full-cover styles for stacked iframes inside .option-card */
+function makeCover(el) {
+  el.style.position = "absolute";
+  el.style.top = "0";
+  el.style.left = "0";
+  el.style.width = "100%";
+  el.style.height = "100%";
+  el.style.border = "none";
+}
+
+/* Step 1: create cards and visible quiz iframes (small delay to prioritize main) */
+setTimeout(() => {
+  shuffledOptions.forEach((option, idx) => {
+    const card = document.createElement("div");
+    card.className = "option-card";
+    card.dataset.index = idx;
+    card.style.position = "relative";
+    card.style.overflow = "hidden";
+
+    // visible quiz iframe (dipole view)
+    const quizIframe = document.createElement("iframe");
+    quizIframe.className = "quiz-frame";
+    quizIframe.src = `${dipoleURL}?srcnmbr=${option.srcnmbr}&azimuth=${option.azimuth}&elevation=${option.elevation}`;
+    quizIframe.loading = "lazy";
+    makeCover(quizIframe);
+    quizIframe.style.opacity = "1";
+    quizIframe.style.transition = "opacity 220ms ease";
+    quizIframe.style.zIndex = "1";
+
+    // answer iframe (preload target) - keep it in DOM but hidden
+    const answerIframe = document.createElement("iframe");
+    answerIframe.className = "answer-frame";
+    makeCover(answerIframe);
+    answerIframe.style.opacity = "0";
+    answerIframe.style.visibility = "hidden";
+    answerIframe.style.transition = "opacity 220ms ease, visibility 0s linear 220ms";
+    answerIframe.style.zIndex = "2";
+    answerIframe.style.pointerEvents = "none";
+
+    // select overlay
+    const selectBtn = document.createElement("div");
+    selectBtn.className = "select-overlay";
+    selectBtn.textContent = "Select This";
+    selectBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectOption(idx, card);
+    });
+
+    card.appendChild(quizIframe);
+    card.appendChild(answerIframe);
+    card.appendChild(selectBtn);
+    choicesDiv.appendChild(card);
+  });
+}, 50);
+
+/* Step 2: preload answer iframes - start immediately after quiz iframes are created */
+setTimeout(() => {
+  document.querySelectorAll(".option-card").forEach((card, idx) => {
+    const opt = shuffledOptions[idx];
+    const answerIframe = card.querySelector(".answer-frame");
+    // Force eager loading for answers (we want them ready)
+    answerIframe.loading = "eager";
+    answerIframe.src = `${answerURL}?srcnmbr=${opt.srcnmbr}&azimuth=${opt.azimuth}&elevation=${opt.elevation}`;
+
+    // when loaded, mark it (no visual change yet)
+    answerIframe.addEventListener("load", () => {
+      answerIframe.dataset.loaded = "1";
+      answerIframe.style.visibility = "hidden";
+    });
+  });
+}, 200);
+
+/* --- selection helpers --- */
+function selectOption(idx, card) {
+  if (answered) return;
+  document.querySelectorAll(".option-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  selectedOption = idx;
+  document.getElementById("submitBtn").disabled = false;
+}
+
+/* --- submission & swap --- */
+function submitAnswer() {
+  if (selectedOption === null || answered) return;
+  const clickedCard = document.querySelector(`.option-card[data-index="${selectedOption}"]`);
+  checkAnswer(shuffledOptions[selectedOption].isCorrect, clickedCard);
+}
+
+function checkAnswer(isCorrect, clickedCard) {
+  if (answered) return;
+  answered = true;
+
+  const feedback = document.getElementById("feedback");
+  const allCards = document.querySelectorAll(".option-card");
+
+  // disable overlays
+  allCards.forEach(card => {
+    const overlay = card.querySelector(".select-overlay");
+    overlay.style.pointerEvents = "none";
+    overlay.style.opacity = "0.5";
+  });
+
+  // swap with smooth fade
+  allCards.forEach((card) => {
+    const quizFrame = card.querySelector(".quiz-frame");
+    const answerFrame = card.querySelector(".answer-frame");
+
+    // fade out quiz frame
+    quizFrame.style.pointerEvents = "none";
+    quizFrame.style.opacity = "0";
+
+    // reveal answer frame after the fade out
+    setTimeout(() => {
+      answerFrame.style.visibility = "visible";
+      answerFrame.style.pointerEvents = "auto";
+      answerFrame.style.opacity = "1";
+    }, 180);
+  });
+
+  // disable submit button immediately
+  document.getElementById("submitBtn").disabled = true;
+
+  if (isCorrect) {
+    clickedCard.classList.add("correct");
+    feedback.textContent = "✅ Correct!";
+    feedback.style.color = "#4caf50";
+  } else {
+    clickedCard.classList.add("incorrect");
+    allCards.forEach((card, idx) => {
+      if (shuffledOptions[idx].isCorrect) card.classList.add("correct");
+    });
+    feedback.textContent = "❌ Wrong! The correct answer is highlighted in green.";
+    feedback.style.color = "#f44336";
+  }
+
+  // Update score
+  incrementScore(isCorrect);
+
+  // show next
+  document.getElementById("nextBtn").style.display = "inline-block";
+}
+
+/* expose functions globally */
+window.submitAnswer = submitAnswer;
+window.locationReload = () => location.reload();
+window.selectOption = selectOption;
+window.resetScore = resetScore;
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const banner = document.querySelector(".nav-banner");
+  if (!banner) return;
+
+  document.body.classList.add("has-nav-banner");
+
+  function updateNavHeight() {
+    const height = banner.getBoundingClientRect().height;
+    document.body.style.setProperty("--nav-height", height + "px");
+  }
+
+  updateNavHeight();
+  window.addEventListener("resize", updateNavHeight);
+
+  const observer = new ResizeObserver(updateNavHeight);
+  observer.observe(banner);
+});
+</script>
+
+</body>
+</html>

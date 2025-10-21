@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Introduction to functional connectivity</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+	<script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+	<script src="../src/nav-banner-smart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,18 +45,14 @@
     </style>
 </head>
 <body>
-	<div class="banner">
-			<img src="https://www.unige.ch/cdn/themes/unige2016/img/unige-logo.svg">
-			<br>&copy; 2025 Dr Nicolas Roehri
-	</div>
 	<h1>Introduction to functional connectivity</h1>
 	<section>
 	<h2>Definition of Functional Connectivity</h2>
 	Functional connectivity refers to the statistical relationship between signals recorded from different brain regions, reflecting their dynamic interactions over time. It can be assessed using various families of measures, including phase-based connectivity (e.g., Phase Locking Value, which quantifies phase synchronization), amplitude-based connectivity (e.g., Amplitude Envelope Correlation, which examines power co-modulations), and coherence, which captures both phase and amplitude relationships.<br><br>
 	Regardless of the chosen method, extracting meaningful connectivity information requires computing the amplitude and phase of signals, typically using the Fourier transform \(\left(\mathcal{F}(.)\right)\) or the Hilbert transform \(\left(\mathcal{H}(.)\right)\).<br><br>
 	Since these transformations yield complex-valued representations of the signals, it is often useful to apply Euler’s formula, which expresses a complex number in terms of its magnitude and phase, making it easier to manipulate and interpret in functional connectivity analyses.
-	$$ z = a + ib = Re^{i\theta}$$
-	with \(\Re(z) = a = R\cos(\theta)\) the real part, \( \Im(z) = b= R\sin(\theta)\) the imaginary part, \(\left|z\right| = R = \sqrt{a^2 + b^2}\) the absolute value or magnitude, \(\arg(z) = \theta = \arctan\left(\frac{b}{a}\right)\) the phase angle, with \(\theta \in \left[0, 2\pi\right[\) or \(\theta \in \left]-\pi, \pi\right]\) (the second definition will be used).
+	$$ z = a + ib = Re^{i\theta}$$ with \(\Re(z) = a = R\cos(\theta)\) the real part, \( \Im(z) = b= R\sin(\theta)\) the imaginary part, \(\left|z\right| = R = \sqrt{a^2 + b^2}\) the absolute value or magnitude, \(\arg(z) = \theta = \arctan\left(\frac{b}{a}\right)\) the phase angle, with \(\theta \in \left[0, 2\pi\right]\) or \(\theta \in \left[-\pi, \pi\right]\) (the second definition will be used).
+
 	</section>
 	<section>
 	To illustrate the principle of the Fourier transform or Hilbert transform, we will define a simple signal.<br><br>
@@ -62,8 +60,8 @@
 	$$S(t) = A(t)\cos(2\pi f_St + \theta) + \epsilon(t),$$ $$\epsilon \sim \mathcal{N}(0,\sigma^{2}).$$<br><br>
 	\(A\) takes the following form:
 	$$A(t) = \frac{1}{2}(m\cos(2\pi f_{A}t + \theta_{A}) + 1)$$ 
-	\(f_{A}\) the frequency of the cosine amplitude modulation, \(\theta_{A}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(\theta_{A} = \pi\textrm{ rad}\) and \(m = \frac{4}{5}\).<br>
-	\(f_S\), \(\theta\) and \(f_{A}\) can be tuned. Note that when \(f_{A} = 0\), \(A(t) = 1\)
+	\(f_{A}\) the frequency of the cosine amplitude modulation, \(\theta_{A}\) the phase shift of the cosine amplitude modulation and \(m\) the  amplitude of modulation. Let us set \(\theta_{A} = \pi\textrm{ rad}\) and \(m = \frac{4}{5}\).<br> 	\(f_S\), \(\theta\) and \(f_{A}\) can be tuned. Note that when \(f_{A} = 0\), \(A(t) = c\), with \(c\) being a constant, dependent on \(m\) and \(\theta_A\). In the example below, \(c\) is set to 1, when \(f_{A} = 0\).
+
 	</section>
 	<section>
 	<h2>Frequency domain (<em>spectral method</em>)</h2>
@@ -77,7 +75,8 @@
 	$$\mathcal{F}_S(f)=\tilde{S}(f) = A'(f)e^{i\theta'(f)}$$
 	<br>
 	The Fourier transform gives us the amplitude \(A'(f)\) and the phase shift \(\theta'(f)\) for each frequency bin. Usually, one represents the power density across frequency bins (i.e. \(A'(f)/\Delta T\), with \(\Delta T\) the duration of the signal) referred to as the <strong>power spectral density</strong> (<strong>PSD</strong>) in \(V^2/Hz\).<br><br>
-	In the example below, \(f_{A} = 0\) and \(A(t) = A =1\). This means that \(A^2 = A'^2(f_S)/\Delta T = 1\) and \(\theta=\theta'(f_S)\) in absence  of noise (\(\sigma = 0\)).<br>
+
+	In the example below, \(f_{A} = 0\) and \(A(t) = A =1\) in case 1. This means that \(A^2 = A'^2(f_S)/\Delta T = 1\) and \(\theta=\theta'(f_S)\) in absence  of noise (\(\sigma = 0\)). <br>In case 2,  \(\theta_{A} = \pi\textrm{ rad}\) and \(m = \frac{4}{5}\). The modulation frequency, \(f_{A} \), can be varied from 0 to 3 Hz <br>
 	There are <em>key values</em> to keep in mind: 
 	<ul>
 		<li>\(\theta=0 \implies S(0)\) <strong>starts at</strong> its peak;</li>
@@ -85,7 +84,8 @@
 		<li>\(\theta=\pi\implies S(0)\) <strong>starts at</strong> its peak;</li>
 		<li>\(\theta=-\frac{\pi}{2}=\frac{3\pi}{2} \implies S(0)\) <strong>starts at the zero-crossing</strong> zero in its down-to-up phase.</li>
 	</ul>
-	 The plot below let you modify \(f_S\), \(\theta\) and \(\sigma\) and see their effect on the Fourier transform. You could start by modifying \(\theta\) to verify the above list.
+
+	 The plot below let you modify \(f_S\), \(\theta\) and \(\sigma\) in case 1 and additionaly  \(f_{A} \) in case 2, and see their effect on the Fourier transform. You could start by modifying \(\theta\) to verify the above list.
 	</section>
     <div id="plot_DFT" style="width:100%;height:600px;"></div>
 	<div class="divfooter" id="myDivFooter_DFT">
@@ -105,6 +105,17 @@
 			<span id="noiseValue_DFT">0.00</span>
 		</span>
 		<span style="padding: 5px">
+			<label for="envFreq_DFT">\(f_{A}\) :</label>
+			<input type="range" id="envFreq_DFT" class="slider" min="0" max="3" value="0" step=".2">
+			<span id="envFreqValue_DFT">0.00 Hz</span>
+		</span>
+		<span style="padding: 5px">
+		Cases: 
+		<input type="radio" id="case1Btn" name="caseID" checked>
+		<label for="case1Lbl">case 1</label>
+		<input type="radio" id="case2Btn" name="caseID">
+		<label for="case2Lbl"> case 2</label>
+
     </div>
 	
 	<section>
@@ -216,7 +227,10 @@
 		import {computeDFT, generateGaussianNoise, generateSineWave, analyticSignal, computeCoherence, computecImCoh, computeImCoh} from 'https://roehrin.github.io/webapps_for_EEG_courses/js-scripts/simpleSignalProcessing.js';
 			
 		const sampleRate = 256;
-		
+
+		const checkboxes = document.querySelectorAll('input[type=checkbox]');
+		const radiobuttons = document.querySelectorAll('input[type=radio]');
+
 		var freq1_DFT = parseFloat(document.getElementById("frequency_DFT").value);
 		var phase1_DFT = 2*Math.PI/360*parseFloat(document.getElementById("phase_DFT").value);
 		var noiseLvl_DFT = parseFloat(document.getElementById("noiseLevel_DFT").value);
@@ -225,6 +239,8 @@
 		var noiseLvl_Hil = parseFloat(document.getElementById("noiseLevel_Hil").value);
 		var timeIdx_Hil = parseFloat(document.getElementById("time_Hil").value);
 		var envFreq = parseFloat(envFreq_Hil.value);
+
+		var envFreqDFT = parseFloat(document.getElementById("envFreq_DFT").value);
         const time = Array.from({ length: sampleRate }, (_, i) => i / sampleRate);
 		const N = time.length;
 		const envPhase = Math.PI;
@@ -248,7 +264,9 @@
 		var noise1_DFT = generateGaussianNoise(noiseLvl_DFT, time.length); // Noise for first channel
 		
 		// Generate sine waves
-		var sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT); // First sine wave
+
+
+		var sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreqDFT); // First sine wave
 		
 		var dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
 		
@@ -264,7 +282,9 @@
 		frequency_DFT.oninput = function () {
 			freq1_DFT = parseFloat(document.getElementById("frequency_DFT").value);
 			document.getElementById("freqValue_DFT").textContent = freq1_DFT + " Hz";
-			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT);
+
+			envFreq = parseFloat(envFreq_DFT.value);
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
 			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
 			updatePlots_DFT()
 		}
@@ -272,7 +292,9 @@
 		phase_DFT.oninput = function () {
 			phase1_DFT = 2*Math.PI/360*parseFloat(document.getElementById("phase_DFT").value);
 			document.getElementById("phaseValue_DFT").textContent = phase1_DFT.toFixed(2) + " rad";
-			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT);
+
+			envFreq = parseFloat(envFreq_DFT.value);
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
 			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
 			updatePlots_DFT()
 		}
@@ -280,9 +302,16 @@
 		noiseLevel_DFT.oninput = function () {
 			noiseLvl_DFT = parseFloat(document.getElementById("noiseLevel_DFT").value);
 			document.getElementById("noiseValue_DFT").textContent = noiseLvl_DFT.toFixed(2);
-			
+			envFreq = parseFloat(envFreq_DFT.value);
 			noise1_DFT = generateGaussianNoise(noiseLvl_DFT, time.length);
-			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT);
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
+			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
+			updatePlots_DFT()
+		}
+		envFreq_DFT.oninput = function () {
+			envFreq = parseFloat(envFreq_DFT.value);
+			envFreqValue_DFT.textContent = envFreq.toFixed(2) + " Hz";
+			sineWave1_DFT = generateSineWave(time, freq1_DFT, phase1_DFT, noise1_DFT,case2Btn.checked*envFreq);
 			dftResult1_DFT = computeDFT(sineWave1_DFT, sampleRate);
 			updatePlots_DFT()
 		}
@@ -365,8 +394,9 @@
                 line: { color: 'purple' },
 				showlegend: true,
             };
+
 			const freqInd = dftResult1_DFT.frequencies.indexOf(freq1_DFT);
-			
+
 			const annot = [
 				{
 				  x: dftResult1_DFT.frequencies[freqInd],
@@ -616,7 +646,9 @@
             // Update the plot
             Plotly.newPlot('plot_Hil', combinedData, layout, {responsive: true});
         }
-
+		radiobuttons.forEach(checkbox => {
+            checkbox.addEventListener('click', noiseLevel_DFT.oninput);
+        });
         // Initial plot
         updatePlots_DFT();
 		updatePlots_Hil();
@@ -624,154 +656,156 @@
 
     </script>
 	<script>
-		function makeData(theta = []){
-			if (theta.length === 0) theta = [Math.random(), Math.random(), Math.random(), Math.random()];
-			theta = theta.map( (val,i) => 2*Math.PI*val);
-			var mag = [Math.random(), Math.random(), Math.random(), Math.random()];
-			//mag = mag.map( (val,i) => 3*val+1);
-			mag = mag.map( (val,i) => 1);
-			
-			const reMag = mag.map((val,i) => val*Math.cos(theta[i]))
-			const imMag = mag.map((val,i) => val*Math.sin(theta[i]))
-			
-			const cumRe = reMag.reduce((acc, value, i) => {
-					acc[i] = (i === 0 ? value : acc[i - 1] + value);
-					return acc;
-				}, []);;
-			const cumIm = imMag.reduce((acc, value, i) => {
-					acc[i] = (i === 0 ? value : acc[i - 1] + value);
-					return acc;
-				}, []);
-			const cumMag = cumRe.map((val,i) => Math.sqrt(val ** 2 + cumIm[i] ** 2));
-			const cumTh = cumRe.map((val,i) => Math.atan2(cumIm[i], val));
-			// Create scatter plot trace
-			const scatterTrace = [{
-				type: "scatterpolar",
-				r: mag,
-				theta: theta,
-				mode: "markers",
-				marker: {
-					color: ['black', 'orange', 'purple', 'green'],//"#2255ff",
-					symbol: "square",
-					size: 15,
-				},
-				thetaunit: "radians",
-				cliponaxis: true,
-				subplot: "polar1",
-				name: '$e^{i\\theta[j]}$',
-			},{
-				type: "scatterpolar",
-				name: "$\\sum e^{i\\theta[j]}$",
-				r: [0, ...cumMag],
-				theta: [0, ...cumTh],
-				marker: {
-					color: ['', 'black', 'orange', 'purple', 'green'],
-					symbol: "square",
-					size: [0, 15, 15, 15, 15],
-				},
-				line: {
-					color: 'black',
-					width: 5},
-				thetaunit: "radians",
-				subplot: "polar2",
-			},{
-				type: "scatterpolar",
-				name: "$\\frac{1}{N}\\sum e^{i\\theta[j]}$",
-				r: [0, 1/4*cumMag[3]],
-				theta: [0, cumTh[3]],
-				marker: {
-					color: ['', 'brown'],
-					symbol: "square",
-					size: [0, 15],
-				},
-				line: {
-					color: 'brown',
-					width: 5},
-				thetaunit: "radians",
-				subplot: "polar3",
-			}];
-			return scatterTrace
-		}
-		
-		var randPhPLot = makeData();
-		
-		var constPhPLot = makeData([1.01*Math.PI/3, 1.005*Math.PI/3, 0.985*Math.PI/3, Math.PI/3]);
-		var inconstPhPLot = makeData([Math.PI/3, 5*Math.PI/3, Math.PI/2, -Math.PI/2]);
-		
-		var annot = [{
-			text: "4 complex numbers",
-			  font: {
-			  size: 18,
-			},
-			showarrow: false,
-			xanchor: 'center',
-			x: 1/6, //position in x domain
-			y: -.2, //position in y domain
-			xref: 'paper',
-			yref: 'paper',
-			},
-			{
-			  text: "",
-			  font: {
-			  size: 18,
-			},
-			showarrow: false,
-			xanchor: 'center',
-			x: 3/6, //position in x domain
-			y: -.2,  // position in y domain
-			xref: 'paper',
-			yref: 'paper',
-			},
-			{
-			  text: "",
-			  font: {
-			  size: 18,
-			},
-			showarrow: false,
-			xanchor: 'center',
-			x: 5/6, //position in x domain
-			y: -.2,  // position in y domain
-			xref: 'paper',
-			yref: 'paper',
-			}
-		];
-		
-		
-		var layout = {
-			polar1: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}},
-			polar2: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, randPhPLot[0].r.length*1]}},
-			polar3: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1]}},
-			annotations: annot,
-			showlegend: true,
-			font: { size: 16 },
-			legend: {x: 0, xanchor: 'left', y: 1.3, orientation: "h", font: { size: 16 }}
-		};
-		
-		annot[1].text = `sum as vectors (length: ${constPhPLot[1].r[4].toFixed(2)})`;
-		annot[2].text = `average resultant vector (length: ${constPhPLot[2].r[1].toFixed(2)})`;
-		layout.annotations = annot;
-		Plotly.newPlot('consistentPh', constPhPLot, layout, {showSendToCloud:false});
-		
-		annot[1].text = `sum as vectors (length: ${inconstPhPLot[1].r[4].toFixed(2)})`;
-		annot[2].text = `average resultant vector (length: ${inconstPhPLot[2].r[1].toFixed(2)})`;
-		layout.annotations = annot;
-		Plotly.newPlot('inconsistentPh', inconstPhPLot, layout, {showSendToCloud:false});
-		
-		annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
-		annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
-		layout.annotations = annot;
-		Plotly.newPlot('randPh', randPhPLot, layout, {showSendToCloud:false});
+	function makeData(theta = []){
+    if (theta.length === 0) theta = [Math.random(), Math.random(), Math.random(), Math.random()];
+    theta = theta.map( (val,i) => 2*Math.PI*val);
+    var mag = [Math.random(), Math.random(), Math.random(), Math.random()];
+    //mag = mag.map( (val,i) => 3*val+1);
+     mag = mag.map( (val,i) => 1);
+    const reMag = mag.map((val,i) => val*Math.cos(theta[i]))
+    const imMag = mag.map((val,i) => val*Math.sin(theta[i]))
+    
+    const cumRe = reMag.reduce((acc, value, i) => {
+            acc[i] = (i === 0 ? value : acc[i - 1] + value);
+            return acc;
+        }, []);;
+    const cumIm = imMag.reduce((acc, value, i) => {
+            acc[i] = (i === 0 ? value : acc[i - 1] + value);
+            return acc;
+        }, []);
+    const cumMag = cumRe.map((val,i) => Math.sqrt(val ** 2 + cumIm[i] ** 2));
+    const cumTh = cumRe.map((val,i) => Math.atan2(cumIm[i], val));
+    // Create scatter plot trace
 
-		function randomize() {
-			randPhPLot = makeData()
-			annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
-			annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
-			layout.annotations = annot;
-			Plotly.animate('randPh', {
-				data: randPhPLot,
-				layout: layout
-			  }, {})
-		}
+    const scatterTrace = [{
+        
+        type: "scatterpolar",
+		name: '$e^{i\\theta[j]}$',
+        r: mag,
+        theta: theta,
+        mode: "markers",
+        marker: {
+            color: ['black', 'orange', 'purple', 'green'],//"#2255ff",
+            symbol: "square",
+            size: 15,
+        },
+        cliponaxis: true,
+		thetaunit: "radians",
+		subplot: "polar2",
+       
+    },{
+        type: "scatterpolar",
+        name: "$\\sum e^{i\\theta[j]}$",
+        r: [0, ...cumMag],
+        theta: [0, ...cumTh],
+        marker: {
+            color: ['', 'black', 'orange', 'purple', 'green'],
+            symbol: "square",
+            size: [0, 15, 15, 15, 15],
+        },
+        line: {
+            color: 'black',
+            width: 5},
+        thetaunit: "radians",
+        subplot: "polar3",
+    },{
+        type: "scatterpolar",
+        name: "$\\frac{1}{N}\\sum e^{i\\theta[j]}$",
+        r: [0, 1/4*cumMag[3]],
+        theta: [0, cumTh[3]],
+        marker: {
+            color: ['', 'brown'],
+            symbol: "square",
+            size: [0, 15],
+        },
+        line: {
+            color: 'brown',
+            width: 5},
+        thetaunit: "radians",
+        subplot: "polar4",
+    }];
+    return scatterTrace
+}
+
+var randPhPLot = makeData();
+
+var constPhPLot = makeData([1.01*Math.PI/3, 1.005*Math.PI/3, 0.985*Math.PI/3, Math.PI/3]);
+var inconstPhPLot = makeData([Math.PI/3, 5*Math.PI/3, Math.PI/2, -Math.PI/2]);
+
+var annot = [{
+    text: "4 complex numbers",
+      font: {
+      size: 18,
+    },
+    showarrow: false,
+    xanchor: 'center',
+    x: 1/6, //position in x domain
+    y: -.2, //position in y domain
+    xref: 'paper',
+    yref: 'paper',
+    },
+    {
+      text: "",
+      font: {
+      size: 18,
+    },
+    showarrow: false,
+    xanchor: 'center',
+    x: 3/6, //position in x domain
+    y: -.2,  // position in y domain
+    xref: 'paper',
+    yref: 'paper',
+    },
+    {
+      text: "",
+      font: {
+      size: 18,
+    },
+    showarrow: false,
+    xanchor: 'center',
+    x: 5/6, //position in x domain
+    y: -.2,  // position in y domain
+    xref: 'paper',
+    yref: 'paper',
+    }
+];
+
+
+var layout = {
+	polar2: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+	polar3: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, randPhPLot[0].r.length*1]}},
+	polar4: {angularaxis: {thetaunit: "radians"}, radialaxis: {range: [0, 1.1]}},
+    annotations: annot,
+    showlegend: true,
+    font: { size: 16 },
+    legend: {x: 0, xanchor: 'left', y: 1.3, orientation: "h", font: { size: 16 }}
+};
+
+annot[1].text = `sum as vectors (length: ${constPhPLot[1].r[4].toFixed(2)})`;
+annot[2].text = `average resultant vector (length: ${constPhPLot[2].r[1].toFixed(2)})`;
+layout.annotations = annot;
+Plotly.newPlot('consistentPh', constPhPLot, layout, {showSendToCloud:false});
+
+annot[1].text = `sum as vectors (length: ${inconstPhPLot[1].r[4].toFixed(2)})`;
+annot[2].text = `average resultant vector (length: ${inconstPhPLot[2].r[1].toFixed(2)})`;
+layout.annotations = annot;
+Plotly.newPlot('inconsistentPh', inconstPhPLot, layout, {showSendToCloud:false});
+
+annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
+annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+layout.annotations = annot;
+Plotly.newPlot('randPh', randPhPLot, layout, {showSendToCloud:false});
+
+function randomize() {
+    randPhPLot = makeData()
+    annot[1].text = `sum as vectors (length: ${randPhPLot[1].r[4].toFixed(2)})`;
+    annot[2].text = `average resultant vector (length: ${randPhPLot[2].r[1].toFixed(2)})`;
+    layout.annotations = annot;
+    Plotly.animate('randPh', {
+        data: randPhPLot,
+        layout: layout
+      }, {})
+}
 	</script>
 </body>
 </html>

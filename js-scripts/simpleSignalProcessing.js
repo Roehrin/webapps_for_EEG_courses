@@ -86,7 +86,10 @@ export function pearsonCorrelation(x, y) {
 
 	let numerator = (n * sumXY) - (sumX * sumY);
 	let denominator = Math.sqrt((n * sumX2 - sumX ** 2) * (n * sumY2 - sumY ** 2));
-	let correlation = (denominator < 1e-10) ? 0 : (numerator / denominator);
+
+
+	let correlation = (denominator < 1e-6) ? 0 : (numerator / denominator);
+
 	
 	// Compute Linear Regression inside the same function
     let slope = numerator / (n * sumX2 - sumX ** 2);

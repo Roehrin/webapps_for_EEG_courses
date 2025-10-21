@@ -5,6 +5,7 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <base target="_self"> 
   <title>niivue demos for EEG, iEEG and source space connectivity</title>
   <style>
     section {
@@ -31,49 +32,88 @@
   <section>
     <h1>Collections of interactive web applications for the visualisation, teaching and investigation of advanced scalp EEG and intracranial EEG analysis.</h1>
     <p>
-      Welcome to the prototype of a future interactive learning platform dedicated to advanced EEG analysis. Here, you will find a series of web applications designed to help you intuitively explore key concepts such as electrical source imaging (ESI) and functional connectivity. Developed for students and researchers, this open-access resource aims to make complex neuroimaging methods more accessible. The applications are built using <a href="https://github.com/niivue/niivue">NiiVue</a> and <a href="https://plotly.com/javascript/">Plotly</a> and were developed by Dr Nicolas Roehri at the University of Geneva, Faculty of Medecine, EEG and Epilepsy Unit.
+      Welcome to the prototype of a future interactive learning platform dedicated to advanced EEG analysis. Here, you will find a series of web applications designed to help you intuitively explore key concepts such as electrical source imaging (ESI) and functional connectivity. Developed for students and researchers, this open-access resource aims to make complex neuroimaging methods more accessible. The applications are built using <a href="https://github.com/niivue/niivue">NiiVue</a> and <a href="https://plotly.com/javascript/">Plotly</a> and were developed by Dr Nicolas Roehri and Steven Beumer MSc at the University of Geneva, Faculty of Medecine, EEG and Epilepsy Unit. This work was co-financed by the SNSF (209120, 209470) and la commission d'informatique of the UNIGE.
     </p>
   </section>
   <section>
 	<h2>Courses</h2>
-	<h3>Functional Connectivity</h3>
+	<h3>Functional Connectivity </h3>
 	<section>
-		<ul style="line-height:150%">
-			<li><a href="./examples/Introduction_to_connectivity.html" target="_blank" rel="noopener noreferrer">Introduction to functional connectivity.</a></li>
-			<li><a href="./examples/Amplitude_correlation_noisy_signals.html" target="_blank" rel="noopener noreferrer">Amplitude-based connectivity.</a></li>
-			<li><a href="./examples/PLV_noisy_signals.html" target="_blank" rel="noopener noreferrer">Phase-based connectivity.</a></li>
-			<li><a href="./examples/Coherence_noisy_signals.html" target="_blank" rel="noopener noreferrer">Coherence-based connectivity.</a></li>
-		</ul>
+			<a href="./examples/Introduction_to_connectivity.html">Introduction to functional connectivity.</a>
+	</section>
+	<section>
+			<a href="./examples/Amplitude_correlation_noisy_signals.html">Amplitude-based connectivity.</a>
+	</section>
+	<section>
+			<a href="./examples/PLV_noisy_signals.html">Phase-based connectivity.</a>
+	</section>
+	<section>
+			<a href="./examples/Coherence_noisy_signals.html">Coherence-based connectivity.</a>
+	</section>
+		
+		<h3>Electrical source imaging </h3>
+	<section>
+		
+			<a href="./examples/Introduction_to_source_reconstruction.html">Introduction to source reconstruction.</a>
+		
 	</section>
 	<h2>Demos</h2>
 	<h3>Inverse Solution</h3>
 	<section>
-    <a href="./examples/EEG_mesh_with_topo.html" target="_blank" rel="noopener noreferrer">Show topography of different brain sources.</a>
+    <a href="./examples/EEG_mesh_with_topo.html">Show topography of different brain sources.</a>
 	</section>
 	<section>
-    <a href="./examples/display_Point_Spread_Functions_on_MRI.html" target="_blank" rel="noopener noreferrer">Interactive display of multi-source point spread function for inverse solution operator on MRI.</a>
+    <a href="./examples/display_Point_Spread_Functions_on_MRI.html">Interactive display of multi-source point spread function for inverse solution operator on MRI.</a>
 	</section>
 	<section>
-    <a href="./examples/IED_localisation_and_regularisation.html" target="_blank" rel="noopener noreferrer">Illustraction of the impact of the regularisation parameter lambda when localising an interictal epileptiform discharge.</a>
+    <a href="./examples/IED_localisation_and_regularisation.html">Illustraction of the impact of the regularisation parameter lambda when localising an interictal epileptiform discharge.</a>
 	</section>
 	<h3>Functional Connectivity</h3>
 	<section>
-    <a href="./examples/ictal_connectivity.html" target="_blank" rel="noopener noreferrer">Epileptic seizure recorded with iEEG, displayed along connectivity/network measure.</a>
+    <a href="./examples/ictal_connectivity.html">Epileptic seizure recorded with iEEG, displayed along connectivity/network measure.</a>
 	</section>
 	<section>
-    <a href="./examples/interictal_connectivity.html" target="_blank" rel="noopener noreferrer">Interictal connectivity during sleep recorded with iEEG.</a>
+    <a href="./examples/interictal_connectivity.html">Interictal connectivity during sleep recorded with iEEG.</a>
 	</section>
 	<section>
-    <a href="./examples/non_invasive_interictal_connectivity.html" target="_blank" rel="noopener noreferrer">Group averaged non-invasive interictal connectivity during wakefulness recorded with high-density EEG.</a>
+    <a href="./examples/non_invasive_interictal_connectivity.html">Group averaged non-invasive interictal connectivity during wakefulness recorded with high-density EEG.</a>
 	</section>
 	<h3>Structural Connectivity</h3>
 	<section>
-    <a href="./examples/interactive_ROI_network.html" target="_blank" rel="noopener noreferrer">Interactive structural brain network with user-adjustable edge and node properties.</a>
+    <a href="./examples/interactive_ROI_network.html">Interactive structural brain network with user-adjustable edge and node properties.</a>
 	</section>
 	<section>
-    <a href="./examples/matrix_and_3D_network.html" target="_blank" rel="noopener noreferrer">Same as above but displayed along a connectivity matrix.</a>
+    <a href="./examples/matrix_and_3D_network.html">Same as above but displayed along a connectivity matrix.</a>
+	</section>
+	<h2>Quizzes</h2>
+	<h3>Quiz pages</h3>
+	<section>
+	<a href="./examples/InteractiveQuiztoposFancierAnswers_Optimized.html">Topography Quiz</a>
+	</section>
+	<section>
+	<a href="./examples/Conn_matrix_questions_directed_undirected_LComments_score.html">Graph quiz.</a>
+	</section>
+	<section>
+	<a href="./examples/InteractiveQuizsourcesFancier.html">Inverse solution quiz.</a>
+	</section>
+		<section>
+	<a href="./examples/Vector_quiz_standalone.html">Vector quiz.</a>
+	</section>
+	<section>
+	<a href="./examples/topography_quiz_multi.html">Multi quiz.</a>
 	</section>
   </section>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('a').forEach(a => {
+        if (a.href.startsWith(window.location.origin) || a.getAttribute('href').startsWith('.')) {
+          a.target = '_self';
+          a.removeAttribute('rel');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
