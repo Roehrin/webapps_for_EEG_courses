@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vector Addition Quiz</title>
+<script src="../src/nav-banner-smart.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'></script>
 <style>
@@ -22,10 +23,14 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
+  padding: 20px;
+}
+
+.quiz-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  min-height: calc(100vh - 40px);
 }
 
 /* --- Container --- */
@@ -419,7 +424,7 @@ function generateRandomPhases() {
 
 // Calculate resultant vector from phases
 function calculateResultant(phases) {
-  const mag = phases.map(() => 1); // All magnitudes are 1
+  const mag = phases.map(() => 1);
   const reMag = mag.map((val, i) => val * Math.cos(phases[i]));
   const imMag = mag.map((val, i) => val * Math.sin(phases[i]));
   
@@ -441,30 +446,26 @@ function generateWrongResultant(correctResultant, existingWrong = []) {
   let attempts = 0;
   const maxAttempts = 100;
   
-  const minAngleDiff = 15 * Math.PI / 180; // 15 degrees
+  const minAngleDiff = 15 * Math.PI / 180;
   const minMagDiff = 0.15;
-  const minMagnitude = 0.1; // Minimum magnitude threshold
+  const minMagnitude = 0.1;
   
   do {
-    // Randomly vary either angle, magnitude, or both
     const method = Math.random();
     
     if (method < 0.33) {
-      // Change angle significantly
       const angleDelta = (minAngleDiff + Math.random() * (Math.PI - minAngleDiff)) * (Math.random() < 0.5 ? 1 : -1);
       wrongResultant = {
         angle: correctResultant.angle + angleDelta,
         magnitude: Math.max(minMagnitude, Math.min(1, correctResultant.magnitude + (Math.random() - 0.5) * 0.3))
       };
     } else if (method < 0.66) {
-      // Change magnitude significantly
       const magDelta = (minMagDiff + Math.random() * (1 - correctResultant.magnitude - minMagDiff)) * (Math.random() < 0.5 ? 1 : -1);
       wrongResultant = {
         magnitude: Math.max(minMagnitude, Math.min(1, correctResultant.magnitude + magDelta)),
         angle: correctResultant.angle + (Math.random() - 0.5) * minAngleDiff
       };
     } else {
-      // Change both
       const angleDelta = (minAngleDiff + Math.random() * Math.PI) * (Math.random() < 0.5 ? 1 : -1);
       const magDelta = (minMagDiff + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1);
       wrongResultant = {
@@ -473,13 +474,11 @@ function generateWrongResultant(correctResultant, existingWrong = []) {
       };
     }
     
-    // Normalize angle to [-π, π]
     while (wrongResultant.angle > Math.PI) wrongResultant.angle -= 2 * Math.PI;
     while (wrongResultant.angle < -Math.PI) wrongResultant.angle += 2 * Math.PI;
     
     attempts++;
     
-    // Check if different enough from correct and existing wrong answers
     const angleDiff = Math.abs(wrongResultant.angle - correctResultant.angle);
     const magDiff = Math.abs(wrongResultant.magnitude - correctResultant.magnitude);
     const isDifferentFromCorrect = angleDiff > minAngleDiff || magDiff > minMagDiff;
@@ -525,7 +524,6 @@ function createQuestionPlot(phases) {
     showlegend: false,
     font: { size: 16 },
     margin: { t: 40, b: 40, l: 40, r: 40 },
-   // title: '4 Complex Vectors'
   };
   
   return { data: [trace], layout: layout };
@@ -595,14 +593,11 @@ function renderQuestion() {
   selectedOption = null;
   answered = false;
   
-  // Clear feedback
   document.getElementById('feedback').textContent = '';
   
-  // Display question plot
   const questionPlot = createQuestionPlot(currentQuestion.phases);
   Plotly.newPlot('target', questionPlot.data, questionPlot.layout, {responsive: true});
   
-  // Build choice cards
   const choicesDiv = document.getElementById("choices");
   choicesDiv.innerHTML = '';
   
@@ -611,12 +606,10 @@ function renderQuestion() {
     card.className = "option-card";
     card.dataset.index = idx;
     
-    // Quiz view (simple resultant)
     const quizView = document.createElement("div");
     quizView.className = "quiz-view";
     quizView.id = `quiz-${idx}`;
     
-    // Answer view (detailed breakdown)
     const answerView = document.createElement("div");
     answerView.className = "answer-view";
     answerView.id = `answer-${idx}`;
@@ -635,7 +628,6 @@ function renderQuestion() {
     choicesDiv.appendChild(card);
   });
   
-  // Render plots after DOM is ready
   setTimeout(() => {
     currentQuestion.options.forEach((option, idx) => {
       const resultantPlot = createResultantPlot(option.resultant);
@@ -643,7 +635,6 @@ function renderQuestion() {
     });
   }, 0);
   
-  // Reset buttons
   document.getElementById("submitBtn").disabled = true;
   document.getElementById("nextBtn").style.display = "none";
 }
@@ -665,7 +656,6 @@ function submitAnswer() {
   const selectedCard = document.querySelector(`.option-card[data-index="${selectedOption}"]`);
   const isCorrect = currentQuestion.options[selectedOption].isCorrect;
   
-  // Disable select overlays
   allCards.forEach(card => {
     const overlay = card.querySelector(".select-overlay");
     overlay.style.pointerEvents = "none";
@@ -674,7 +664,6 @@ function submitAnswer() {
   
   document.getElementById("submitBtn").disabled = true;
   
-  // Highlight correct/incorrect answers
   if (isCorrect) {
     selectedCard.classList.add("correct");
     feedback.textContent = "✅ Correct!";
@@ -690,7 +679,6 @@ function submitAnswer() {
     feedback.style.color = "#f44336";
   }
   
-  // Update score
   incrementScore(isCorrect);
   document.getElementById("nextBtn").style.display = "inline-block";
 }
