@@ -30,8 +30,8 @@ Collections of interactive web applications for the visualisation, teaching and 
 
 ## Project funding
 This project was funded by the Swiss National Science Foundation (209120, 209470) and la commission d'informatique of the UNIGE
-![SNSF](./images/SNF_logo_standard_office_color_pos_e_w_BKG.png "SNSF logo"){width=250}
-![COINF](./images/coinf_w_BKG.png "COINF UNIGE logo"){width=250}  
+<img src="./images/SNF_logo_standard_office_color_pos_e_w_BKG.png" width="250" alt="SNSF logo">
+<img src="./images/coinf_w_BKG.png" width="250" alt="COINF UNIGE logo">
 
 ## Contributors
 
