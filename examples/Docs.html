@@ -332,6 +332,7 @@
 
                 <li><a href="#connectivity">Connectivity</a></li>
                 <li><a href="#nodal-measures">Nodal Measures</a></li>
+				 <li><a href="#eeg_mesh_with_topo">EEG Topography</a></li>
                 <li><a href="#ictal_connectivity">Ictal connectivity</a></li>
                 <li><a href="#interictal_connectivity">Interictal connectivity</a></li>
                 <li><a href="#matrix_and_3D_network">Structural connectivity</a></li>
@@ -433,7 +434,86 @@ S_i = ∑ w_ij
                     </div>
                 </div>
             </section>
-            
+			
+			
+             <section id="eeg_mesh_with_topo" class="section">
+                <h2>EEG Topography Visualization</h2>
+                <p class="lead">
+                    Explore the relationship between brain sources and scalp EEG voltage distributions. This interactive tool demonstrates how dipole sources within the brain create voltage patterns on the scalp surface.
+                </p>
+                
+                <h3>Visualization Elements</h3>
+                <div class="visual-guide">
+                    <h4>Display Components</h4>
+                    <ul>
+                        <li><strong>EEG Electrodes:</strong> Represented as yellow spheres positioned on the scalp</li>
+                        <li><strong>Voltage Map:</strong> Color-coded surface representing electrical potential distribution
+                            <ul style="margin-left: 25px; margin-top: 5px;">
+                                <li>Red colors indicate positive voltage values</li>
+                                <li>Blue colors indicate negative voltage values</li>
+                            </ul>
+                        </li>
+                        <li><strong>Brain Source:</strong> A dipole source positioned within the brain volume that generates the voltage distribution</li>
+                    </ul>
+                </div>
+                
+                <h3>Interactive Controls</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>Brain Source Slider</h4>
+                        <p>Navigate through different source locations within the brain. Click on the slider and use arrow keys for precise navigation through predefined brain source positions.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>XRay Slider</h4>
+                        <p>Adjust the transparency of the head model to visualize internal structures and the relationship between brain sources and scalp electrodes.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Min/Max Threshold Sliders</h4>
+                        <p>Control the voltage range displayed on the topography map. Adjust minimum and maximum thresholds to focus on specific voltage ranges or enhance contrast.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Gamma Slider</h4>
+                        <p>Modify the color map contrast to enhance visualization of voltage gradients. Higher gamma values increase contrast, making subtle differences more visible.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Normalized Leadfield Checkbox</h4>
+                        <p>Toggle between normalized and unnormalized leadfield matrices. Normalization accounts for differences in electrode sensitivity and source depth.</p>
+                    </div>
+                </div>
+                
+                <h3>Source Orientation Controls</h3>
+                <p class="lead">
+                    The dipole source has a specific orientation that affects the resulting voltage distribution. You can control this orientation using the following options:
+                </p>
+                
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>X, Y, Z Radio Buttons</h4>
+                        <p>Select a primary axis orientation for the dipole source. Each axis represents a different anatomical direction in the brain coordinate system.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Custom Orientation</h4>
+                        <p>Enable custom orientation mode to define arbitrary dipole directions using azimuth and elevation angles.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Azimuth Slider</h4>
+                        <p>When custom orientation is selected, adjust the azimuth angle (rotation around the vertical axis) of the dipole source.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Elevation Slider</h4>
+                        <p>When custom orientation is selected, adjust the elevation angle (tilt from horizontal plane) of the dipole source.</p>
+                    </div>
+                </div>
+                
+                
+            </section>
             <section id="ictal_connectivity" class="section">
                 <h2>Ictal Connectivity Analysis</h2>
                 
