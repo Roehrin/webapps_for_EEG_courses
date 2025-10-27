@@ -1,7 +1,7 @@
 const scriptTag = document.currentScript;
 const caller = scriptTag.dataset.caller;
 console.log(caller);
-const url1 = "docs.html"
+const url1 = "Docs.html"
 
 function toggleIframeDisplay() {
       const iframeSection = document.getElementById('iframeSection');
