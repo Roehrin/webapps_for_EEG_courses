@@ -92,13 +92,11 @@ h3 {
 }
 
 #scoreDisplay {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 18px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #555;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 16px;
+  background: transparent;
 }
 
 .reset-btn {
