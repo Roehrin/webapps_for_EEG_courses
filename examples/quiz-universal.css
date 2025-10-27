@@ -394,6 +394,7 @@ h3 {
 }
 
 .submit-btn:disabled {
+display:none;
   background: #ccc;
   cursor: not-allowed;
   opacity: 0.6;

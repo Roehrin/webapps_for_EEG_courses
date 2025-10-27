@@ -6,22 +6,38 @@
 // Configuration: Add all your quiz page URLs here
 const QUIZ_CONFIG = {
   quizPages: [
-    'topography_quiz_multi.html',
-    'graph_quiz_multi.html',
-    'source_localization_quiz_multi.html',
-	'vector_quiz_multi.html'
+    'topography_quiz_multi.html?mode=multi',
+    'graph_quiz_multi.html?mode=multi',
+    'source_localization_quiz_multi.html?mode=multi',
+    'vector_quiz_multi.html?mode=multi'
     // Add more quiz pages as needed
   ],
   
   // Optional: Weight certain quizzes to appear more frequently
   // Default is equal probability for all
   weights: {
-    'topography_quiz_multi.html': 2,
-    'graph_quiz_multi.html': 2,
-    'source_localization_quiz_multi.html': 1,
-	'vector_quiz_multi.html':2
+    'topography_quiz_multi.html?mode=multi': 2,
+    'graph_quiz_multi.html?mode=multi': 2,
+    'source_localization_quiz_multi.html?mode=multi': 1,
+    'vector_quiz_multi.html?mode=multi': 2
   }
 };
+
+/* ==========================================
+   URL PARAMETER DETECTION
+   ========================================== */
+
+function getUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    mode: params.get('mode') // 'multi' or null
+  };
+}
+
+function isMultiMode() {
+  const { mode } = getUrlParams();
+  return mode === 'multi';
+}
 
 /* ==========================================
    SCORE MANAGEMENT (Universal)
@@ -85,8 +101,18 @@ function getCurrentPageName() {
 
 // Navigate to next random quiz
 function goToNextQuiz() {
+  // Check if we're in single mode
+    // Stay on current page - reload with same parameter
+    window.location.href = window.location.pathname;
+
+  
+   if (isMultiMode()) {
+  // Normal multi-quiz behavior
   const nextPage = getRandomQuizPage();
   window.location.href = nextPage;
+      return;
+   }
+   
 }
 
 // Track quiz history (optional - prevents immediate repeats)
@@ -111,6 +137,12 @@ function getQuizHistory() {
 
 // Smart next quiz (avoids recent repeats if possible)
 function goToNextQuizSmart() {
+  // Check if we're in single mode
+  if (isSingleMode()) {
+    window.location.href = window.location.pathname + '?mode=single';
+    return;
+  }
+  
   const history = getQuizHistory();
   const recentPages = history.slice(-3).map(h => h.page);
   
