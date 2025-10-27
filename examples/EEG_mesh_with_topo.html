@@ -8,6 +8,24 @@
     <title>4D Meshes - EEG topography</title>
 	<script src="../src/nav-banner-smart.js"></script>
 	<link rel="stylesheet" href="../niivue_dualview.css" />
+	<style>
+		.docs-toggle-btn {
+			padding: 4px 12px;
+			background-color: #f0f0f0;
+			color: #333;
+			border: 1px solid #505050;
+			border-radius: 3px;
+			cursor: pointer;
+			font-size: 14px;
+			transition: background-color 0.2s ease;
+		}
+		.docs-toggle-btn:hover {
+			background-color: #e0e0e0;
+		}
+		.docs-toggle-btn:active {
+			background-color: #d0d0d0;
+		}
+	</style>
   </head>
   <body>
     <noscript>
@@ -18,10 +36,7 @@
     </noscript>
     <header>
 	<h3>Investigate the effect of single brain sources on the EEG voltage map</h3>
-	<p>EEG electrodes are represented as yellow spheres, the voltage map is colour coded (red: positive values, blue: negative values).<br>
-	'Brain' source slider enables you to change the source location (if clicked, key arrows wors as well),
-	'Gamma' slider enables you to change the contrast, radio button X, Y and Z permits to change the orientation of the dipole source.</p>
-		<div class='row'>
+	<div class='row'>
 			<div style="outline: #505050 2px solid; padding: 2px 10px;">
 			<label for="meshXRay">XRay</label>
 			<input type="range" min="0" max="10" value="3" class="slider" id="meshXRay" />
@@ -80,6 +95,9 @@
 				<label for="elevSlider">elevation</label>
 				<input type="range"	min="0" max="100" value="0" class="slider" disabled="true" id="elevSlider"/>
 			</div>
+			<div style="outline: #505050 2px solid; padding: 2px 10px;">
+				<button class="docs-toggle-btn" id="toggleDocsBtn" onclick="toggleIframeDisplay()">Toggle Documentation</button>
+			</div>
 		</div>
 		<label for="srcSlider">Brain source</label>
 		<button id="prevSource">previous</button>
@@ -106,6 +124,14 @@
         </div>
     </div>
     </main>
+	 <div class="iframe-section" id="iframeSection">
+			<div class="iframe-header">
+				<span>Documentation Viewer</span>
+				<button class="docs-toggle-btn" id="toggleDocsBtn" onclick="toggleIframeDisplay()">Close Documentation</button>
+			</div>
+			
+			<iframe class="iframe-container" id="documentationFrame" src="docs.html"></iframe>
+		</div>
   </body>
 </html>
 <script type="module" async>
@@ -394,3 +420,4 @@
 	}
 	nv2.updateGLVolume()
 </script>
+<script src="../js-scripts/iFrames.js" data-caller="eeg_mesh_with_topo"></script>

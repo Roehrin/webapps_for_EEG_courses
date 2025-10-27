@@ -190,12 +190,36 @@
     return banner;
   }
 
+  // Check if current page matches a link (handles ?mode=multi specially)
+  function isCurrentPage(linkUrl, currentPagePath, currentMode) {
+    const linkPage = linkUrl.split('?')[0].split('/').pop();
+    const currentPage = currentPagePath.split('?')[0].split('/').pop();
+    
+    // Extract mode from link URL if present
+    const linkParams = new URLSearchParams(linkUrl.split('?')[1] || '');
+    const linkMode = linkParams.get('mode');
+    
+    // Special case: if we're in multi mode and link is also multi mode
+    if (currentMode === 'multi' && linkMode === 'multi') {
+      return true;
+    }
+    
+    // Special case: if link has ?mode=multi, only match if current also has ?mode=multi
+    if (linkMode === 'multi') {
+      return false;
+    }
+    
+    // Regular matching: exact page match (ignoring query params for non-multi pages)
+    return linkPage === currentPage && currentMode !== 'multi';
+  }
+
   // Populate dropdown with tabs and sections
   function populateMenu(menuStructure, activeTabIndex = 0) {
     const dropdown = document.getElementById('nav-dropdown');
     const menuButton = document.getElementById('nav-menu-toggle');
-    const currentPage = window.location.pathname.split('/').pop();
-    const normalizedCurrentPage = normalizeMultiQuizPage(currentPage);
+    const currentPagePath = window.location.pathname.split('/').pop();
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentMode = urlParams.get('mode');
 
     if (!menuStructure || Object.keys(menuStructure).length === 0) {
       dropdown.innerHTML = '<div class="nav-banner-loading">No pages found in index.html</div>';
@@ -218,11 +242,7 @@
           <h3>${sectionName}</h3>
           <ul>
             ${links.map(link => {
-              const linkPage = link.url.split('/').pop();
-              const normalizedLink = normalizeMultiQuizPage(linkPage);
-              const isCurrent = linkPage === currentPage || 
-                               normalizedLink === normalizedCurrentPage || 
-                               linkPage === normalizedCurrentPage;
+              const isCurrent = isCurrentPage(link.url, currentPagePath, currentMode);
               return `
                 <li>
                   <a href="${link.url}" class="${isCurrent ? 'current-page' : ''}">
@@ -287,23 +307,6 @@
     }
   }
 
-  // Normalize multi-quiz page names to match the index entry
-  function normalizeMultiQuizPage(filename) {
-    // Map all three quiz variants to the base name in index.html
-    const multiQuizVariants = [
-      'topography_quiz_multi.html',
-      'graph_quiz_multi.html',
-      'source_localization_quiz_multi.html',
-	  'vector_quiz_multi.html'
-    ];
-    
-    if (multiQuizVariants.includes(filename)) {
-      return 'topography_quiz_multi.html'; // Return the canonical one listed in index
-    }
-    
-    return filename;
-  }
-
   // Update spacer height to match banner
   function updateSpacerHeight() {
     const banner = document.querySelector('.nav-banner');
@@ -362,21 +365,13 @@
       let activeTabIndex = 0;
       if (menuStructure) {
         const tabs = Object.entries(menuStructure);
-        
-        // Normalize current page for multi-quiz variants
-        const normalizedPage = normalizeMultiQuizPage(currentPage);
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentMode = urlParams.get('mode');
         
         for (let i = 0; i < tabs.length; i++) {
           const [tabName, sections] = tabs[i];
           for (const [section, links] of Object.entries(sections)) {
-            // Check if any link matches the current or normalized page
-            if (links.some(link => {
-              const linkPage = link.url.split('/').pop();
-              const normalizedLink = normalizeMultiQuizPage(linkPage);
-              return linkPage === currentPage || 
-                     normalizedLink === normalizedPage ||
-                     linkPage === normalizedPage;
-            })) {
+            if (links.some(link => isCurrentPage(link.url, currentPage, currentMode))) {
               activeTabIndex = i;
               break;
             }

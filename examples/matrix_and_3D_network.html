@@ -74,10 +74,10 @@
 			  <i class="fa fa-caret-down"></i>
 			</button>
 			<div class="dropdown-content">
-				<a class="viewBtn dropdown" id="-Help">Help</a>
 				<a class="viewBtn dropdown" id="-Authors">Authors</a>
 				<a class="viewBtn dropdown" href="https://github.com/niivue/niivue" target="_blank">Niivue</a>
 				<a class="viewBtn dropdown" href="https://plotly.com/javascript/" target="_blank">Plotly</a>
+				<a class="viewBtn dropdown" id="-ToggleIframe">Toggle Documentation</a>
 			</div>
 		</div>
   </header>
@@ -105,6 +105,14 @@
     <input type="range" min="0" max="99" value="0" class="slider" id="NdThreshSlider" />
     <button id="reset">reset</button>
   </footer>
+   <div class="iframe-section" id="iframeSection">
+			<div class="iframe-header">
+				<span>Documentation Viewer</span>
+				<a class="viewBtn dropdown divider" id="-ToggleIframe">Close documentation</a>
+			</div>
+			
+			<iframe class="iframe-container" id="documentationFrame" src="docs.html"></iframe>
+		</div>
   </body>
 </html>
 <script type="module" async>
@@ -240,6 +248,9 @@
 			} else if (event.target.id.substr(1) == "Authors"){
 				alert("The webpage was written by Dr Nicolas Roehri, using Niivue and Plotly.");
 			}
+			else if (event.target.id.substr(1) == "ToggleIframe") {
+				toggleIframeDisplay();
+				}
 		}	
   }
   // Update the current slider value (each time you drag the slider handle)
@@ -493,3 +504,4 @@
 	}
 
 </script>
+<script src="../js-scripts/iFrames.js" data-caller="matrix_and_3D_network"></script>
