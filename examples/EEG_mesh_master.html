@@ -119,7 +119,8 @@
   
   // Fetch source positions
   async function fetchSourcePositions() {
-    const response = await fetch("https://roehrin.github.io/webapps_for_EEG_courses/src/source_points.jcon");
+	let sourceurl = "../src/source_points.jcon";
+    const response = await fetch(sourceurl);
     return response.json();
   }
   
