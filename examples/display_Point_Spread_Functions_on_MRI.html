@@ -63,6 +63,18 @@
 				<a class="viewBtn dropdown-item-checked" id="_eLORETA">eLORETA</a>
 			</div>
 		</div>
+		<div class="dropdown">
+			<button class="dropbtn">
+			  About
+			  <i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+				<a class="viewBtn dropdown" id="-Authors">Authors</a>
+				<a class="viewBtn dropdown" href="https://github.com/niivue/niivue" target="_blank">Niivue</a>
+				<a class="viewBtn dropdown" href="https://www.fieldtriptoolbox.org/" target="_blank">Fieldtrip</a>
+				<a class="viewBtn dropdown" id="-ToggleIframe">Toggle Documentation</a>
+			</div>
+		</div>
 	</div>
 	<div class="row">
 		<label for="meshMinSlider">Min threshold</label>
@@ -104,6 +116,14 @@
     <main id="container">
 		<canvas id="gl1"></canvas>
     </main>
+	 <div class="iframe-section" id="iframeSection">
+			<div class="iframe-header">
+				<span>Documentation Viewer</span>
+				<a class="viewBtn dropdown divider" id="-ToggleIframe">Close documentation</a>
+			</div>
+			
+			<iframe class="iframe-container" id="documentationFrame" src="docs.html"></iframe>
+		</div>
   </body>
 </html>
 <script type="module" async>
@@ -188,7 +208,14 @@
 			nv1.setSliceType(nv1.sliceTypeMultiplanar);
 		  }
 		  toggleGroup(event.target.id);
-	  } //sliceType
+	  } else if (event.target.id.charAt(0) === "-") {
+			if (event.target.id.substr(1) == "Authors"){
+				alert("For this page, Dr Isotta Rigoni processed the data with Fieldtrip.\nThe webpage was written by Dr Nicolas Roehri, using Niivue and Plotly.");
+			}
+			else if (event.target.id.substr(1) == "ToggleIframe") {
+				toggleIframeDisplay();
+				}
+		}
 	  if (event.target.id === "Colorbar") {
 		  nv1.opts.isColorbar = !nv1.opts.isColorbar;
 		  event.srcElement.classList.toggle("dropdown-item-checked");
@@ -347,3 +374,4 @@
 	
   
  </script>
+ <script src="../js-scripts/iFrames.js" data-caller="ictal_connectivity"></script>
