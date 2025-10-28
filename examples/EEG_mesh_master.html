@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>4D Meshes - EEG topography</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      header {
+        display: none;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+      .page-wrapper {
+        width: 100%;
+        height: 100%;
+      }
+      .row {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+      .column {
+        flex: 1;
+        height: 100%;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+      #loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 18px;
+        font-family: Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <strong>niivue doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="loading"></div>
+    <main id="container">
+      <div class='page-wrapper'>
+        <div class='row'>
+          <div class='column'>
+            <canvas id="gl1"></canvas>
+          </div>
+          <div class='column' id="secondColumn" style="pointer-events: none">
+            <canvas id="gl2"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+<script type="module">
+  import * as niivue from "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.46.0/dist/index.js";
+  
+  // Parse URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const mode = urlParams.get('mode') || 'hidden'; // 'hidden', 'dipole', or 'answer'
+  const srcnmbr = parseFloat(urlParams.get('srcnmbr')) || 0;
+  const elevation = parseFloat(urlParams.get('elevation')) || 0;
+  const azimuth = parseFloat(urlParams.get('azimuth')) || 0;
+
+  // Mode configurations
+  const config = {
+    hidden: {
+      show2D: false,
+      showDipole: false,
+      showCrosshair: false,
+      meshXRay: 0.5
+    },
+    dipole: {
+      show2D: false,
+      showDipole: true,
+      showCrosshair: true,
+      meshXRay: 0.3
+    },
+    answer: {
+      show2D: false,
+      showDipole: true,
+      showCrosshair: true,
+      meshXRay: 0.5
+    }
+  };
+
+  const currentConfig = config[mode];
+  
+  // Hide second column for dipole and answer modes
+  if (!currentConfig.show2D) {
+    document.getElementById('secondColumn').style.display = 'none';
+  }
+
+  // Constants
+  const nElec = 208;
+  const R = 10;
+  const TWO_PI = 2 * Math.PI;
+  
+  // State variables
+  let layIdx = 0;
+  let azi = azimuth * TWO_PI * 0.01;
+  let elev = elevation * TWO_PI * 0.01;
+  let nv1, nv2;
+  let srcPos;
+  let currSrcPos;
+  let nFrame4D;
+  
+  // Fetch source positions
+  async function fetchSourcePositions() {
+	let sourceurl = "../src/source_points.jcon";
+    const response = await fetch(sourceurl);
+    return response.json();
+  }
+  
+  // Update crosshair position
+  function updateCrosshairPos() {
+    const dPos = nv1.mm2frac(currSrcPos);
+    nv1.scene.crosshairPos = dPos;
+    nv1.createOnLocationChange();
+    nv1.drawScene();
+  }
+  
+  // Calculate offset based on orientation
+  function calculateOffset() {
+    return [
+      R * Math.cos(elev) * Math.cos(azi),
+      R * Math.cos(elev) * Math.sin(azi),
+      R * Math.sin(elev)
+    ];
+  }
+  
+  // Update source visualization
+  function updateSource() {
+    currSrcPos = [
+      srcPos.nodes.X[5 * srcnmbr], 
+      srcPos.nodes.Y[5 * srcnmbr], 
+      srcPos.nodes.Z[5 * srcnmbr]
+    ];
+    updateCrosshairPos();
+    
+    const offset = calculateOffset();
+    
+    // Update dipole if visible
+    if (currentConfig.showDipole && nv1.meshes[2]) {
+      nv1.meshes[2].nodes = [
+        {
+          name: "source",
+          x: currSrcPos[0],
+          y: currSrcPos[1],
+          z: currSrcPos[2],
+          colorValue: 1,
+          sizeValue: 5
+        },
+        {
+          name: "target",
+          x: currSrcPos[0] + 1.4 * offset[0],
+          y: currSrcPos[1] + 1.4 * offset[1],
+          z: currSrcPos[2] + 1.4 * offset[2],
+          colorValue: 1,
+          sizeValue: 2.5
+        }
+      ];
+      nv1.meshes[2].updateMesh(nv1.gl);
+    }
+    
+    // Update custom orientation
+    const values = nv1.meshes[0].layers[1].values;
+    const startIdx = 3 * srcnmbr * nElec;
+    
+    const currTopoX = values.slice(startIdx, startIdx + nElec);
+    const currTopoY = values.slice(startIdx + nElec, startIdx + 2 * nElec);
+    const currTopoZ = values.slice(startIdx + 2 * nElec, startIdx + 3 * nElec);
+    
+    const normOffset = offset.map(o => o / R);
+    const newTopo = currTopoX.map((num, idx) => 
+      normOffset[0] * num + normOffset[1] * currTopoY[idx] + normOffset[2] * currTopoZ[idx]
+    );
+    
+    const frameOffset = nFrame4D * nElec;
+    nv1.meshes[0].layers[1].values.set(newTopo, frameOffset);
+    if (currentConfig.show2D && nv2) {
+      nv2.meshes[0].layers[1].values.set(newTopo, frameOffset);
+    }
+    
+    const maxV = Math.max(...newTopo.map(Math.abs));
+    const normTopo = newTopo.map(v => 90 * v / maxV);
+    
+    nv1.meshes[0].layers[0].values.set(normTopo, frameOffset);
+    if (currentConfig.show2D && nv2) {
+      nv2.meshes[0].layers[0].values.set(normTopo, frameOffset);
+    }
+    
+    nv1.setMeshLayerProperty(nv1.meshes[0].id, layIdx, "frame4D", nFrame4D + 1);
+    if (currentConfig.show2D && nv2) {
+      nv2.setMeshLayerProperty(nv2.meshes[0].id, layIdx, "frame4D", nFrame4D + 1);
+    }
+  }
+  
+  // Initialize visualization
+  async function initialize() {
+    try {
+      // Fetch data
+      srcPos = await fetchSourcePositions();
+      currSrcPos = [srcPos.nodes.X[5 * srcnmbr], srcPos.nodes.Y[5 * srcnmbr], srcPos.nodes.Z[5 * srcnmbr]];
+      
+      // Mesh layers configuration - dipole mode has lower opacity to hide topography
+      const meshLayersList = mode === 'dipole' ? [
+        {
+		   url: "../src/testleadfield100.gii",
+		  colormap: "hot",
+		  colormapNegative: "electric_blue",
+		  cal_min: 0,
+		  cal_max: 120,
+		  useNegativeCmap: true,
+		  opacity: 0.4,
+        },
+        {
+			url: "../src/testleadfield100.gii",
+			colormap: "hot",
+			colormapNegative: "electric_blue",
+			cal_min: 0,
+			cal_max: 120,
+			useNegativeCmap: true,
+			opacity: 0,
+        }
+      ] : [
+        {
+		  url: "../src/norm_leadfield.gii",
+          colormap: "hot",
+          colormapNegative: "electric_blue",
+          cal_min: 0,
+          cal_max: 100,
+          useNegativeCmap: true,
+          opacity: 1,
+        },
+        {
+		  url: "../src/leadfield.gii",
+          colormap: "hot",
+          colormapNegative: "electric_blue",
+          cal_min: 0,
+          cal_max: 100,
+          useNegativeCmap: true,
+          opacity: 0,
+        }
+      ];
+      
+      // Initialize first viewer
+      nv1 = new niivue.Niivue({
+        show3Dcrosshair: currentConfig.showCrosshair,
+        isColorbar: false,
+        showLegend: false,
+        backColor: [0.9, 0.9, 1, 1],
+        meshXRay: currentConfig.meshXRay,
+        isOrientCube: true,
+        dragAndDropEnabled: false,
+      });
+      nv1.setSliceType(nv1.sliceTypeRender);
+      nv1.attachTo("gl1");
+      
+      // Load meshes for nv1
+      await nv1.loadMeshes([
+        {
+         
+		  url: "../src/leadfield.gii",
+          layers: meshLayersList,
+        },
+        {
+		  url: "../src/EGI257_electrodes.jcon",
+        },
+      ]);
+      
+      // Add dipole if needed
+      if (currentConfig.showDipole) {
+        const offset = calculateOffset();
+        const dipole = {
+          name: "dipole",
+          nodeColormap: mode === 'dipole' ? "red" : "hot",
+          nodeColormapNegative: "",
+          nodeMinColor: 0,
+          nodeMaxColor: 1,
+          nodeScale: 1,
+          edgeColormap: mode === 'dipole' ? "red" : "hot",
+          edgeColormapNegative: "",
+          edgeMin: 0,
+          edgeMax: 2.5,
+          edgeScale: 1,
+          legendLineThickness: 0,
+          nodes: [
+            {
+              name: "source",
+              x: currSrcPos[0],
+              y: currSrcPos[1],
+              z: currSrcPos[2],
+              colorValue: 1,
+              sizeValue: 5
+            },
+            {
+              name: "target",
+              x: currSrcPos[0] + 1.4 * offset[0],
+              y: currSrcPos[1] + 1.4 * offset[1],
+              z: currSrcPos[2] + 1.4 * offset[2],
+              colorValue: 1,
+              sizeValue: 2.5
+            }
+          ],
+          edges: [{
+            first: 0,
+            second: 1,
+            colorValue: 2.5
+          }],
+        };
+        nv1.addMesh(nv1.loadConnectomeAsMesh(dipole));
+      }
+      
+      nv1.drawScene();
+      nv1.setMeshShader(nv1.meshes[0].id, "Diffuse");
+      updateCrosshairPos();
+      nv1.setRenderAzimuthElevation(0, 90);
+      
+      // Initialize second viewer if needed
+      if (currentConfig.show2D) {
+        nv2 = new niivue.Niivue({
+          show3Dcrosshair: false,
+          dragAndDropEnabled: false,
+          isColorbar: false,
+          showLegend: false,
+          backColor: [0.9, 0.9, 1, 1],
+          meshXRay: 0,
+          isOrientCube: false,
+        });
+        nv2.attachTo("gl2");
+        
+        await nv2.loadMeshes([
+          {
+			url: "../src/leadfield2D.gii",
+            layers: meshLayersList,
+          },
+          {
+			url: "../src/EGI257_2Dlayout.jcon",
+          }
+        ]);
+        
+        nv2.setMeshShader(nv2.meshes[0].id, "Diffuse");
+        nv2.setMeshProperty(nv2.meshes[1].id, "nodeScale", 1);
+        nv2.meshes[1].colorbarVisible = false;
+        nv2.meshes[0].layers[1].colorbarVisible = false;
+        nv2.setRenderAzimuthElevation(0, 90);
+      }
+      
+      // Add custom frame for orientation
+      nFrame4D = nv1.meshes[0].layers[0].nFrame4D;
+      nv1.meshes[0].layers[0].nFrame4D = nFrame4D + 1;
+      nv1.meshes[0].layers[1].nFrame4D = nFrame4D + 1;
+      
+      const currNormV = nv1.meshes[0].layers[0].values;
+      const currV = nv1.meshes[0].layers[1].values;
+      const newNormV = new Float32Array(currNormV.length + nElec);
+      const newV = new Float32Array(currV.length + nElec);
+      newNormV.set(currNormV, 0);
+      newV.set(currV, 0);
+      nv1.meshes[0].layers[0].values = newNormV;
+      nv1.meshes[0].layers[1].values = newV;
+      
+      if (currentConfig.show2D && nv2) {
+        nv2.meshes[0].layers[0].nFrame4D = nFrame4D + 1;
+        nv2.meshes[0].layers[1].nFrame4D = nFrame4D + 1;
+        nv2.meshes[0].layers[0].values = newNormV;
+        nv2.meshes[0].layers[1].values = newV;
+        nv2.updateGLVolume();
+      }
+      
+      // Update with URL parameters
+      updateSource();
+      
+      // Hide loading indicator
+      const loadingEl = document.getElementById('loading');
+      if (loadingEl) loadingEl.style.display = 'none';
+    } catch (error) {
+      console.error('Error initializing visualization:', error);
+      const loadingEl = document.getElementById('loading');
+      if (loadingEl) loadingEl.textContent = 'Error loading visualization. Please refresh the page.';
+    }
+  }
+  
+  // Start initialization
+  initialize();
+</script>
+<!-- 
+Usage examples:
+- Hidden mode (quiz): ?mode=hidden&srcnmbr=123&azimuth=45&elevation=67
+- Dipole mode (quiz options): ?mode=dipole&srcnmbr=123&azimuth=45&elevation=67
+- Answer mode (reveal): ?mode=answer&srcnmbr=123&azimuth=45&elevation=67
+-->

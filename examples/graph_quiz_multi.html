@@ -186,6 +186,7 @@ function matricesEqual(m1, m2, size) {
 }
 
 // Display matrix as table
+// Display matrix as table with color coding
 function displayMatrix(matrix, size) {
   let html = '<div class="matrix-display"><table>';
   
@@ -202,9 +203,25 @@ function displayMatrix(matrix, size) {
     html += `<td class="label-cell">${i + 1}</td>`;
     for (let j = 0; j < size; j++) {
       const value = matrix[i][j];
-      const cssClass = value > 0 ? 'connected' : 'disconnected';
       const displayValue = value > 0 ? value.toFixed(1) : '0';
-      html += `<td class="${cssClass}">${displayValue}</td>`;
+      
+      // Calculate color based on weight (0 = light gray, max weight = dark blue)
+      let backgroundColor, textColor;
+      if (value === 0) {
+        backgroundColor = '#f0f0f0';
+        textColor = '#999';
+      } else {
+        // Normalize weight to 0-1 range
+        const normalized = value / MAX_WEIGHT;
+        // Create a gradient from light blue to dark blue
+        const lightness = 85 - (normalized * 50); // 85% to 35% lightness
+        const saturation = 40 + (normalized * 50); // 40% to 90% saturation
+        backgroundColor = `hsl(230, ${saturation}%, ${lightness}%)`;
+        // Use white text for darker backgrounds
+        textColor = lightness < 60 ? '#ffffff' : '#1a1a1a';
+      }
+      
+      html += `<td style="background-color: ${backgroundColor}; color: ${textColor}; font-weight: ${value > 0 ? 'bold' : 'normal'};">${displayValue}</td>`;
     }
     html += '</tr>';
   }

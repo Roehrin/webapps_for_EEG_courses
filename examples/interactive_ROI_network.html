@@ -67,6 +67,19 @@
           <a class="viewBtn" id="_SClogNE">log fiber count and nodal eff</a> 
         </div>
     </div>
+		<div class="dropdown">
+			<button class="dropbtn">
+			  About
+			  <i class="fa fa-caret-down"></i>
+			</button>
+			<div class="dropdown-content">
+				<a class="viewBtn dropdown" id="-Authors">Authors</a>
+				<a class="viewBtn dropdown" href="https://github.com/niivue/niivue" target="_blank">Niivue</a>
+				<a class="viewBtn dropdown" href="https://www.fieldtriptoolbox.org/" target="_blank">Fieldtrip</a>
+				<a class="viewBtn dropdown" href="https://plotly.com/javascript/" target="_blank">Plotly</a>
+				<a class="viewBtn dropdown" id="-ToggleIframe">Toggle Documentation</a>
+			</div>
+		</div>
   </header>
     <main id="container">
 	<div class='page-wrapper'>
@@ -100,6 +113,14 @@
     <input type="range" min="0" max="99" value="0" class="slider" id="NdThreshSlider" />
     <button id="reset">reset</button>
   </footer>
+  	<div class="iframe-section" id="iframeSection">
+			<div class="iframe-header">
+				<span>Documentation Viewer</span>
+				<a class="viewBtn dropdown divider" id="-ToggleIframe">Close documentation</a>
+			</div>
+			
+			<iframe class="iframe-container" id="documentationFrame" src="docs.html"></iframe>
+		</div>
   </body>
 </html>
 <script type="module" async>
@@ -207,7 +228,15 @@
 			nv1.setSliceType(nv1.sliceTypeMultiplanar);
 		  }
 		  toggleGroup(event.target.id);
-	  } //sliceType
+	  }
+		else if (event.target.id.charAt(0) === "-") {
+			if (event.target.id.substr(1) == "Authors"){
+				alert("For this page, Dr Isotta Rigoni processed the data with Fieldtrip.\nThe webpage was written by Dr Nicolas Roehri, using Niivue and Plotly.");
+			}
+						else if (event.target.id.substr(1) == "ToggleIframe") {
+				toggleIframeDisplay();
+				}
+		}	  //sliceType
 	  if (event.target.id === "Colorbar") {
 		  nv1.opts.isColorbar = !nv1.opts.isColorbar;
 		  event.srcElement.classList.toggle("dropdown-item-checked");
@@ -360,3 +389,4 @@
   }
   //nv1.updateGLVolume()
 </script>
+<script src="../js-scripts/iFrames.js" data-caller="inprogress"></script>

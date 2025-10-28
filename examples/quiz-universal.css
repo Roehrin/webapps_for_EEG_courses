@@ -412,7 +412,51 @@ display:none;
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
+/* Color legend for matrix */
+.color-legend {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
 
+.legend-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.legend-gradient {
+  display: flex;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
+}
+
+.legend-segment {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 80px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.legend-labels span:first-child {
+  text-align: left;
+}
+
+.legend-labels span:last-child {
+  text-align: right;
+}
 /* --- Animations --- */
 @keyframes correctPulse {
   0%, 100% { transform: scale(1); }
