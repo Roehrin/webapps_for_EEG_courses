@@ -72,6 +72,7 @@
 				<a class="viewBtn dropdown" href="https://github.com/niivue/niivue" target="_blank">Niivue</a>
 				<a class="viewBtn dropdown" href="https://www.fieldtriptoolbox.org/" target="_blank">Fieldtrip</a>
 				<a class="viewBtn dropdown" href="https://plotly.com/javascript/" target="_blank">Plotly</a>
+				<a class="viewBtn dropdown" id="-ToggleIframe">Toggle Documentation</a>
 			</div>
 		</div>
 	</div>
@@ -155,6 +156,14 @@
         </div>
     </div>
     </main>
+	<div class="iframe-section" id="iframeSection">
+			<div class="iframe-header">
+				<span>Documentation Viewer</span>
+				<a class="viewBtn dropdown divider" id="-ToggleIframe">Close documentation</a>
+			</div>
+			
+			<iframe class="iframe-container" id="documentationFrame" src="docs.html"></iframe>
+		</div>
   </body>
 </html>
 <script type="module" async>
@@ -392,6 +401,9 @@
 			if (event.target.id.substr(1) == "Authors"){
 				alert("For this page, Dr Isotta Rigoni processed the data with Fieldtrip.\nThe webpage was written by Dr Nicolas Roehri, using Niivue and Plotly.");
 			}
+						else if (event.target.id.substr(1) == "ToggleIframe") {
+				toggleIframeDisplay();
+				}
 		}
 	}
 	async function loadESI() {
@@ -645,3 +657,4 @@
 	var config = {responsive: true};
 	Plotly.newPlot('iedTrace', eegData, layout, config);	
  </script>
+ <script src="../js-scripts/iFrames.js" data-caller="ictal_connectivity"></script>
