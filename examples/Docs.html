@@ -45,37 +45,49 @@
             opacity: 0.9;
         }
         
-        .nav {
-            background: #2c3e50;
-            padding: 0;
+       .nav {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 10px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
         .nav ul {
             list-style: none;
             display: flex;
             flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
         
         .nav li {
-            flex: 1;
-            min-width: 120px;
+            flex: 0 1 auto;
         }
         
         .nav a {
             display: block;
             color: white;
             text-decoration: none;
-            padding: 15px 10px;
+            padding: 12px 20px;
             text-align: center;
-            border-right: 1px solid #34495e;
-            transition: background 0.3s;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+            font-weight: 500;
+            font-size: 0.95em;
         }
         
         .nav a:hover {
-            background: #34495e;
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .nav a.active {
+            background: #3498db;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
         }
         
         .content {
@@ -336,6 +348,9 @@
                 <li><a href="#ictal_connectivity">Ictal connectivity</a></li>
                 <li><a href="#interictal_connectivity">Interictal connectivity</a></li>
                 <li><a href="#matrix_and_3D_network">Structural connectivity</a></li>
+				<li><a href="#PSF">Point spread function</a></li>
+				<li><a href="#Regularization">Regularization parameter effect</a></li>
+				
             </ul>
         </nav>
         
@@ -639,7 +654,90 @@ S_i = ∑ w_ij
                     The color coding between the connectivity map and electrode visualization is synchronized to facilitate interpretation of network dynamics across different views.
                 </div>
             </section>
-			            <section id="inprogress" class="section">
+			
+		<section id="PSF" class="section">
+                <h2>Point spread function for several inverse solution methods</h2>
+           
+                
+              <p class="lead">
+                    Explore the relationship between brain sources and the point spread function that is inherent to each source localization method. 
+                </p>
+                
+                <h3>Visualization Elements</h3>
+                <div class="visual-guide">
+                    <h4>Display Components</h4>
+                    <ul>
+                        <li><strong>Sources:</strong> A dipole source within the brain volume, represented as white circles in the MRI slices</li>
+                        <li><strong>PSF map:</strong> Color-coded surface representing the point spread function
+                    </ul>
+                </div>
+                
+                <h3>Interactive Controls</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>Brain Source Slider</h4>
+                        <p>Navigate through different source locations within the brain. Click on the slider and use arrow keys for precise navigation through predefined brain source positions.</p>
+                    </div>
+                    
+                    
+                    <div class="control-item">
+                        <h4>Min/Max Threshold Sliders</h4>
+                        <p>Control the voltage range displayed on the topography map. Adjust minimum and maximum thresholds to focus on specific voltage ranges or enhance contrast.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Gamma Slider</h4>
+                        <p>Modify the color map contrast to enhance visualization of voltage gradients. Higher gamma values increase contrast, making subtle differences more visible.</p>
+                    </div>
+                   
+                </div>
+                
+            </section>
+			
+					<section id="Regularization" class="section">
+                <h2>Impact of the regularisation parameter on different inverse solutions of the interictal epileptiform discharge</h2>
+           
+                
+              <p class="lead">
+                    Explore the relationship between inverse solution and regularisation parameter on the localization of the interictal epileptiform discharge
+                </p>
+                
+                <h3>Visualization Elements</h3>
+                <div class="visual-guide">
+                    <h4>Display Components</h4>
+                    <ul>
+                        <li><strong>EEG trace:</strong> An EEG trace of a interictal epileptiform discharges, with a red line indicating the time point corresponding to the source localization </li>
+						<li><strong>2D voltage map:</strong> A two-dimensional voltage map corresponding to the EEG trace. </li>
+                    </ul>
+                </div>
+                
+                <h3>Interactive Controls</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>Brain Source Slider</h4>
+                        <p>Navigate through different source locations within the brain. Click on the slider and use arrow keys for precise navigation through predefined brain source positions.</p>
+                    </div>
+                    
+                    
+                    <div class="control-item">
+                        <h4>Min/Max Threshold Sliders</h4>
+                        <p>Control the voltage range displayed on the topography map. Adjust minimum and maximum thresholds to focus on specific voltage ranges or enhance contrast.</p>
+                    </div>
+					<div class="control-item">
+                        <h4>Percentage thresholding</h4>
+                        <p>Control the voltage range displayed on the topography map based on keeping the x percent maximal values in the maps.  </p>
+                    </div>
+                    
+                    
+                    <div class="control-item">
+                        <h4>Adaptive color scale</h4>
+                        <p>Modify the color map contrast to enhance visualization of voltage gradients. Higher gamma values increase contrast, making subtle differences more visible.</p>
+                    </div>
+                   
+                </div>
+                
+            </section>
+	<section id="inprogress" class="section">
                 <h2>This documentation is still in progress</h2>
                 
             </section>
