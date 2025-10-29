@@ -694,48 +694,111 @@ S_i = ∑ w_ij
                 
             </section>
 			
-					<section id="Regularization" class="section">
-                <h2>Impact of the regularisation parameter on different inverse solutions of the interictal epileptiform discharge</h2>
-           
+     
+			            <section id="Regularization" class="section">
+                <h2>Impact of Regularization Parameter on Inverse Solutions</h2>
                 
-              <p class="lead">
-                    Explore the relationship between inverse solution and regularisation parameter on the localization of the interictal epileptiform discharge
+                <p class="lead">
+                    Explore how the regularization parameter (lambda) affects the localization of interictal epileptiform discharges (IEDs) across different inverse solution methods. This interactive tool demonstrates the trade-off between spatial resolution and noise sensitivity in source reconstruction.
                 </p>
+                
+                <h3>Overview</h3>
+                <p class="lead">
+                    The regularization parameter controls the balance between fitting the data and constraining the solution.
+                </p>
+                
+                <h3>Available Inverse Solution Methods</h3>
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>eLORETA</h4>
+                        <p>Exact Low Resolution Electromagnetic Tomography - provides zero localization error for point sources under ideal conditions. Produces distributed source solutions with depth normalization.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>LCMV</h4>
+                        <p>Linearly Constrained Minimum Variance beamformer - adaptive spatial filter that minimizes output variance while maintaining unit gain in the direction of interest. Particularly effective for localizing oscillatory sources.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Dipole Fit</h4>
+                        <p>Equivalent Current Dipole fitting - parametric approach that models sources as point dipoles. Provides precise localization when the number and orientation of sources are correctly specified. Note: Lambda parameter does not apply to dipole fitting.</p>
+                    </div>
+                </div>
                 
                 <h3>Visualization Elements</h3>
                 <div class="visual-guide">
                     <h4>Display Components</h4>
                     <ul>
-                        <li><strong>EEG trace:</strong> An EEG trace of a interictal epileptiform discharges, with a red line indicating the time point corresponding to the source localization </li>
-						<li><strong>2D voltage map:</strong> A two-dimensional voltage map corresponding to the EEG trace. </li>
+                        <li><strong>EEG Trace:</strong> Time series showing the interictal epileptiform discharge with a red vertical line indicating the selected time point for source localization</li>
+                        <li><strong>2D Voltage Map:</strong> Topographic representation of the scalp voltage distribution at the selected time point, providing a sensor-level view of the data</li>
+                        <li><strong>3D Brain Visualization:</strong> Multi-planar MRI views (axial, coronal, sagittal) with overlaid source reconstruction showing the estimated location and extent of brain activity</li>
+                        <li><strong>Source Activity Map:</strong> Color-coded overlay on the anatomical MRI indicating source strength:
+                            <ul style="margin-left: 25px; margin-top: 5px;">
+                                <li>Warmer colors (red/yellow) indicate stronger estimated source activity</li>
+                                <li>Color intensity reflects the amplitude of reconstructed sources</li>
+                            </ul>
+                        </li>
+                        <li><strong>Dipole Arrows (Dipole Fit only):</strong> Arrow visualization showing the position and orientation of the fitted equivalent current dipole</li>
                     </ul>
                 </div>
                 
                 <h3>Interactive Controls</h3>
                 <div class="controls-grid">
                     <div class="control-item">
-                        <h4>Brain Source Slider</h4>
-                        <p>Navigate through different source locations within the brain. Click on the slider and use arrow keys for precise navigation through predefined brain source positions.</p>
+                        <h4>Time Point Slider</h4>
+                        <p>Navigate through five key time points during the IED evolution. The selected time point is marked by a red line on the EEG trace and determines which source distribution is displayed.</p>
                     </div>
                     
+                    <div class="control-item">
+                        <h4>Lambda Slider</h4>
+                        <p>Adjust the regularization parameter across five logarithmically-spaced values (0.00001, 0.001, 0.01, 0.05, 0.1). Lower values produce more focal solutions; higher values produce smoother, more distributed solutions. This control is disabled when Dipole Fit is selected.</p>
+                    </div>
                     
                     <div class="control-item">
                         <h4>Min/Max Threshold Sliders</h4>
-                        <p>Control the voltage range displayed on the topography map. Adjust minimum and maximum thresholds to focus on specific voltage ranges or enhance contrast.</p>
+                        <p>Control the range of source amplitudes displayed in the 3D visualization. Adjust minimum and maximum thresholds to focus on specific amplitude ranges or enhance contrast between strong and weak sources.</p>
                     </div>
-					<div class="control-item">
-                        <h4>Percentage thresholding</h4>
-                        <p>Control the voltage range displayed on the topography map based on keeping the x percent maximal values in the maps.  </p>
-                    </div>
-                    
                     
                     <div class="control-item">
-                        <h4>Adaptive color scale</h4>
-                        <p>Modify the color map contrast to enhance visualization of voltage gradients. Higher gamma values increase contrast, making subtle differences more visible.</p>
+                        <h4>Percentage Thresholding</h4>
+                        <p>Alternative thresholding mode that displays only the top percentage of source values (20%, 10%, 5%, or 1%). Enable the checkbox to activate, then select the desired percentage. This helps identify the most active brain regions while filtering out weaker activity.</p>
                     </div>
-                   
+                    
+                    <div class="control-item">
+                        <h4>Adaptive Color Scale</h4>
+                        <p>When enabled, the color scale adjusts independently for each time point based on the maximum amplitude at that moment. When disabled, a global color scale is used across all time points, allowing direct amplitude comparison between different time points.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Reset Button</h4>
+                        <p>Restore all visualization settings to their default values, including view orientation, threshold values, and color scale settings.</p>
+                    </div>
                 </div>
                 
+                <h3>Method Selection</h3>
+                <p class="lead">
+                    Use the "Inverse solutions" dropdown menu to switch between different source reconstruction algorithms. Each method has distinct characteristics:
+                </p>
+                
+                <div class="note">
+                    When switching to Dipole Fit, the lambda slider and threshold controls are automatically disabled since parametric dipole fitting does not use regularization. The visualization changes to show discrete dipole positions and orientations rather than distributed source activity.
+                </div>
+                
+                <h3>Visualization Options</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>View Menu</h4>
+                        <p>Select different anatomical views (Axial, Sagittal, Coronal, Render, or combined multi-planar layouts). Toggle colorbar display, radiological convention, and rendering clip plane.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>PSF Color Menu</h4>
+                        <p>Choose from various color maps for the source visualization including Hot (default), Viridis, Plasma, Inferno, and others. Different color maps may enhance visualization of different spatial patterns.</p>
+                    </div>
+                </div>
+                
+                
+
             </section>
 	<section id="inprogress" class="section">
                 <h2>This documentation is still in progress</h2>
