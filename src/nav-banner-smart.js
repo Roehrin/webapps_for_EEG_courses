@@ -402,7 +402,15 @@
     }
   }
 
-  if (document.readyState === 'loading') {
+  // Parse URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+
+  // If nobanner=true, skip banner creation
+  const disableBanner = urlParams.has("nobanner");
+  
+  if (disableBanner) {
+	  return
+  } else if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
