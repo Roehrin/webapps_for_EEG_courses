@@ -45,37 +45,49 @@
             opacity: 0.9;
         }
         
-        .nav {
-            background: #2c3e50;
-            padding: 0;
+       .nav {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 10px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
         .nav ul {
             list-style: none;
             display: flex;
             flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
         
         .nav li {
-            flex: 1;
-            min-width: 120px;
+            flex: 0 1 auto;
         }
         
         .nav a {
             display: block;
             color: white;
             text-decoration: none;
-            padding: 15px 10px;
+            padding: 12px 20px;
             text-align: center;
-            border-right: 1px solid #34495e;
-            transition: background 0.3s;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+            font-weight: 500;
+            font-size: 0.95em;
         }
         
         .nav a:hover {
-            background: #34495e;
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .nav a.active {
+            background: #3498db;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
         }
         
         .content {
@@ -336,6 +348,10 @@
                 <li><a href="#ictal_connectivity">Ictal connectivity</a></li>
                 <li><a href="#interictal_connectivity">Interictal connectivity</a></li>
                 <li><a href="#matrix_and_3D_network">Structural connectivity</a></li>
+				<li><a href="#PSF">Point spread function</a></li>
+				<li><a href="#Regularization">Regularization parameter effect</a></li>
+				<li><a href="#InteractiveROI">Interactive ROI</a></li>
+				
             </ul>
         </nav>
         
@@ -639,7 +655,359 @@ S_i = ∑ w_ij
                     The color coding between the connectivity map and electrode visualization is synchronized to facilitate interpretation of network dynamics across different views.
                 </div>
             </section>
-			            <section id="inprogress" class="section">
+			
+		<section id="PSF" class="section">
+                <h2>Point spread function for several inverse solution methods</h2>
+           
+                
+              <p class="lead">
+                    Explore the relationship between brain sources and the point spread function that is inherent to each source localization method. 
+                </p>
+                
+                <h3>Visualization Elements</h3>
+                <div class="visual-guide">
+                    <h4>Display Components</h4>
+                    <ul>
+                        <li><strong>Sources:</strong> A dipole source within the brain volume, represented as white circles in the MRI slices</li>
+                        <li><strong>PSF map:</strong> Color-coded surface representing the point spread function
+                    </ul>
+                </div>
+                
+                <h3>Interactive Controls</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>Brain Source Slider</h4>
+                        <p>Navigate through different source locations within the brain. Click on the slider and use arrow keys for precise navigation through predefined brain source positions.</p>
+                    </div>
+                    
+                    
+                    <div class="control-item">
+                        <h4>Min/Max Threshold Sliders</h4>
+                        <p>Control the voltage range displayed on the topography map. Adjust minimum and maximum thresholds to focus on specific voltage ranges or enhance contrast.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Gamma Slider</h4>
+                        <p>Modify the color map contrast to enhance visualization of voltage gradients. Higher gamma values increase contrast, making subtle differences more visible.</p>
+                    </div>
+                   
+                </div>
+                
+            </section>
+			
+     
+			            <section id="Regularization" class="section">
+                <h2>Impact of Regularization Parameter on Inverse Solutions</h2>
+                
+                <p class="lead">
+                    Explore how the regularization parameter (lambda) affects the localization of interictal epileptiform discharges (IEDs) across different inverse solution methods. This interactive tool demonstrates the trade-off between spatial resolution and noise sensitivity in source reconstruction.
+                </p>
+                
+                <h3>Overview</h3>
+                <p class="lead">
+                    The regularization parameter controls the balance between fitting the data and constraining the solution.
+                </p>
+                
+                <h3>Available Inverse Solution Methods</h3>
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>eLORETA</h4>
+                        <p>Exact Low Resolution Electromagnetic Tomography - provides zero localization error for point sources under ideal conditions. Produces distributed source solutions with depth normalization.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>LCMV</h4>
+                        <p>Linearly Constrained Minimum Variance beamformer - adaptive spatial filter that minimizes output variance while maintaining unit gain in the direction of interest. Particularly effective for localizing oscillatory sources.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Dipole Fit</h4>
+                        <p>Equivalent Current Dipole fitting - parametric approach that models sources as point dipoles. Provides precise localization when the number and orientation of sources are correctly specified. Note: Lambda parameter does not apply to dipole fitting.</p>
+                    </div>
+                </div>
+                
+                <h3>Visualization Elements</h3>
+                <div class="visual-guide">
+                    <h4>Display Components</h4>
+                    <ul>
+                        <li><strong>EEG Trace:</strong> Time series showing the interictal epileptiform discharge with a red vertical line indicating the selected time point for source localization</li>
+                        <li><strong>2D Voltage Map:</strong> Topographic representation of the scalp voltage distribution at the selected time point, providing a sensor-level view of the data</li>
+                        <li><strong>3D Brain Visualization:</strong> Multi-planar MRI views (axial, coronal, sagittal) with overlaid source reconstruction showing the estimated location and extent of brain activity</li>
+                        <li><strong>Source Activity Map:</strong> Color-coded overlay on the anatomical MRI indicating source strength:
+                            <ul style="margin-left: 25px; margin-top: 5px;">
+                                <li>Warmer colors (red/yellow) indicate stronger estimated source activity</li>
+                                <li>Color intensity reflects the amplitude of reconstructed sources</li>
+                            </ul>
+                        </li>
+                        <li><strong>Dipole Arrows (Dipole Fit only):</strong> Arrow visualization showing the position and orientation of the fitted equivalent current dipole</li>
+                    </ul>
+                </div>
+                
+                <h3>Interactive Controls</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>Time Point Slider</h4>
+                        <p>Navigate through five key time points during the IED evolution. The selected time point is marked by a red line on the EEG trace and determines which source distribution is displayed.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Lambda Slider</h4>
+                        <p>Adjust the regularization parameter across five logarithmically-spaced values (0.00001, 0.001, 0.01, 0.05, 0.1). Lower values produce more focal solutions; higher values produce smoother, more distributed solutions. This control is disabled when Dipole Fit is selected.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Min/Max Threshold Sliders</h4>
+                        <p>Control the range of source amplitudes displayed in the 3D visualization. Adjust minimum and maximum thresholds to focus on specific amplitude ranges or enhance contrast between strong and weak sources.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Percentage Thresholding</h4>
+                        <p>Alternative thresholding mode that displays only the top percentage of source values (20%, 10%, 5%, or 1%). Enable the checkbox to activate, then select the desired percentage. This helps identify the most active brain regions while filtering out weaker activity.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Adaptive Color Scale</h4>
+                        <p>When enabled, the color scale adjusts independently for each time point based on the maximum amplitude at that moment. When disabled, a global color scale is used across all time points, allowing direct amplitude comparison between different time points.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Reset Button</h4>
+                        <p>Restore all visualization settings to their default values, including view orientation, threshold values, and color scale settings.</p>
+                    </div>
+                </div>
+                
+                <h3>Method Selection</h3>
+                <p class="lead">
+                    Use the "Inverse solutions" dropdown menu to switch between different source reconstruction algorithms. Each method has distinct characteristics:
+                </p>
+                
+                <div class="note">
+                    When switching to Dipole Fit, the lambda slider and threshold controls are automatically disabled since parametric dipole fitting does not use regularization. The visualization changes to show discrete dipole positions and orientations rather than distributed source activity.
+                </div>
+                
+                <h3>Visualization Options</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>View Menu</h4>
+                        <p>Select different anatomical views (Axial, Sagittal, Coronal, Render, or combined multi-planar layouts). Toggle colorbar display, radiological convention, and rendering clip plane.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>PSF Color Menu</h4>
+                        <p>Choose from various color maps for the source visualization including Hot (default), Viridis, Plasma, Inferno, and others. Different color maps may enhance visualization of different spatial patterns.</p>
+                    </div>
+                </div>
+				
+                 </section>
+                   <section id="InteractiveROI" class="section">
+                <h2>Interactive ROI Network Visualization</h2>
+                
+                <p class="lead">
+                    Explore the structural connectome of the brain through an interactive 3D visualization of the Lausanne parcellation. This tool allows you to investigate white matter connections between brain regions and analyze network properties using diffusion tractography data.
+                </p>
+                
+                <h3>Overview</h3>
+                <p class="lead">
+                    The Interactive ROI Network displays structural connectivity derived from diffusion MRI tractography. Regions of interest (ROIs) are represented as nodes, and white matter fiber connections between them are shown as edges. The visualization combines anatomical MRI views with network visualization to provide comprehensive insight into brain structure.
+                </p>
+                
+                <div class="example">
+                    This visualization is based on the Lausanne atlas parcellation with structural connectivity computed from diffusion tractography, showing both fiber counts and various network metrics.
+                </div>
+                
+                <h3>Visualization Elements</h3>
+                <div class="visual-guide">
+                    <h4>Display Components</h4>
+                    <ul>
+                        <li><strong>ROI Nodes:</strong> Brain regions represented as spheres, color-coded according to nodal metrics
+                            <ul style="margin-left: 25px; margin-top: 5px;">
+                                <li>Node size can be adjusted with the Node Size slider</li>
+                                <li>Node color intensity reflects the selected metric value</li>
+                            </ul>
+                        </li>
+                        <li><strong>Connection Edges:</strong> White matter fiber tracts between regions, visualized as lines
+                            <ul style="margin-left: 25px; margin-top: 5px;">
+                                <li>Edge thickness reflects connection strength (fiber count or log fiber count)</li>
+                                <li>Edge color indicates connection strength using the selected colormap</li>
+                            </ul>
+                        </li>
+                        <li><strong>MRI Background:</strong> T1-weighted MRI in MNI152 standard space provides anatomical context</li>
+                        <li><strong>Hemisphere Separation:</strong> ROIs are organized by hemisphere (Right and Left) in the selection panels</li>
+                    </ul>
+                </div>
+                
+                <h3>Region Selection and Interaction</h3>
+                <p class="lead">
+                    The interface provides two modes for exploring the network: viewing individual nodes or examining node neighbourhoods.
+                </p>
+                
+                <h4>Selection Modes</h4>
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>Node Mode</h4>
+                        <p>Default mode. Clicking on a region name centers the crosshair on that ROI's location in the brain. All network connections remain visible.</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Node Neighbourhood Mode</h4>
+                        <p>When activated, clicking on a region shows only the connections to and from that specific node, highlighting its local connectivity pattern. The selected node appears in <span style="background: #00AA00; color: white; padding: 2px 6px; border-radius: 3px;">green</span>, while connected neighbours are shown in <span style="background: #880088; color: white; padding: 2px 6px; border-radius: 3px;">purple</span>.</p>
+                    </div>
+                </div>
+                
+                <h3>Interactive Navigation</h3>
+                <ol class="steps">
+                    <li><strong>Select a mode</strong> using the radio buttons: <em>node</em> (default) or <em>node neighbourhood</em></li>
+                    <li><strong>Click on an ROI button</strong> in either the Right hemisphere or Left hemisphere panel to navigate to that region</li>
+                    <li><strong>In neighbourhood mode:</strong> The selected ROI is highlighted in green, connected ROIs in purple, and unconnected regions appear grayed out</li>
+                    <li><strong>Click the same ROI again</strong> to deselect and return to the full network view</li>
+                </ol>
+                
+                <h3>Network File Options</h3>
+                <p class="lead">
+                    Choose from multiple network configurations that combine different edge weights and nodal metrics:
+                </p>
+                
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>Fiber Count & Strength</h4>
+                        <p><strong>Edge:</strong> Raw fiber count<br>
+                        <strong>Node:</strong> Node strength (sum of connections)</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Log Fiber Count & Strength</h4>
+                        <p><strong>Edge:</strong> Logarithm of fiber count (reduces dominance of very strong connections)<br>
+                        <strong>Node:</strong> Node strength</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Fiber Count & Clustering Coeff</h4>
+                        <p><strong>Edge:</strong> Raw fiber count<br>
+                        <strong>Node:</strong> Clustering coefficient (local network cohesion)</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Log Fiber Count & Clustering Coeff</h4>
+                        <p><strong>Edge:</strong> Log fiber count<br>
+                        <strong>Node:</strong> Clustering coefficient</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Fiber Count & Nodal Efficiency</h4>
+                        <p><strong>Edge:</strong> Raw fiber count<br>
+                        <strong>Node:</strong> Nodal efficiency (how efficiently a node communicates with the network)</p>
+                    </div>
+                    
+                    <div class="connectivity-item">
+                        <h4>Log Fiber Count & Nodal Efficiency</h4>
+                        <p><strong>Edge:</strong> Log fiber count<br>
+                        <strong>Node:</strong> Nodal efficiency</p>
+                    </div>
+                </div>
+                
+                <h3>Visualization Controls</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>Edge Size Slider</h4>
+                        <p>Adjust the thickness of fiber tract connections. Increase to make connections more visible; decrease to reduce visual clutter in densely connected regions.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Edge Threshold Slider</h4>
+                        <p>Filter edges based on connection strength. Values range from 0-99%. Only connections above the threshold percentage are displayed, allowing you to focus on the strongest pathways.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Node Size Slider</h4>
+                        <p>Adjust the size of ROI spheres in the visualization. Larger nodes are easier to identify; smaller nodes reduce overlap in the 3D view.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Node Threshold Slider</h4>
+                        <p>Filter nodes based on their metric values. Values range from 0-99%. Only nodes with values above the threshold are displayed, highlighting regions with high network importance.</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Reset Button</h4>
+                        <p>Restore all visualization settings to default values, including view orientation, threshold values, and color scales.</p>
+                    </div>
+                </div>
+                
+                <h3>Color Schemes</h3>
+                <p class="lead">
+                    Customize the appearance of edges and nodes independently using different color maps:
+                </p>
+                
+                <h4>Edge Color Menu</h4>
+                <div class="connectivity-grid">
+                    <div class="connectivity-item">
+                        <h4>Plasma</h4>
+                        <p>Default colormap with perceptually uniform gradients from purple through red to yellow</p>
+                    </div>
+                    <div class="connectivity-item">
+                        <h4>Viridis</h4>
+                        <p>Perceptually uniform colormap from dark purple through teal to yellow</p>
+                    </div>
+                    <div class="connectivity-item">
+                        <h4>Inferno</h4>
+                        <p>Dark colormap progressing from black through red to bright yellow</p>
+                    </div>
+                    <div class="connectivity-item">
+                        <h4>Random</h4>
+                        <p>Each edge assigned a random color, useful for distinguishing individual connections</p>
+                    </div>
+                </div>
+                
+                <h4>Node Color Menu</h4>
+                <p class="lead">Same color options as edge colors (Plasma, Viridis, Inferno, Random), applied independently to node coloring.</p>
+                
+                <h3>View Options</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <h4>Anatomical Views</h4>
+                        <p><strong>Axial:</strong> Horizontal slices (top-down view)<br>
+                        <strong>Sagittal:</strong> Side view slices<br>
+                        <strong>Coronal:</strong> Front-to-back slices<br>
+                        <strong>Render:</strong> 3D surface rendering only</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Multi-Planar Views</h4>
+                        <p><strong>A+C+S:</strong> Combined axial, coronal, and sagittal slices<br>
+                        <strong>A+C+S+R:</strong> All slices plus 3D rendering (default view)</p>
+                    </div>
+                    
+                    <div class="control-item">
+                        <h4>Display Options</h4>
+                        <p><strong>Colorbar:</strong> Toggle color scale legend<br>
+                        <strong>Radiological:</strong> Switch between radiological and neurological conventions<br>
+                        <strong>Render Clip Plane:</strong> Enable/disable clipping plane in 3D render</p>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    The legend in the top-right corner displays the current edge and node metrics being visualized. This updates automatically when switching between network files.
+                </div>
+                
+                <h3>Interpretation Guide</h3>
+                <div class="visual-guide">
+                    <h4>Understanding the Network</h4>
+                    <ul>
+                        <li><strong>Strong edges:</strong> Indicate robust white matter connections, typically corresponding to major fiber bundles like the corpus callosum, arcuate fasciculus, or corticospinal tract</li>
+                        <li><strong>High-degree nodes:</strong> Regions with many connections, often serving as network hubs (e.g., precuneus, posterior cingulate, thalamus)</li>
+                        <li><strong>High clustering coefficient:</strong> Indicates regions with tightly interconnected neighbours, suggesting local processing modules</li>
+                        <li><strong>High nodal efficiency:</strong> Regions that enable efficient information transfer across the network, often corresponding to integration hubs</li>
+                        <li><strong>Hemisphere differences:</strong> Compare left and right hemisphere connectivity patterns by examining the separate region lists</li>
+                    </ul>
+                </div>
+                
+     
+                
+    
+            </section>
+
+ 
+	<section id="inprogress" class="section">
                 <h2>This documentation is still in progress</h2>
                 
             </section>
