@@ -14,176 +14,283 @@
 	<h1>Introduction to source reconstruction</h1>
 	<section>
 	<h2>Problem outline </h2>
-	One of the holy grails of EEG analysis would be to infer where in the brain the signals are generated that constitute the EEG. It is well established that the EEG does not reflect the activity of single neurons, but rather the combined electrical activity of spatially extended patches of simultaneously active cortical tissue with a minimal area in the order of several square centimeters. To go from these patches of simultaneous active cortex to EEG signals, we will use the terminology and mathematical notation described in (<a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>) <br><br>
-	
+	One of the holy grails of EEG analysis would be to determine where in the brain the signals that make up the EEG are generated. It is well established that the EEG does not reflect the activity of single neurons, but rather the combined electrical activity of spatially extended patches of simultaneously active cortical tissue with a minimal area in the order of several square centimeters. To go from these patches of simultaneous active cortex to EEG signals, we will use the terminology and mathematical notation described in (<a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>) <br><br>
+	</section>
+	<section>
 	<h2>Assumptions </h2>
-In this module, we will make a few key assumptions to develop elegant mathematical models for the forward and inverse problems in EEG. These assumptions are:
+	In this module, we will make a few key assumptions to develop elegant mathematical models for the forward and inverse problems in EEG. These assumptions are:
 
 	<ul> 
-		<li>There is no time delay between synchronized neuronal activity and the resulting EEG; any change in the neuronal signal is reflected instantaneously in the EEG.</li> 
+		<li>There is no time delay between synchronised neuronal activity and the resulting EEG; any change in the neuronal signal is reflected instantaneously in the EEG.</li> 
 		<li>Neuronal sources can be represented as mathematical dipoles, which will be explained in detail below.</li> 
 		<li>The head consists of homogeneous tissue layers, typically with isotropic electrical conductivity.</li> 
 	</ul>
-	<h2>Forward problem </h2>
+	</section>
+	<h1>Forward problem </h1>
+	<section>
 	To transform the electrical signals recorded on the EEG into the source space (i.e., to estimate where in the brain they originated), we first need to understand how brain activity generates signals measurable at the scalp. 
 	This is known as the forward problem in EEG. The first step is to define how neural sources are represented. The best current approximation models each source as an electric dipole — a pair of equal and opposite charges separated by a very small distance. Because of this structure, a dipole has both a magnitude (strength) and a direction, and can therefore be represented as a vector.
-<br> <br>
+	<br> <br>
 	This dipole model is based on the properties of pyramidal neurons, which are long, oriented cells in the cerebral cortex. When many of these neurons are active and aligned, their combined electrical fields produce measurable EEG signals. Thus, the dipole serves as a simplified but biologically grounded model of how neuronal populations contribute to scalp potentials.
 	
 	<br> <br>
 	In the diagram below, adapted from (<a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>), a simplification of the forward problem is shown.
 
-<div class="single-image-container">	
-<figure id="fig-head-model" aria-describedby="fig-caption" style="width:550px;">
-  <img
-    src="../src/New_test_source_2dir.svg"
-    alt="Schematic three-layer head model (scalp, skull, brain) with a single dipole at position r_dip_i and one measurement electrode at r. Dipole orientation decomposed into x and z axes."
-    title="Three-layer head model with a single dipole"
-  />
-  <figcaption id="fig-caption">
-    Diagram adapted from <a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>.
-    A three-layer approximation of the head (scalp, skull, brain) is shown with a single dipole located at position
-    \( \mathbf{r}_{\text{dip}_i} \) from the origin. In this two-dimensional plane, any dipole orientation at that location can be decomposed into two orthogonal axes,
-    \( \mathbf{e}_{\text{x}} \) and \( \mathbf{e}_{\text{z}} \). For simplicity, one measurement electrode \( \mathbf{m}_{\text{r}} \) is drawn at radius \( \mathbf{r} \).
-  </figcaption>
-</figure>
-</div>
+	<div class="single-image-container">	
+		<figure id="fig-head-model" aria-describedby="fig-caption" style="width:550px;">
+		  <img
+			src="../src/New_test_source_2dir.svg"
+			alt="Schematic three-layer head model (scalp, skull, brain) with a single dipole at position r_dip_i and one measurement electrode at r. Dipole orientation decomposed into x and z axes."
+			title="Three-layer head model with a single dipole"
+		  />
+		  <figcaption id="fig-caption">
+			Diagram adapted from <a href="https://doi.org/10.1186/1743-0003-5-25" target="_blank" rel="noopener noreferrer">Grech et al., 2008</a>.
+			A three-layer approximation of the head (scalp, skull, brain) is shown with a single dipole located at position
+			\( \mathbf{r}_{\text{dip}_i} \) from the origin. In this two-dimensional plane, any dipole orientation at that location can be decomposed into two orthogonal axes,
+			\( \mathbf{e}_{\text{x}} \) and \( \mathbf{e}_{\text{z}} \). For simplicity, one measurement electrode \( \mathbf{m}_{\text{r}} \) is drawn at radius \( \mathbf{r} \).
+		  </figcaption>
+		</figure>
+	</div>
 	<br><br>
-	The source space can be represented in one of two main ways. In a volumetric model, dipoles oriented along the x, y, and z axes are placed at discrete points throughout the whole brain volume. Alternatively, sources can be restricted to the cortical surface, where dipoles are oriented perpendicular (normal) to the cortex. This approach reduces the number of parameters to estimate and reflects the organization of cortical pyramidal neurons.
+	The source space can be represented in one of two main ways. In a volumetric model, dipoles oriented along the x, y, and z axes are placed at discrete points throughout the whole brain volume. Alternatively, sources can be restricted to the cortical surface, where dipoles are oriented perpendicular (normal) to the cortex. This approach reduces the number of parameters to estimate and reflects the organisation of cortical pyramidal neurons.
 	<br> <br>
-By solving the Poisson equation—using the tissues’ electrical conductivities, geometry, source locations, and EEG electrode positions as inputs—we can estimate how each dipole influences each electrode. Two examples of dipoles and their influence on the EEG electrodes are given below <br><br>
+	By solving the Poisson equation—using the tissues’ electrical conductivities, geometry, source locations, and EEG electrode positions as inputs—we can estimate how each dipole influences each electrode. Two examples of dipoles and their influence on the EEG electrodes are given below <br><br>
 
- <div class="image-container">
-    <figure>
-       <img src="../src/dipole_topo1.png" alt="Normal dipole">
-      <figcaption>The electric field and influence on EEG electrodes for a normal oriented dipole</figcaption>
-    </figure>
-    <figure>
-	  <img src="../src/dipole_topo2.png" alt="Tangential dipole">
-      <figcaption>The electric field and influence on EEG electrodes for a tangential oriented dipole</figcaption>
-    </figure>
-  </div>
-  <br><br>
-According to the principle of superposition, the EEG signal measured at electrode \( m \) at time \( t \) can be expressed as a linear combination of dipole contributions, each weighted by a gain factor \( g \).
-All gain factors can be collected into an \( M \times N \) matrix, where \( M \) is the number of electrodes and \( N \) is the number of sources. Typically, \( M \ll N \), making the system underdetermined; in practice, 
-\( M  \) ranges from roughly 20 to 256 electrodes, whereas \( N \) is on the order of several thousand potential sources.
+	<div class="image-container">
+		<figure>
+		   <img src="../src/dipole_topo1.png" alt="Normal dipole">
+		  <figcaption>The electric field and influence on EEG electrodes for a normal oriented dipole</figcaption>
+		</figure>
+		<figure>
+		  <img src="../src/dipole_topo2.png" alt="Tangential dipole">
+		  <figcaption>The electric field and influence on EEG electrodes for a tangential oriented dipole</figcaption>
+		</figure>
+	</div>
+	<br><br>
+	According to the principle of superposition, the EEG signal measured at electrode \( m \) at time \( t \) can be expressed as a linear combination of dipole contributions, each weighted by a gain factor \( g \).
+	All gain factors can be collected into an \( M \times N \) matrix, where \( M \) is the number of electrodes and \( N \) is the number of sources. Typically, \( M \ll N \), making the system underdetermined; in practice, 
+	\( M  \) ranges from roughly 20 to 256 electrodes, whereas \( N \) is on the order of several thousand potential sources.
 
 
-$$
-\mathbf{M} = 
-\begin{bmatrix}
-    m(\mathbf{r}_1) \\
-    \vdots \\
-    m(\mathbf{r}_N)
-\end{bmatrix}
-=
-\begin{bmatrix}
-    g(\mathbf{r}_1, \mathbf{r}_{\text{dip}_1}) & \cdots & g(\mathbf{r}_1, \mathbf{r}_{\text{dip}_p}) \\
-    \vdots & \ddots & \vdots \\
-    g(\mathbf{r}_N, \mathbf{r}_{\text{dip}_1}) & \cdots & g(\mathbf{r}_N, \mathbf{r}_{\text{dip}_p})
-\end{bmatrix}
-\begin{bmatrix}
-    d_1 \mathbf{e}_1 \\
-    \vdots \\
-    d_p \mathbf{e}_p
-\end{bmatrix}
-$$
+	$$
+	\mathbf{M} = 
+	\begin{bmatrix}
+		m(\mathbf{r}_1) \\
+		\vdots \\
+		m(\mathbf{r}_N)
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		g(\mathbf{r}_1, \mathbf{r}_{\text{dip}_1}) & \cdots & g(\mathbf{r}_1, \mathbf{r}_{\text{dip}_p}) \\
+		\vdots & \ddots & \vdots \\
+		g(\mathbf{r}_N, \mathbf{r}_{\text{dip}_1}) & \cdots & g(\mathbf{r}_N, \mathbf{r}_{\text{dip}_p})
+	\end{bmatrix}
+	\begin{bmatrix}
+		d_1 \mathbf{e}_1 \\
+		\vdots \\
+		d_p \mathbf{e}_p
+	\end{bmatrix}
+	$$
 	<br><br>
 	
-Or in compact notation, with added gaussian noise from the amplifying system \( n \sim \mathcal{N}(0,\sigma^{2}) \)
+	Or in compact notation, with added gaussian noise from the amplifying system \( n \sim \mathcal{N}(0,\sigma^{2}) \)
 	
-		$$M = GD+n$$ 
-		
-		<h2>The minimum norm inverse solution</h2>
-		
-	Since the forward problem is non-square due to the vast amount of sources compared to the limited amount of measuring electrods, the matrix \( G \) cannot be simply inverted and applied to the EEG signal \( M \) to find the sources \( D \) . Consequently, there is an infinite amount of solutions to this problem. Choosing an inverse method is thus choosing a solution with certain properties. 
-	
-	The most simple solution is choosing a solution where the sources have minimal power with regards to a certain norm.  This family of estimates is usually referred to as the Minimum norm estimates (MNE)
-		To find the <b>minimum norm solution</b> with regularization, we solve the following minimization problem:
-</p>
-
-<p style="text-align: center;">
-\[
-\min_D \| M - G D \|_2^2 + \lambda \| D \|_2^2
-\]
-</p>
-
-<p>
-Here, \( \lambda > 0 \) is a regularization parameter that balances the fitting of the residual and the norm of the sources.
-</p>
-
-<p>
-Taking the derivative with respect to \( D \) and set it to zero:
-</p>
-
-<p style="text-align: center;">
-\[
--2 G^\top (M - G D) + 2 \lambda D = 0
-\]
-</p>
-
-<p>
-Rearranging:
-</p>
-
-<p style="text-align: center;">
-\[
-G^\top G D + \lambda D = G^\top M
-\quad \Rightarrow \quad
-(G^\top G + \lambda I) D = G^\top M
-\]
-</p>
-
-<p>
-Solve for \( D \):
-</p>
-
-<p style="text-align: center;">
-\[
-\boxed{
-D_\text{min-norm} = (G^\top G + \lambda I)^{-1} G^\top M = G^\top (G G^\top + \lambda I)^{-1}M
-}
-\]
-</p>
-
-<p>
-These are called the regularized minimum norm solutions, where the second form is obtained by applying the Woodbury matrix identity. Since \(G \) is an \( M \times N \) matrix, the first form requires the inversion of an \( N \times N \) matrix and the second form only a \( M \times M \) matrix, obviously, for computational purposes, the second form is preferred.  Inherently, this solution is biased towards shallower sources, since sources closer to the measurement electrodes require less amplitude to give a similar signal with respect to deeper sources.
-One way to solve this is by changing the minimization problem to include a weighting matrix \( W \) which is diagonal with entries equal to the norms of the lead fields. Since sources with smaller lead field norms are typically deeper, this weighting effectively compensates for depth bias.
-<p style="text-align: center;">
-\[
-\min_D \| M - G D \|_2^2 + \lambda \| WD \|_2^2
-\]
-</p>
-This leads to the solution for the weighted minimum norm where again, the Woodbury matrix identity has been used to find the computationally more efficient form. 
-<p style="text-align: center;">
-\[
-\boxed{
-D_\text{weighted-min-norm} = (G^\top G + \lambda W^\top W)^{-1} G^\top M = W^{-1}G^\top (G (W^\top W)^{-1}G^\top + \lambda I)^{-1}M
-}
-\]
-</p>
-</p>
+	$$M = GD+n$$ 
+	<br><br>
+	Below is an interactive leadfield visualisation. Use the Brain Source slider to change the source location, adjust its orientation (X, Y, Z, or custom), and explore how these parameters shape the resulting EEG scalp topography. For the full page demo click <a href="EEG_mesh_with_topo.html" target="_blank" rel="noopener noreferrer">here</a>.
+	<br><br>
+	<div id="EEG_topo" style="width:100%;height:650px"></div>
 	</section>
-	<br>
+	<h1>Electrical Source Imaging — Inverse Solutions</h1>	
 	<section>
-		<h2>Parametric methods</h2>
-		The minimum norm methods belong to the family of distributed source models, which are built on the assumption that the brain activity can be represented by many small sources. These models estimate the contribution of all potential sources simultaneously. In contrast, parametric methods attempt to explain the measured voltages by a limited amount of equivalent current dipoles. 
-		<br> <br>
-		The most intuitive of these methods is the dipole fitting method, which identifies the dipole (or dipoles) located that best fits the observed scalp potential topography. This means fitting six parameters per dipole, 3 for the spatial location and three for its moment (orientation and strength). This is a non-linear minimization of the cost function defined by :
-		<p style="text-align: center;">
-		\[
-		
-		|| M - G({r_j,r_{dip_i}})D ||
-	
-		\]
-		
-</p>
-<br>
-Another approach is to focus on the sources rather than the measurements. A beamformer applies spatial filtering to estimate the activity of a source at a specific location. It computes a weighted linear combination of sensor signals that maximizes sensitivity to the target source while minimizing sensitivity to other brain regions. The weights are derived from the lead field and the covariance of the measured data, making the method a data-driven approach to source localization.
+		<p>Short guide to dipole fitting, minimum-norm approaches and common regularised variants (LORETA/LAURA, dSPM, sLORETA).</p>
 	</section>
 	<section>
-		<h2>Other types of inverse solutions</h2>
-		he solutions described in the previous section are among the most fundamental, because their mathematical foundations are elegant and relatively straightforward to describe. Countless other algorithms have been developed, each constraining the solution to the problem in different ways. These include methods that provide exact localization of the source in a noiseless situation (sLORETA, eLORETA) and methods that introduce sparsity in the source space (FOCUSS, MxNE).
+		<h2>Dipole fitting</h2>
+			<p>Dipole fitting searches for the dipole (or set of dipoles) whose predicted scalp topography best matches the observed data. Each dipole has six parameters: three for spatial position \(r_i\) and three for the dipole moment \(D_i\). Because the leadfield depends nonlinearly on dipole position, the optimisation can be nonlinear.</p>
+
+
+			<p class="box note">Objective for a single dipole:</p>
+			<div>\[\min_{r_i,\,D_i} \; \| M - G(r_i) D_i \|_2^2\]</div>
+
+
+			<p>Typical dipole-fitting workflows alternate between <em>grid-search</em> (or global search) for location and linear estimation of the dipole moment at each candidate location, or use gradient-based nonlinear optimisation (e.g., Levenberg–Marquardt).</p>
+		</section>
+	<section>
+		<h2>Distributed Source Model</h2>
+		<p>Whereas dipole fitting explains the data using a few focal generators, distributed source models take the complementary approach of estimating activity at all possible source locations at once. Because the inverse problem is underdetermined or ill-posed (many candidate sources vs. relatively few sensors), the leadfield matrix  \( G\) cannot be directly inverted. For a given scalp distribution \( M\), there are infinitely many source solutions \( D\). Choosing a type of inverse method is therefore equivalent to imposing a constraint that selects one solution from this solution set.</p>
+		<h3>The Minimum Norm Estimate Solution</h3>
+		<p>A common constraint is to choose the solution with minimal overall source power. This leads to the family of <strong>Minimum Norm Estimates (MNE)</strong>.</p>
+
+		<p> The Tikhonov-regularised minimum-norm objective is </p>
+		<div>\[ \min_D \; \| M - G D \|_2^2 + \lambda \| D \|_2^2, \qquad \lambda>0, \]</div>
+		<p> whose stationary condition gives the familiar closed-form estimate </p>
+		<div>\[ \boxed{D_{\mathrm{MNE}} = (G^\top G + \lambda I)^{-1} G^\top M} \]</div>
+		<p> We often separate the linear operator (the inverse “filter”) from the data by writing </p>
+		<div>\[ \boxed{D_{\mathrm{MNE}} = W_{\mathrm{MNE}} \; M, \qquad W_{\mathrm{MNE}} = (G^\top G + \lambda I)^{-1} G^\top.} \]</div>
+		<p> Two practical observations about this form: (1) the operator \(W_{\mathrm{MNE}}\) does not depend on the data \(M\) and can therefore be precomputed; (2) the direct form above requires inverting an \(N×N\) matrix (number of sources), which may be computationally expensive. </p>
+		<p> The <strong>generalised MNE</strong> expresses prior knowledge about source amplitudes through a source covariance (or prior) matrix \(R\). With this prior the operator becomes </p>
+		<div>\[ \boxed{ W_{\mathrm{MNE}} \;=\; R\, G^\top \big( G\,R\,G^\top + \lambda I \big)^{-1} } \]</div>
+		<p> and the estimate is </p>
+		<div>\[ \boxed{ D_{\mathrm{MNE}} = W_{\mathrm{MNE}} \; M \;=\; R\,G^\top \big( G\,R\,G^\top + \lambda I \big)^{-1} M }. \]</div>
+		<p> When the prior is the identity, \(R = I\), the generalised operator reduces to the usual MNE operator: </p>
+		<div>\[ R = I \quad\Rightarrow\quad W_{\mathrm{MNE}}^{(R)} = G^\top \big( G G^\top + \lambda I \big)^{-1}. \]</div>
+		<p> The advantage of the generalised form is twofold: (i) an informative source prior \(R\) (e.g., encoding expected variance, orientation constraints, or spatial covariances) is incorporated naturally; (ii) the computation typically involves inversion of an <em>M×M</em> matrix (number of sensors) rather than an <em>N×N</em> matrix when implemented via the latter expression, which is computationally preferable in typical EEG/MEG setups. </p>	
+		<p> Inherently, this solution is biased towards shallower sources, since sources closer to the measurement electrodes require less amplitude to give a similar signal with respect to deeper sources. A common practical correction for depth bias is to include a diagonal <em>depth-weighting</em> matrix \(W_{\mathrm{MNE}}\) (not to be confused with the operator \(W\)). One way to incorporate depth weighting into the generalised framework is to absorb it into the source prior: </p>
+		<div>\[ R \leftarrow W_{\text{depth}}^{-2} \quad\text{(i.e., use a prior variance that compensates for smaller lead-field norms).} \]</div>
+		<p> Alternatively, the weighted Tikhonov objective </p>
+		<div>\[ \min_D \; \| M - G D \|_2^2 + \lambda \| W_{\text{depth}} D \|_2^2 \]</div>
+		<p> yields the equivalent explicit weighted solution </p>
+		<div>\[ \boxed{ D_{\mathrm{wMNE}} = (G^\top G + \lambda W_{\text{depth}}^\top W_{\text{depth}})^{-1} G^\top M } \]</div>
+		<p> or, using the generalised/prior viewpoint with \(R = (W_{\text{depth}}^\top W_{\text{depth}})^{-1}\), </p>
+		<div>\[ \boxed{ D_{\mathrm{wMNE}} = R\,G^\top \big( G\,R\,G^\top + \lambda I \big)^{-1} M }. \]</div>
+		<br>
+		<p>From a general point of view, any prior on the sources which can be summarised in an operator \(B\) as:</p>
+		<div>\[ \min_D \; \| M - G D \|_2^2 + \lambda \| BD \|_2^2 \]</div>
+		<p> yields the explicit solution </p>
+		<div>\[ \boxed{ W_{\mathrm{wMNE}} = (G^\top G + \lambda B^\top B )^{-1} G^\top} \]</div>
+		<p> or, using the generalised/prior viewpoint with \(R = (B^\top B)^{-1}\).</p>
+		<p> One classical prior is spatial smoothness.</p>
 	</section>
+	<section>
+		<h3>LORETA and LAURA — MNE solution with spatial priors</h3>
+		<p>LORETA and LAURA can be seen as MNE solutions where the regulariser encodes spatial priors.</p>
+
+		<p><strong>LORETA</strong> uses a discrete Laplacian operator \(L\) (second-order neighborhood) that penalises rapid spatial changes. The objective is</p>
+		<div>\[\min_D \| M - G D \|_2^2 + \lambda \| LW_{\text{depth}} D \|_2^2\]</div>
+		<p>giving</p>
+		<div>\[\boxed{ W_{\mathrm{LORETA}} = (G^\top G + \lambda (LW_{\text{depth}})^\top LW_{\text{depth}})^{-1} G^\top}\]</div>
+		<p> or, using the generalised/prior viewpoint with \(R = ((LW_{\text{depth}})^\top LW_{\text{depth}})^{-1} =  W_{\text{depth}}^\top L^\top L W_{\text{depth}}\)</p>
+		<p>This yields the smoothest possible solution.</p>
+		<p><strong>LAURA</strong> replaces the Laplacian with a flexible, distance-weighted prior matrix  (often derived from a local autoregressive model)</div>
+		<p>The choice of spatial prior controls smoothness scale and effective spatial resolution. </p>
+	</section>
+	<section>
+		<h3>Noise-normalised methods: dSPM and sLORETA</h3>
+		<p>To reduce the influence of noise and improve statistical interpretability, MNE-type estimates are often <em>normalised</em> by an estimate of the noise variance at each source voxel.</p>
+
+
+		<h3>dSPM (dynamic statistical parametric mapping)</h3>
+		<p>dSPM normalises the MNE estimate by the (estimated) standard deviation of the noise at each source:</p>
+		<div>\[ D_{\mathrm{dSPM}} = W_{\mathrm{dSPM}} \; D_{\mathrm{MNE}} , \quad W_{\mathrm{dSPM}} = \operatorname{diag}\Big( \sqrt{\operatorname{diag}\big( G^\top C_n^{-1} G \big)} \Big)^{-1} \]</div>
+		<p>Here \(C_n\) is the noise covariance matrix estimated from baseline or empty-room recordings. The result is a z-like map where each source value is scaled by its noise standard deviation.</p>
+
+
+		<h3>sLORETA (standardized LORETA)</h3>
+		<p>sLORETA applies a noise-standardisation to the LORETA estimator such that, under ideal conditions, the localisation bias is eliminated and the map has standardised units:</p>
+		<div>\[ D_{\mathrm{sLORETA}} = \left( \operatorname{diag}\big( G^\top (G G^\top + \lambda L^\top L)^{-1} G \big) \right)^{-1/2} \; D_{\mathrm{LORETA}} . \]</div>
+
+
+		<p>Both dSPM and sLORETA improve interpretability by accounting for the spatial variation in sensitivity and noise—but their theoretical properties differ, and their practical performance depends on SNR and model accuracy.</p>
+	</section>
+	<section>
+		Below you can experiment with different inverse methods for the distributed source model. Use the Brain Source slider to change the source location and use the inverse solutions dropdown menu to select the different methods. The estimated activity generated by one source (white dot) is coloured. See how, according to the location of the real source and inverse method used, the maximum activity is mislocalised and that the estimated activity is wider than the real source (spatial leakge). For the full page demo click <a href="display_Point_Spread_Functions_on_MRI.html"target="_blank" rel="noopener noreferrer">here</a>.
+		<br><br>
+		<div id="PSF_intrac" style="width:100%;height:650px"></div>
+	</section>
+	<section>
+		<h2>Beamformers (spatial filters)</h2>
+		<p>Distributed methods estimate the contribution of many small sources simultaneously.Beamformers compute a linear spatial filter that enhances activity originating from a target source location while suppressing contributions from all other locations. The filter weights depend on both the leadfield at the target location and the data covariance matrix, making beamformers intrinsically <em>data-adaptive</em>.</p>
+
+		<h3>LCMV Beamformer</h3>
+		<p>
+		  The classical <strong>Linearly Constrained Minimum Variance (LCMV)</strong> beamformer finds spatial weights that
+		  (i) pass activity from the target source with unit gain, while
+		  (ii) minimising the projected power of all other sources and noise.
+		</p>
+
+		<p>The optimisation problem is</p>
+		<div>
+		  \[
+		  \min_w \; w^\top C \, w
+		  \quad \text{subject to} \quad
+		  w^\top g = 1,
+		  \]
+		</div>
+		<p>
+		  where \(C\) is the data covariance matrix and \(g\) is the leadfield vector for the target source (i.e., the column of \(G(.,i) = g\) ).
+		</p>
+
+		<p>The resulting weight vector is</p>
+		<div>
+		  \[
+		  \boxed{
+		  w_{\mathrm{LCMV}} =
+		  \frac{C^{-1} g}{g^\top C^{-1} g}
+		  }
+		  \]
+		</div>
+
+		<p>
+		  The estimated source activity at that location is then obtained by projecting the sensor data \(M\) through the beamformer:
+		</p>
+		<div>
+		  \[ \hat{D}(r) = w_{\mathrm{LCMV}}^\top M. \]
+		</div>
+		<p>
+		  One can see that the spatial filter \(w_{\mathrm{LCMV}}\) is dependent on the data but independent of the other estimated sources of interest. These are key differences with distributed source model.
+		</p>
+		<p>
+		Because leadfield strength decreases with source depth, unit-gain beamformers assign larger weights to deep sources, which in turn inflates their estimated power. This <em>center-of-head bias</em> prevents direct comparisons of power across space. Normalised beamformer variants, such as array-gain normalisation, address this issue by correcting the filter sensitivity.
+		</p>
+		<h4>Array Gain Normalisation</h4>
+		<p>
+		 <strong>Array gain normalisation</strong> compensates the <em>center-of-head bias</em> by scaling the beamformer weights such that the filter's sensitivity is equalised across all candidate locations.
+		</p>
+
+		<p>
+		  The array gain LCMV at a location with weight vector \(w\) and leadfield \(g\) is defined as
+		</p>
+		<div>
+		  \[
+		  \min_w \; w^\top C \, w \quad \text{subject to} \quad w^\top g = \|g\|,
+		  \]
+		</div>
+
+		<p>
+		  Using the unit-gain LCMV formulation,
+		</p>
+
+		<div>
+		  \[ \boxed{ w_{\mathrm{LCMV, array\text{-}gain}} = \frac{C^{-1} g_n}{{g_n}^\top C^{-1} g_n}, \quad \text{with} \quad g_n = \frac{g}{\|g\|}}
+		  \]
+		</div>
+
+		<p>
+		  The estimated activity then becomes
+		</p>
+
+		<div>
+		  \[ \hat{D}_{\mathrm{norm}}(r) =  \left( w_{\mathrm{LCMV}}^{\mathrm{gain\text{-}norm}} \right)^\top M, \]
+		</div>
+
+		<p>
+		  ensuring that differences in estimated activity reflect neural effects rather than purely spatial variations in beamformer sensitivity. For more details on beamformer we recommend this paper: <a href="https://doi.org/10.1016/j.neuroimage.2021.118789" target="_blank" rel="noopener noreferrer">Westner et al., 2022</a>.
+		</p>
+	</section>
+	<script>
+		const topoDiv = document.getElementById("EEG_topo");
+		const PSFDiv = document.getElementById("PSF_intrac");
+		const topoIframe = document.createElement("iframe");
+		const PSFIframe = document.createElement("iframe");
+		
+		topoIframe.src = 'EEG_mesh_with_topo.html?nobanner';
+		topoIframe.loading = "eager";
+		topoIframe.style.border = "3px solid #667eea";
+		topoIframe.style.borderRadius = "15px";
+		topoIframe.style.boxShadow = "0 10px 30px rgba(0,0,0,0.2)";
+		topoIframe.style.width = "100%";
+		topoIframe.style.height = "650px";
+		topoDiv.appendChild(topoIframe);
+		
+		PSFIframe.src = 'display_Point_Spread_Functions_on_MRI.html?nobanner';
+		PSFIframe.loading = "eager";
+		PSFIframe.style.border = "3px solid #667eea";
+		PSFIframe.style.borderRadius = "15px";
+		PSFIframe.style.boxShadow = "0 10px 30px rgba(0,0,0,0.2)";
+		PSFIframe.style.width = "100%";
+		PSFIframe.style.height = "650px";
+		PSFDiv.appendChild(PSFIframe);
+	</script>
 </body>
 </html>
