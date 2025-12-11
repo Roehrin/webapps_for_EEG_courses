@@ -101,7 +101,7 @@
 	<br><br>
 	<div id="EEG_topo" style="width:100%;height:650px"></div>
 	</section>
-	<h1>Electrical Source Imaging — Inverse Solutions</h1>	
+	<h1>Inverse Models</h1>	
 	<section>
 		<p>Short guide to dipole fitting, minimum-norm approaches and common regularised variants (LORETA/LAURA, dSPM, sLORETA).</p>
 	</section>
@@ -136,7 +136,7 @@
 		<p> When the prior is the identity, \(R = I\), the generalised operator reduces to the usual MNE operator: </p>
 		<div>\[ R = I \quad\Rightarrow\quad W_{\mathrm{MNE}}^{(R)} = G^\top \big( G G^\top + \lambda I \big)^{-1}. \]</div>
 		<p> The advantage of the generalised form is twofold: (i) an informative source prior \(R\) (e.g., encoding expected variance, orientation constraints, or spatial covariances) is incorporated naturally; (ii) the computation typically involves inversion of an <em>M×M</em> matrix (number of sensors) rather than an <em>N×N</em> matrix when implemented via the latter expression, which is computationally preferable in typical EEG/MEG setups. </p>	
-		<p> Inherently, this solution is biased towards shallower sources, since sources closer to the measurement electrodes require less amplitude to give a similar signal with respect to deeper sources. A common practical correction for depth bias is to include a diagonal <em>depth-weighting</em> matrix \(W_{\mathrm{MNE}}\) (not to be confused with the operator \(W\)). One way to incorporate depth weighting into the generalised framework is to absorb it into the source prior: </p>
+		<p> Inherently, this solution is biased towards shallower sources, since sources closer to the measurement electrodes require less amplitude to give a similar signal with respect to deeper sources. A common practical correction for depth bias is to include a diagonal <em>depth-weighting</em> matrix \(W_{\mathrm{depth}}\) (not to be confused with the operator \(W\)). One way to incorporate depth weighting into the generalised framework is to absorb it into the source prior: </p>
 		<div>\[ R \leftarrow W_{\text{depth}}^{-2} \quad\text{(i.e., use a prior variance that compensates for smaller lead-field norms).} \]</div>
 		<p> Alternatively, the weighted Tikhonov objective </p>
 		<div>\[ \min_D \; \| M - G D \|_2^2 + \lambda \| W_{\text{depth}} D \|_2^2 \]</div>
@@ -156,32 +156,33 @@
 		<h3>LORETA and LAURA — MNE solution with spatial priors</h3>
 		<p>LORETA and LAURA can be seen as MNE solutions where the regulariser encodes spatial priors.</p>
 
-		<p><strong>LORETA</strong> uses a discrete Laplacian operator \(L\) (second-order neighborhood) that penalises rapid spatial changes. The objective is</p>
+		<p><strong>LORETA</strong> (low resolution brain electromagnetic tomography) uses a discrete Laplacian operator \(L\) (second-order neighborhood) that penalises rapid spatial changes. The objective is</p>
 		<div>\[\min_D \| M - G D \|_2^2 + \lambda \| LW_{\text{depth}} D \|_2^2\]</div>
 		<p>giving</p>
 		<div>\[\boxed{ W_{\mathrm{LORETA}} = (G^\top G + \lambda (LW_{\text{depth}})^\top LW_{\text{depth}})^{-1} G^\top}\]</div>
-		<p> or, using the generalised/prior viewpoint with \(R = ((LW_{\text{depth}})^\top LW_{\text{depth}})^{-1} =  W_{\text{depth}}^\top L^\top L W_{\text{depth}}\)</p>
+		<p> or, using the generalised/prior viewpoint with \(R = ((LW_{\text{depth}})^\top LW_{\text{depth}})^{-1} =  (W_{\text{depth}}^\top L^\top L W_{\text{depth}})^{-1}\)</p>
 		<p>This yields the smoothest possible solution.</p>
-		<p><strong>LAURA</strong> replaces the Laplacian with a flexible, distance-weighted prior matrix  (often derived from a local autoregressive model)</div>
+		<p><strong>LAURA</strong> (Local Auto-Regressive Averages) replaces the Laplacian with a flexible, distance-weighted prior matrix
 		<p>The choice of spatial prior controls smoothness scale and effective spatial resolution. </p>
 	</section>
 	<section>
-		<h3>Noise-normalised methods: dSPM and sLORETA</h3>
-		<p>To reduce the influence of noise and improve statistical interpretability, MNE-type estimates are often <em>normalised</em> by an estimate of the noise variance at each source voxel.</p>
+		<h3>Normalised methods: dSPM, sLORETA and eLORETA</h3>
+		<p>To reduce the influence of noise and improve statistical interpretability or remove localisation bias, MNE-type estimates are often <em>normalised</em> at each source voxel.</p>
 
 
 		<h3>dSPM (dynamic statistical parametric mapping)</h3>
 		<p>dSPM normalises the MNE estimate by the (estimated) standard deviation of the noise at each source:</p>
-		<div>\[ D_{\mathrm{dSPM}} = W_{\mathrm{dSPM}} \; D_{\mathrm{MNE}} , \quad W_{\mathrm{dSPM}} = \operatorname{diag}\Big( \sqrt{\operatorname{diag}\big( G^\top C_n^{-1} G \big)} \Big)^{-1} \]</div>
+		<div>\[ D_{\mathrm{dSPM}} = W_{\mathrm{dSPM}} \; D_{\mathrm{MNE}} , \quad W_{\mathrm{dSPM}} = \operatorname{diag}\Big( \sqrt{\operatorname{diag}\big( W_{\mathrm{MNE}} C_n W_{\mathrm{MNE}}^\top \big)} \Big)^{-1} \]</div>
 		<p>Here \(C_n\) is the noise covariance matrix estimated from baseline or empty-room recordings. The result is a z-like map where each source value is scaled by its noise standard deviation.</p>
 
 
 		<h3>sLORETA (standardized LORETA)</h3>
-		<p>sLORETA applies a noise-standardisation to the LORETA estimator such that, under ideal conditions, the localisation bias is eliminated and the map has standardised units:</p>
-		<div>\[ D_{\mathrm{sLORETA}} = \left( \operatorname{diag}\big( G^\top (G G^\top + \lambda L^\top L)^{-1} G \big) \right)^{-1/2} \; D_{\mathrm{LORETA}} . \]</div>
+		<p>sLORETA applies a standardisation to the MNE estimator such that, under ideal conditions, the localisation bias is eliminated:</p>
+		<div>\[ D_{\mathrm{sLORETA}} = \left( \operatorname{diag}\big( R_{\mathrm{WME}} \big) \right)^{-1/2} \; D_{\mathrm{MNE}} , \quad \text{with } R_{\mathrm{WME}} = W_{\mathrm{WME}}G \quad \text{the resolution matrix.}\]</div>
+		
+		<h3>eLORETA (exact LORETA)</h3>
+		<p>eLORETA is a variant of sLORETA, where the normalisation to eliminate the localisation bias is done by an interative re-weighting process.</p>
 
-
-		<p>Both dSPM and sLORETA improve interpretability by accounting for the spatial variation in sensitivity and noise—but their theoretical properties differ, and their practical performance depends on SNR and model accuracy.</p>
 	</section>
 	<section>
 		Below you can experiment with different inverse methods for the distributed source model. Use the Brain Source slider to change the source location and use the inverse solutions dropdown menu to select the different methods. The estimated activity generated by one source (white dot) is coloured. See how, according to the location of the real source and inverse method used, the maximum activity is mislocalised and that the estimated activity is wider than the real source (spatial leakge). For the full page demo click <a href="display_Point_Spread_Functions_on_MRI.html"target="_blank" rel="noopener noreferrer">here</a>.
