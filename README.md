@@ -1,6 +1,7 @@
 ## Description
 
 Collections of interactive web applications for the visualisation, teaching and investigation of advanced scalp EEG and intracranial EEG analysis.
+[![DOI](https://zenodo.org/badge/940488852.svg)](https://doi.org/10.5281/zenodo.17966134)
 
 ## GitHub Page
 
