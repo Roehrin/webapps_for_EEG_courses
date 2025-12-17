@@ -3,18 +3,33 @@
 
 cff-version: 1.2.0
 title: >-
-  Interactive web-based applications for teaching and learning advanced EEG signal processing methods.
+  Interactive web-based applications for teaching and
+  learning advanced EEG signal processing methods.
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
 type: software
 authors:
+  - given-names: Steve
+    family-names: Beumer
+    affiliation: >-
+      Epilepsy Unit, University Hospitals and Faculty of
+      Medicine, University of Geneva
+    email: steve.beumer@unige.ch
+    orcid: 'https://orcid.org/0000-0002-7718-1394'
+  - given-names: Serge
+    family-names: Vulliemoz
+    email: serge.vulliemoz@hug.ch
+    affiliation: >-
+      Epilepsy Unit, University Hospitals and Faculty of
+      Medicine, University of Geneva
+    orcid: 'https://orcid.org/0000-0002-1877-8625'
   - given-names: Nicolas
     family-names: Roehri
     email: nicolas.roehri@unige.ch
     affiliation: >-
-      EEG and Epilepsy Unit, University Hospitals and
-      Faculty of Medicine, University of Geneva
+      Epilepsy Unit, University Hospitals and Faculty of
+      Medicine, University of Geneva
     orcid: 'https://orcid.org/0000-0002-6948-1055'
 repository-code: 'https://github.com/Roehrin/webapps_for_EEG_courses'
 url: 'https://roehrin.github.io/webapps_for_EEG_courses/'
