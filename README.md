@@ -3,6 +3,10 @@
 Collections of interactive web applications for the visualisation, teaching and investigation of advanced scalp EEG and intracranial EEG analysis.
 [![DOI](https://zenodo.org/badge/940488852.svg)](https://doi.org/10.5281/zenodo.17966134)
 
+For more information please refer to the letter describing this project published in Epileptic Disorders:  
+Beumer, S., Rigoni, I., Lagarde, S., Vulliemoz, S. and Roehri, N. (2026), Interactive and open educational resources for advanced EEG analysis. Epileptic Disorders. [![DOI:10.1002/epd2.70209](https://zenodo.org/badge/DOI/10.1002/epd2.70209.svg)](https://doi.org/10.1002/epd2.70209)
+
+
 ## GitHub Page
 
 ### [https://roehrin.github.io/webapps_for_EEG_courses](https://roehrin.github.io/webapps_for_EEG_courses)
@@ -31,7 +35,7 @@ Collections of interactive web applications for the visualisation, teaching and 
 3. go to `http://localhost:8080`
 
 ## Project funding
-This project was funded by the Swiss National Science Foundation (209120 to Dr Roehri, 209470 to Dr Vulliemoz) and la commission d'informatique of the UNIGE  
+This project was funded by the Swiss National Science Foundation (209120 to Dr. Roehri, 209470 to Prof. Vulliemoz) and la commission d'informatique of the UNIGE  
 <img src="./images/SNF_logo_standard_office_color_pos_e_w_BKG.png" width="250" alt="SNSF logo">
 <img src="./images/coinf_w_BKG.png" width="250" alt="COINF UNIGE logo">
 
@@ -40,4 +44,4 @@ This project was funded by the Swiss National Science Foundation (209120 to Dr R
 - Steven Beumer MSc
 - Dr. Isotta Rigoni
 - Dr. Stanislas Lagarde
-- Dr. Serge Vulliemoz
+- Prof. Serge Vulliemoz
